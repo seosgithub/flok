@@ -2,11 +2,29 @@
 
 require 'flok'
 require 'thor'
+require 'fileutils'
 
 class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
   def new path
-    Dir.mkdir path
+    name = File.basename(path)
+    Dir.chdir File.dirname(path) do
+      `bundle gem #{name}`
+
+      Dir.chdir name do
+        Dir.mkdir "app"
+        Dir.mkdir "config"
+      end
+    end
+  end
+
+  desc "build", "Build a flok project, you must be in the root of the project"
+  def build
+    Dir.mkdir("./public") unless File.exists?("./public")
+    FileUtils.touch "./public/application.js"
+
+    kernel_src = Flok::MergeSource.merge_kernel
+    File.write("./public/application.js", kernel_src)
   end
 end
 
