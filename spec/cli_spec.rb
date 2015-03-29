@@ -91,9 +91,26 @@ RSpec.describe "CLI" do
 
       puts "------------------------------------------------------------------------------"
       puts "Files not found matching Gemfile: #{file_paths.inspect}" if file_paths.count > 0
-      puts "Directories not found matching Gemfile: #{dir_paths.inspect}" if file_paths.count > 0
+      puts "Directories not found matching Gemfile: #{dir_paths.inspect}" if dir_paths.count > 0
       puts "------------------------------------------------------------------------------"
-    end
 
+      (file_paths.count+dir_paths.count).should eq(0)
+    end
+  end
+
+  it "does create a public/application.js when 'build' is run" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
+      puts Dir["*"]
+      (File.exist?("./public/application.js").should eq(true))
+    end
   end
 end

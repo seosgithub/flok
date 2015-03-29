@@ -17,6 +17,12 @@ class FlokCLI < Thor
       end
     end
   end
+
+  desc "build", "Build a flok project, you must be in the root of the project"
+  def build
+    Dir.mkdir("./public") unless File.exists?("./public")
+    FileUtils.touch "./public/application.js"
+  end
 end
 
 FlokCLI.start(ARGV)
