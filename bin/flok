@@ -7,6 +7,9 @@ class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
   def new path
     Dir.mkdir path
+    Dir.mkdir "#{path}/app"
+    Dir.mkdir "#{path}/lib"
+    Dir.mkdir "#{path}/config"
   end
 end
 

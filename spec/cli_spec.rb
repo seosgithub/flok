@@ -28,4 +28,21 @@ RSpec.describe "CLI" do
     `ruby -Ilib ./bin/flok new #{dir}`
     (File.exists?(dir).should eq(true))
   end
+
+  it "Creates a new module folder with correct root folders" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+
+    folders = %w{app lib config}
+
+    folders.each do |f|
+      p = "#{path}/#{f}"
+      (Dir.exists? p).should eq(true)
+    end
+  end
 end
