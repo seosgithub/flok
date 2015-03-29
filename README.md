@@ -1,6 +1,6 @@
 # Flok
 
-TODO: Write a gem description
+Flok is a cross-platform application framework system that exports javascript files. 
 
 ## Installation
 
