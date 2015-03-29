@@ -4,9 +4,9 @@ require 'flok'
 require 'thor'
 
 class FlokCLI < Thor
-  desc "new <project_name>", "Create a new flok project and/or module"
-  def new name
-    puts "Yay"
+  desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
+  def new path
+    Dir.mkdir path
   end
 end
 
