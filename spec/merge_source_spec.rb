@@ -33,7 +33,6 @@ RSpec.describe "Flok::MergeSourceSpec" do
     path = temp.path
     temp.close
     temp.unlink
-    `echo #{path} | pbcopy`
 
     #Create a new project
     `ruby -Ilib ./bin/flok new #{path}`
