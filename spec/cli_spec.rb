@@ -17,7 +17,7 @@ RSpec.describe "CLI" do
 
     `ruby -Ilib ./bin/flok new #{path}`
 
-    (Dir.exists? path).should eq(true)
+    expect(Dir.exists? path).to be(true)
   end
 
   it "Creates a new module folder with relative path" do
@@ -26,7 +26,7 @@ RSpec.describe "CLI" do
 
     dir = "./spec/tmp/#{fn}"
     `ruby -Ilib ./bin/flok new #{dir}`
-    (File.exists?(dir).should eq(true))
+    expect(File.exists?(dir)).to be(true)
   end
 
   it "Creates a new module folder with correct root folders" do
@@ -42,7 +42,7 @@ RSpec.describe "CLI" do
 
     folders.each do |f|
       p = "#{path}/#{f}"
-      (Dir.exists? p).should eq(true)
+      expect(Dir.exists? p).to be(true)
     end
   end
 
@@ -89,12 +89,14 @@ RSpec.describe "CLI" do
         end
       end
 
-      puts "------------------------------------------------------------------------------"
-      puts "Files not found matching Gemfile: #{file_paths.inspect}" if file_paths.count > 0
-      puts "Directories not found matching Gemfile: #{dir_paths.inspect}" if dir_paths.count > 0
-      puts "------------------------------------------------------------------------------"
+      if file_paths.count+dir_paths.count != 0
+        puts "------------------------------------------------------------------------------"
+        puts "Files not found matching Gemfile: #{file_paths.inspect}" if file_paths.count > 0
+        puts "Directories not found matching Gemfile: #{dir_paths.inspect}" if dir_paths.count > 0
+        puts "------------------------------------------------------------------------------"
+      end
 
-      (file_paths.count+dir_paths.count).should eq(0)
+      expect(file_paths.count+dir_paths.count).to be(0)
     end
   end
 
@@ -109,8 +111,7 @@ RSpec.describe "CLI" do
     gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
     Dir.chdir path do
       `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
-      puts Dir["*"]
-      (File.exist?("./public/application.js").should eq(true))
+      expect(File.exist?("./public/application.js")).to be(true)
     end
   end
 end
