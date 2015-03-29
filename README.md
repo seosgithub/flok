@@ -1,4 +1,4 @@
-![flok: The mobile application framework](https://raw.githubusercontent.com/sotownsend/flok/master/banner.png)
+![flok: The mobile application framework](https://raw.githubusercontent.com/sotownsend/flok/master/logo.png)
 
 [![Gem Version](https://badge.fury.io/rb/iarrogant.svg)](http://badge.fury.io/rb/flok)
 [![Build Status](https://travis-ci.org/sotownsend/flok.svg)](https://travis-ci.org/sotownsend/flok)
