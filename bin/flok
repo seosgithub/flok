@@ -25,14 +25,14 @@ class FlokCLI < Thor
     Dir.mkdir("./public") unless File.exists?("./public")
     FileUtils.touch "./public/application.js"
 
-    kernel_src = Flok::MergeSource.merge_kernel
+    src = Flok::MergeSource.merge_all
 
     #Compress by writing to a temporary dir, run closure, and then put back
     if options["compress"] == true
-      kernel_src = Closure::Compiler.new.compile(kernel_src)
+      src = Closure::Compiler.new.compile(src)
     end
 
-    File.write("./public/application.js", kernel_src)
+    File.write("./public/application.js", src)
   end
 end
 

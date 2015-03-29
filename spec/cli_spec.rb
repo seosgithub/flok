@@ -1,6 +1,7 @@
 require './lib/flok.rb'
 require 'tempfile'
 require 'securerandom'
+require 'v8'
 
 def ensure_tmp
   tmp_spec_path = './spec/tmp'
@@ -141,8 +142,10 @@ RSpec.describe "CLI" do
     gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
     Dir.chdir path do
       `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
-      str = File.read("./public/application.js")
-      ExecJS.compile(str)
+      #str = File.read("./public/application.js")
+      ctx = V8::Context.new
+      ctx.load("./public/application.js")
+      #ExecJS.compile(str)
 #it does not throw an error
     end
   end
@@ -199,10 +202,9 @@ RSpec.describe "CLI" do
     gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
     Dir.chdir path do
       `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build --compress`
-      str = File.read("./public/application.js")
-      ExecJS.compile(str)
+      ctx = V8::Context.new
+      ctx.load("./public/application.js")
 #it does not throw an error
     end
   end
-
 end

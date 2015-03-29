@@ -17,5 +17,23 @@ module Flok
         end
       end
     end
+
+    def self.merge_user_app
+      js_files = Dir["./app/*.js"]
+      out = ""
+      js_files.each do |js|
+        out << File.read(js)
+        out << "\n"
+      end
+
+      return out
+    end
+
+    def self.merge_all
+      str_kernel = self.merge_kernel
+      str_user = self.merge_user_app
+
+      return str_kernel + "\n" + str_user
+    end
   end
 end
