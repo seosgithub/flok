@@ -146,4 +146,63 @@ RSpec.describe "CLI" do
 #it does not throw an error
     end
   end
+
+  it "supports build --compress, which makes a smaller js file" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    uncompressed_length = 0
+    compressed_length = 0
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
+      str = File.read("./public/application.js")
+      uncompressed_length = str.length
+
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build --compress`
+      str = File.read("./public/application.js")
+      compressed_length = str.length
+      expect(compressed_length).to be < uncompressed_length
+#it does not throw an error
+    end
+  end 
+
+  it "supports build --compress, which makes a smaller js file (that still contains something)" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build --compress`
+      str = File.read("./public/application.js")
+      expect(str.length).to be > 0
+#it does not throw an error
+    end
+  end 
+
+  it "creates an application.js that is executable by js when compress" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build --compress`
+      str = File.read("./public/application.js")
+      ExecJS.compile(str)
+#it does not throw an error
+    end
+  end
+
 end

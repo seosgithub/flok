@@ -3,6 +3,7 @@
 require 'flok'
 require 'thor'
 require 'fileutils'
+require 'closure-compiler'
 
 class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
@@ -18,12 +19,19 @@ class FlokCLI < Thor
     end
   end
 
+  option :compress, type: :boolean
   desc "build", "Build a flok project, you must be in the root of the project"
   def build
     Dir.mkdir("./public") unless File.exists?("./public")
     FileUtils.touch "./public/application.js"
 
     kernel_src = Flok::MergeSource.merge_kernel
+
+    #Compress by writing to a temporary dir, run closure, and then put back
+    if options["compress"] == true
+      kernel_src = Closure::Compiler.new.compile(kernel_src)
+    end
+
     File.write("./public/application.js", kernel_src)
   end
 end
