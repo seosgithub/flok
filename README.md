@@ -1,29 +1,47 @@
-# Flok
+![flok: The mobile application framework](https://raw.githubusercontent.com/sotownsend/flok/master/banner.png)
 
-Flok is a cross-platform application framework system that exports javascript files. 
+[![Gem Version](https://badge.fury.io/rb/iarrogant.svg)](http://badge.fury.io/rb/flok)
+[![Build Status](https://travis-ci.org/sotownsend/flok.svg)](https://travis-ci.org/sotownsend/flok)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/sotownsend/flok/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/sotownsend/flok/blob/master/LICENSE)
+
+# What is this?
+
+A work in progress
+
+## Requirements
+
+- Mac OS X 10.9+ (Untested)
+- Ruby 2.1 or Higher
+
+## Communication
+
+- If you **found a bug**, open an issue.
+- If you **have a feature request**, open an issue.
+- If you **want to contribute**, submit a pull request.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Run `sudo gem install flok`
 
-    gem 'flok'
+---
 
-And then execute:
+## FAQ
 
-    $ bundle
+### When should I use flok?
 
-Or install it yourself as:
+Todo
 
-    $ gem install flok
+### What's Fittr?
 
-## Usage
+Fittr is a SaaS company that focuses on providing personalized workouts and health information to individuals and corporations through phenomenal interfaces and algorithmic data-collection and processing.
 
-TODO: Write usage instructions here
+* * *
 
-## Contributing
+### Creator
 
-1. Fork it ( https://github.com/[my-github-username]/flok/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+- [Seo Townsend](http://github.com/sotownsend) ([@seotownsend](https://twitter.com/seotownsend))
+
+## License
+
+flok is released under the MIT license. See LICENSE for details.
