@@ -22,6 +22,9 @@ class FlokCLI < Thor
   def build
     Dir.mkdir("./public") unless File.exists?("./public")
     FileUtils.touch "./public/application.js"
+
+    kernel_src = Flok::MergeSource.merge_kernel
+    File.write("./public/application.js", kernel_src)
   end
 end
 

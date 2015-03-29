@@ -114,4 +114,36 @@ RSpec.describe "CLI" do
       expect(File.exist?("./public/application.js")).to be(true)
     end
   end
+
+  it "does create a public/application.js when 'build' is run that's not empty" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
+      expect(File.read("./public/application.js").length).to be > 0
+    end
+  end
+
+  it "creates an application.js that is executable by js" do
+    #Get a temporary file, delete it, but save the path
+    temp = Tempfile.new "flok-temp"
+    path = temp.path
+    temp.close
+    temp.unlink
+
+    `ruby -Ilib ./bin/flok new #{path}`
+    gem_root_path = File.expand_path(File.dirname(__FILE__))+"/.."
+    Dir.chdir path do
+      `ruby -I#{gem_root_path}/lib #{gem_root_path}/bin/flok build`
+      str = File.read("./public/application.js")
+      ExecJS.compile(str)
+#it does not throw an error
+    end
+  end
 end

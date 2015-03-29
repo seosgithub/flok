@@ -1,6 +1,7 @@
 require './lib/flok.rb'
 require 'tempfile'
 require 'securerandom'
+require 'execjs'
 
 def ensure_tmp
   tmp_spec_path = './spec/tmp'
@@ -18,4 +19,9 @@ RSpec.describe "Flok::MergeSourceSpec" do
     expect(str.length).to be > 0
   end
 
+  it "when merging the kernel, the kernel files located in ./lib/js/kernel/ do merge and run without js syntax errors" do
+    str = Flok::MergeSource.merge_kernel
+    ExecJS.compile(str)
+    #It does not throw an error
+  end
 end
