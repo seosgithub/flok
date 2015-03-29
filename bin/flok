@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'flok'
+require 'thor'
+
+class FlokCLI < Thor
+  desc "new <project_name>", "Create a new flok project and/or module"
+  def new name
+    puts "Yay"
+  end
+end
+
+FlokCLI.start(ARGV)
