@@ -61,7 +61,7 @@ RSpec.describe "Flok::MergeSourceSpec" do
         ctx = V8::Context.new
         ctx.load "application.js"
         res = ctx.eval("call_me_maybe()")
-        expect(res).equal?("no_way")
+        expect(res).to eq("no_way")
       end
     end
   end
