@@ -43,7 +43,6 @@ drivers.network.request = function(verb, url, params, completion) {
 
 drivers.network.cancel_request = function(socket) {
   res = drivers.network.callbackTable[socket];
-  console.log("Cancelling: " + res);
   //Clear callback
   delete drivers.network.callbackTable[socket]
 }
