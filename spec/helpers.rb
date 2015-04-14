@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'phantomjs'
 
 #Duplex pipe
 ###################################################################################################################
@@ -105,6 +106,7 @@ class ChromeRunner
   def initialize fn
     @code = File.read(fn)
     @code << "\n"
+    @@phantomjs_path ||= Phantomjs.path
   end
 
   def eval(code)
@@ -117,7 +119,7 @@ class ChromeRunner
     file.write @code
 
     @pid = fork do
-      system("phantomjs #{file.path}")
+      system("#{@@phantomjs_path} #{file.path}")
     end
   end
 
