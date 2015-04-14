@@ -36,3 +36,7 @@ task :push do
   `gem push flok-#{version}.gem`
   `rm flok-#{version}.gem`
 end
+
+task :build do
+  `ruby -Ilib ./bin/flok build`
+end

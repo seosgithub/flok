@@ -24,6 +24,7 @@ class FlokCLI < Thor
   def build
     Dir.mkdir("./public") unless File.exists?("./public")
     FileUtils.touch "./public/application.js"
+    FileUtils.touch "../FlokTest/app/assets/javascripts/flok.js"
 
     src = Flok::MergeSource.merge_all
 
@@ -32,7 +33,8 @@ class FlokCLI < Thor
       src = Closure::Compiler.new.compile(src)
     end
 
-    File.write("./public/application.js", src)
+    File.write("./products/application.js", src)
+    File.write("../FlokTest/app/assets/javascripts/flok.js", src)
   end
 end
 
