@@ -17,26 +17,27 @@ module Spek
       @block = block
       @port = rand(30000)+3000
 
-      @r, @w = IO.pipe
+      @a, @b = IO.pipe
       @pid = fork do
+        @pipe = @a
+        @b.close
         @server = WEBrick::HTTPServer.new :Port => @port, :DocumentRoot => "."
         @server.mount_proc '/' do |req, res|
           res.body = "Hello"
-          @r.close
-          @w.write "hey"
-          @w.close
-          puts "WRITITTTTTTTTTTTTEN"
+          @pipe.write "hey\n"
         end
         @server.start
       end
 
-      begin
-        @w.close
-        res = @r.read
-        @r.close
-        @block.call(res)
-      rescue => e
-        puts "Exception: #{e.inspect}"
+      Thread.new do
+        begin
+          @pipe = b
+          @a.close
+          puts @pipe.readline
+          @block.call("YAY")
+        rescue => e
+          puts "Exception: #{e.inspect}"
+        end
       end
     end
   end
