@@ -17,24 +17,24 @@ module Spek
       @block = block
       @port = rand(30000)+3000
 
-      @a, @b = IO.pipe
+      @r, @w = IO.pipe
       @pid = fork do
-        @pipe = @a
-        @b.close
         @server = WEBrick::HTTPServer.new :Port => @port, :DocumentRoot => "."
         @server.mount_proc '/' do |req, res|
           res.body = "Hello"
-          @pipe.write "hey\n"
+          @r.close
+          @w.write "hey"
+          @w.close
         end
         @server.start
       end
 
       Thread.new do
         begin
-          @pipe = b
-          @a.close
-          puts @pipe.readline
-          @block.call("YAY")
+          @w.close
+          res = @r.read
+          @r.close
+          @block.call(res)
         rescue => e
           puts "Exception: #{e.inspect}"
         end
@@ -71,7 +71,7 @@ RSpec.describe "Drivers::Net" do
     @pids << spek.pid
     puts "PORT = #{spek.port}"
 
-    sleep 3
+    sleep 2
     `curl http://localhost:#{spek.port}`
 
     #Load synchronously, but execute the code asynchronously, quit after it's been running for 3 seconds
