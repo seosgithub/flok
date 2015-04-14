@@ -33,4 +33,5 @@ task :push do
   `git push origin #{version}`
   `gem build flok.gemspec`
   `gem push flok-#{version}.gem`
+  `rm flok-#{version}.gem`
 end
