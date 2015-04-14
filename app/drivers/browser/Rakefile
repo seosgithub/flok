@@ -1,9 +1,9 @@
 require 'fileutils'
 
 #Compile all the *.js files into one file
-COMPILE_PATH = '../../../products/drivers/browser.js'
-task :compile do
-  out = ""
+BUILD_PATH = '../../../products/drivers/browser.js'
+task :build do
+  out = "/* THIS IS AN AUTOGENETARED FILE, DO NOT EDIT THIS */\n"
   Dir["./vendor/*.js"].each do |js|
     code = File.read(js)
     out << code
@@ -17,8 +17,8 @@ task :compile do
   end
 
   Dir.chdir File.dirname(__FILE__) do
-    FileUtils.rm_f COMPILE_PATH
-    FileUtils.mkdir_p File.dirname(COMPILE_PATH)
-    File.write COMPILE_PATH, out
+    FileUtils.rm_f BUILD_PATH
+    FileUtils.mkdir_p File.dirname(BUILD_PATH)
+    File.write BUILD_PATH, out
   end
 end

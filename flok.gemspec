@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'webrick', '~> 1.3'
   spec.add_development_dependency "closure-compiler", "~> 1.1"
   spec.add_development_dependency "phantomjs", "~> 1.9"
+  spec.add_development_dependency "rspec-wait", "~> 0.0"
   spec.add_runtime_dependency "thor", "~> 0.19"
   spec.executables << 'flok'
 end
