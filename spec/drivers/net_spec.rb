@@ -3,6 +3,7 @@ require 'rspec/wait'
 require 'webrick'
 require "./spec/helpers"
 require 'json'
+require 'os'
 
 RSpec.describe "Drivers::Net" do
   before(:all) do
@@ -15,8 +16,10 @@ RSpec.describe "Drivers::Net" do
     @killable.each {|p| p.kill}
 
     #Stopgap to kill everything
-    `ps -ax | grep net_spec | awk '{print $1}' | grep -v #{Process.pid} | xargs kill -9`
-    `ps -ax | grep phantomjs| awk '{print $1}' | xargs kill -9`
+    if OS.mac?
+      `ps -ax | grep net_spec | awk '{print $1}' | grep -v #{Process.pid} | xargs kill -9`
+        `ps -ax | grep phantomjs| awk '{print $1}' | xargs kill -9`
+    end
   end
 
   it "can make a get request" do
