@@ -1,0 +1,17 @@
+require 'tempfile'
+
+def compile
+  out = ""
+  out << "drivers = {};\n"
+
+  Dir["*.js"].each {|fn| out << File.read(fn) }
+  return out
+end
+
+task :compile do |out|
+end
+
+task :test do
+  out = compile
+  puts out
+end

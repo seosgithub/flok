@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.3"
   spec.add_development_dependency "rspec", "~> 3.2"
   spec.add_development_dependency "therubyracer", "~> 0.12.1"
+  spec.add_development_dependency 'webrick', '~> 1.3.1'
   spec.add_development_dependency "closure-compiler", "~> 1.1.11"
   spec.add_runtime_dependency "thor", "~> 0.19"
   spec.executables << 'flok'
