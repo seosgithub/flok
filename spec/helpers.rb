@@ -73,6 +73,11 @@ module Webbing
           res.header["Access-Control-Allow-Origin"] = "*"
           res.header["Content-Type"] = "json/text"
         end
+        @server.mount_proc '/404' do |req, res|
+          res.header["Access-Control-Allow-Origin"] = "*"
+
+          raise WEBrick::HTTPStatus::NotFound
+        end
         @server.start
       end
 
