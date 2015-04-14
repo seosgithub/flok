@@ -20,6 +20,7 @@ def upgrade_version
 
   sreg = "s/#{version}/#{new_version}/"
   puts `sed #{sreg} #{versionf} > tmp; cp tmp #{versionf}`
+  `rm tmp`
 
   return new_version
 end

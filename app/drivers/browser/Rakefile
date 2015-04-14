@@ -1,0 +1,24 @@
+require 'fileutils'
+
+#Compile all the *.js files into one file
+COMPILE_PATH = '../../../products/drivers/browser.js'
+task :compile do
+  out = ""
+  Dir["./vendor/*.js"].each do |js|
+    code = File.read(js)
+    out << code
+    out << "\n"
+  end
+
+  Dir["*.js"].each do |js|
+    code = File.read(js)
+    out << code
+    out << "\n"
+  end
+
+  Dir.chdir File.dirname(__FILE__) do
+    FileUtils.rm_f COMPILE_PATH
+    FileUtils.mkdir_p File.dirname(COMPILE_PATH)
+    File.write COMPILE_PATH, out
+  end
+end
