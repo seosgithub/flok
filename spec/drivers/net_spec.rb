@@ -17,8 +17,8 @@ RSpec.describe "Drivers::Net" do
 
     #Stopgap to kill everything
     if OS.mac?
-      `ps -ax | grep net_spec | awk '{print $1}' | grep -v #{Process.pid} | xargs kill -9`
-        `ps -ax | grep phantomjs| awk '{print $1}' | xargs kill -9`
+      `ps -ax | grep net_spec | awk '{print $1}' | grep -v #{Process.pid} | xargs kill -9 >/dev/null 2>&1`;
+      `ps -ax | grep phantomjs| awk '{print $1}' | xargs kill -9 >/dev/null 2>&1`
     end
   end
 

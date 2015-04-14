@@ -52,7 +52,6 @@ module Webbing
     attr_accessor :port
 
     def kill
-      puts "killing #{@pid}"
       Process.kill("KILL", @pid)
     end
 
@@ -124,7 +123,6 @@ class ChromeRunner
   end
 
   def kill
-    puts "killing #{@pid}"
     Process.kill("KILL", @pid)
   end
 end
