@@ -23,7 +23,7 @@ class FlokCLI < Thor
   desc "build", "Build a flok project, you must be in the root of the project"
   def build
     Dir.mkdir("./public") unless File.exists?("./public")
-    FileUtils.touch "./public/application.js"
+    FileUtils.touch "./products/application.js"
     FileUtils.touch "../FlokTest/app/assets/javascripts/flok.js"
 
     src = Flok::MergeSource.merge_all

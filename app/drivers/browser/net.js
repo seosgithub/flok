@@ -1,9 +1,9 @@
 drivers = window.drivers || {}
 drivers.network = {}
 
-$(document).ready(function() {
+//$(document).ready(function() {
   //drivers.network.request("GET", "http://test.services.fittr.com/ping", {}, null);
-})
+//})
 
 //All requests are bound to this table and removed when cancelled
 drivers.network.callbackTable = {}

@@ -37,6 +37,8 @@ task :push do
   `rm flok-#{version}.gem`
 end
 
-task :build do
+task :compile do
+  `rm ./products/application.js`
   `ruby -Ilib ./bin/flok build`
+  `osascript -e 'tell application "Keyboard Maestro Engine" to do script "3B15D84D-30B0-4DC5-91BA-91BBE0AA340B"'`
 end

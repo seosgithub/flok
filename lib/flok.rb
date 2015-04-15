@@ -5,17 +5,23 @@ module Flok
     #Merge all the kernel javascript files into one string
     def self.merge_kernel
       Dir.chdir(File.dirname(__FILE__)) do
+        #Embed drivers
+        Dir.chdir("../app/drivers/browser") do
+          `rake build`
+        end
+        out = File.read("../products/drivers/browser.js")
+
         Dir.chdir("./js/kernel/") do
           js_files = Dir["*.js"]
-          out = ""
           js_files.each do |js|
             out << File.read(js)
             out << "\n"
           end
-
-          return out
         end
+
+        return out
       end
+
     end
 
     def self.merge_user_app
