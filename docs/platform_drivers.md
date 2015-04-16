@@ -22,7 +22,6 @@ In order to run the *interface* driver test suite you must run `rake test:driver
   * ./Rakefile - You must at least have the tasks `test` and `build`.  Note that if you're writing custom drivers in your own project folder, this does not apply to you. Also, you must observe the rules in the platform's README.md		
   * ./README.md - A description of this platform driver, how to extend it with custom drivers, and how it is deployed correctly.		
   * ./config.yml - Must contain a list of the supported interfaces for a driver.
-  ```
 
 ### config.yml
 Your configuration must have a `iface` key. This is an array of the supported interfaces.  The interface name is just the filename located in
