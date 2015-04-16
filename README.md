@@ -10,9 +10,9 @@
 A work in progress
 
 #### Docs
-  - [Project Layout](./docs/project_layout.md) <br />
-  -[Platform Drivers](./docs/platform_drivers.md) <br />
-  -[Architecture](./docs/architecture.md)
+[Project Layout](./docs/project_layout.md)
+[Platform Drivers](./docs/platform_drivers.md)
+[Architecture](./docs/architecture.md)
 
 ## Requirements
 
