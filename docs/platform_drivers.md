@@ -30,6 +30,7 @@ ifaces:
   - ui
   - network
 ```
+You may access this list in a compiled kernel via `lsiface()`. See functions for more info.
 
 ### Platform specifics
 See the ./app/drivers/$PLATFORM/README.md file for information on each individual platforms specifics.

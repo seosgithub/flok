@@ -70,17 +70,26 @@ def glob type, dir_path, output_path
   File.write(output_path, out)
 end
 
+require 'yaml'
+require 'json'
+def add_etc_commands output
+  #Add the lsiface() command
+  raise "No config.yml found in your 'platform: #{PLATFORM}' driver" unless driver_config = YAML.load_file("./app/drivers/#{PLATFORM}/config.yml")
+  iface_arr = "[" + driver_config['ifaces'].map!{|e| "'#{e}'"}.join(", ") + "]"
+  puts `echo "function lsiface() { return #{iface_arr}; }}" >> #{output}`
+end
+
 task :build_world do
   #What platform are we working with?
   raise "No $PLATFORM given" unless PLATFORM = ENV["PLATFORM"]
   BUILD_PATH = "./products/#{PLATFORM}"
-  `rm -r #{BUILD_PATH}`
+  `rm -rf #{BUILD_PATH}`
 
   #1. `rake build` is run inside `./app/drivers/$PLATFORM` with the environmental variables set to BUILD_PATH=`./produts/$PLATFORM/driver` (and folder
   driver_build_path = File.expand_path("drivers", BUILD_PATH)
   FileUtils.mkdir_p driver_build_path
   Dir.chdir("./app/drivers/#{PLATFORM}") do 
-   puts `rake build BUILD_PATH=#{driver_build_path}`
+   `rake build BUILD_PATH=#{driver_build_path}`
   end
 
   #2. All files in `./app/config/.*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/0config.js`
@@ -100,5 +109,10 @@ task :build_world do
 
   #7. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
   glob("js", "#{BUILD_PATH}/glob", "#{BUILD_PATH}/application.js")
+
+  #Add custom commands
+  add_etc_commands "#{BUILD_PATH}/application.js"
+
+  `rm -rf #{BUILD_PATH}/glob`
 end
 #######################################################################################################################################################
