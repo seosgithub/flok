@@ -10,3 +10,12 @@ During compliation all platform drivers must respect enviorenmental variables. F
 Your build path may contain additional files as you see fit.  These files will be available in the user's project in `./products/$PLATFORM/xxxxx` with the exception of the javascript outputfile which will be merged at the beginning of the complete source.		
   
 Additionally, the full application contains the function `lsdrivers()` which will return an array of all the drivers that are supported`
+
+
+### $PLATFORM
+The 'platform' naming convention is for it to be completely upper-case.
+
+### Testing
+All drivers must pass the driver test suite located in `./spec/driver_interface/*_spec.rb` for any drivers they have enabled in their config.yml
+
+In order to run the *interface* driver test suite you must run `rake test:driver_iface` or `rake test:driver_iface PLATFORM=MY_PLATFORM`.  For running a test suite for the specific driver, that is accomplished through `rake test:driver PLATFORM=MY_PLATFORM`
