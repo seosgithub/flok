@@ -53,7 +53,7 @@ module Flok
     iface_arr = "[" + driver_config['ifaces'].map!{|e| "'#{e}'"}.join(", ") + "]"
 
     #Append this to our output file
-    puts `echo "function lsiface() { return #{iface_arr}; }" >> #{build_path}/application.js`
+    `echo "function lsiface() { return #{iface_arr}; }" >> #{build_path}/application.js`
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 

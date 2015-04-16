@@ -7,8 +7,8 @@ require './lib/flok'
 # Run with `rake spec`
 RSpec::Core::RakeTask.new(:spec)
 
-task :default => :spec
-
+#Gem things
+#############################################################################
 #Upgrade version of gem
 def upgrade_version
   versionf = './lib/flok/version.rb'
@@ -38,27 +38,10 @@ task :push do
   `gem push flok-#{version}.gem`
   `rm flok-#{version}.gem`
 end
-
-task :compile do
-  `rm ./products/application.js`
-  `ruby -Ilib ./bin/flok build`
-  `osascript -e 'tell application "Keyboard Maestro Engine" to do script "3B15D84D-30B0-4DC5-91BA-91BBE0AA340B"'`
-end
-
-task :test_env do
-  puts ENV["FUCK"]
-end
-
-#Update documents to github
-task :udocs do
-  `git add ./docs/*`
-  `git add README.md`
-  `git commit -a -m "Update docs"`
-  `git push`
-end
+#############################################################################
 
 #Compliation
-#######################################################################################################################################################
+#############################################################################
 task :build_world do
   #What platform are we working with?
   raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
@@ -66,4 +49,4 @@ task :build_world do
 
   Flok.build_world(build_path, platform)
 end
-#######################################################################################################################################################
+#############################################################################
