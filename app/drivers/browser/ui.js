@@ -53,9 +53,6 @@ drivers.ui.createSurface = function(protoName, info) {
       new scc($sel, info, p);
     }
   })();
-  
-
-  
 
   //Our surface pointers are selectors
   return $sel
