@@ -1,7 +1,7 @@
 # Compliation
 
 Compilation is handled by the `rake build platform=z` and then end result of that compliation is put in ./products/
-Compilation *always* results in a `./products/$PLATFORM/appliaction.js` file along with other files in `./products/$PLATFORM/` that
+Compilation *always* results in a `./products/$PLATFORM/application.js` file along with other files in `./products/$PLATFORM/` that
 were deemed necessary by the platform driver `build` scripts.
 
 ### Build Order
@@ -18,7 +18,3 @@ as necessary.*
  6. All js files in `./app/user/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/3user_config.js`
  7. All js files in `./app/user/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/4user.js`
  8. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
-
-
- At the end, you end up with a standalone JS file called `./products/$PLATFORM/application.js` and platform dependent code in
- `./products/$PLATFORM/driver` that you must implement based on that drivers readme

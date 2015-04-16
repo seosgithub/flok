@@ -2,7 +2,8 @@
 This driver supports an internet browser.
 
 # Installing / Implementation
-There are no additional steps to use this driver, it is self-contained within the main binary. You must however follow some conventions.
+At the completion of the build, the driver directory, typically `products/$PLATFORM/driver` will contain a `chrome.js` file.  This must be included
+before your `application.js` file.
 
 ### HTML conventions
 There is excatly (1) divider that is used to place everything inside of that is visible.  This divider *must* have the following HTML code:
