@@ -24,7 +24,7 @@ In order to run the *interface* driver test suite you must run `rake test:driver
   * ./config.yml - Must contain a list of the supported interfaces for a driver.
 
 ### config.yml
-Your configuration must have a `iface` key. This is an array of the supported interfaces.  The interface name is just the filename located in
+Your configuration must have a `ifaces` key. This is an array of the supported interfaces.  The interface name is just the filename located in
 `./app/drivers/iface/.*.js`.  In the example below there is a `ui.js` and `network.js` in the `./app/drivers/iface/` folder.
 ```yml
 ifaces:
