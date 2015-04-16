@@ -44,6 +44,8 @@ During compliation all platform drivers must respect enviorenmental variables. F
   * $BUILD_JS_NAME - The filename of the javascript file to output to the $BUILD_PATH.
 Your build path may contain additional files as you see fit.  These files will be available in the user's project in `./products/$PLATFORM/xxxxx` with the exception of the javascript outputfile which will be merged at the beginning of the complete source.
 
+Additionally, the full application contains the function `lsdrivers()` which will return an array of all the drivers that are supported`
+
 # Compilation
 Flok does not rely on ruby for the final produced `application.js` file.  The output file is pure javascript and written in javascript (not transcoded).  Ruby only serves as a compilation assistant.
 
