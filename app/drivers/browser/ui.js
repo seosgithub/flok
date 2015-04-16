@@ -19,16 +19,43 @@ drivers.ui.createSurface = function(protoName, info) {
 
   //Does this have a controller?
   var scc = drivers.ui.scc[protoName];
-  var pipe = {
-    sendEvent: function(name, info) {
-      var source = drivers.ui.createSurface("login");
-      var dest = $("#root-surface");
-      drivers.ui.embedSurface(source, dest, "main", false, null);
+
+  (function() {
+    var _sel = $sel;
+    var p = pipe(function(msg) {
+      console.log("CLICKED!");
+      if (msg === "sign_in_clicked") {
+        var source = drivers.ui.createSurface("nav_container", {color: "blue"});
+        var source2 = drivers.ui.createSurface("login", {color: "blue"});
+        drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
+        drivers.ui.embedSurface(source2, source, "content", false, null);
+
+      } else if (msg === "login") {
+        var source = drivers.ui.createSurface("loading");
+        drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
+
+        var callback = function() {
+          alert("error!");
+        var source = drivers.ui.createSurface("nav_container", {color: "blue"});
+        var source2 = drivers.ui.createSurface("login", {color: "blue"});
+        drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
+        drivers.ui.embedSurface(source2, source, "content", false, null);
+        }
+        setTimeout(callback, 400);
+
+      } else {
+        var source = drivers.ui.createSurface("splash");
+        drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
+      }
+    });
+
+    if (scc != undefined) {
+      new scc($sel, info, p);
     }
-  };
-  if (scc != undefined) {
-    new scc($sel, info, pipe);
-  }
+  })();
+  
+
+  
 
   //Our surface pointers are selectors
   return $sel
@@ -51,6 +78,7 @@ drivers.ui.embedSurface = function(source_sp, dest_sp, viewName, animated, anima
     throw "Found surface, but couldn't find a view *inside* a surface named: " + viewName;
   }
 
+  $view.html("");
   source_sp.appendTo($view);
   source_sp.removeClass('hidden');
 }
