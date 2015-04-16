@@ -9,7 +9,8 @@ were deemed necessary by the platform driver `build` scripts.
 as necessary.*
 
 ### Compilation is accomplished in the following order.
- * All files in `./app/config/.*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/0config.js`
+
+  * All files in `./app/config/.*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/0config.js`
  * `rake build` is run inside `./app/drivers/$PLATFORM` with the environmental variables set to BUILD_PATH=`./produts/$PLATFORM/driver` (and folder
  * created)
  * All js files in `./app/libkern/` are globbed togeather and sent to `./products/$PLATFORM/glob/1libkern.js`
