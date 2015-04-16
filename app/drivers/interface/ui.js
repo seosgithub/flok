@@ -22,9 +22,10 @@ drivers.ui.deleteSurface = function(sp) {
 }
 
 //Embed a surface into another surface in the view with the correct name
-//root_sp - The surface we are embedding into
-//content_sp - The surface we are embedding
+//source_sp - The surface we are embedding
+//dest_sp - The surface we are embedding into
+//viewName - The name of the view in the destination surface
 //animated - If true, a segue is allowed to take place
 //animationDidComplete - Call this funtction if animated is true when you are done animating.
-drivers.ui.embedSurface(root_sp, content_sp, viewName, animated, animationDidComplete) {
+drivers.ui.embedSurface = function(source_sp, dest_sp, viewName, animated, animationDidComplete) {
 }
