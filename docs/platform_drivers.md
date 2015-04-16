@@ -31,3 +31,6 @@ ifaces:
   - ui
   - network
 ```
+
+### Platform specifics
+See the ./app/drivers/$PLATFORM/README.md file for information on each individual platforms specifics.
