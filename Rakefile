@@ -76,7 +76,7 @@ def add_etc_commands output
   #Add the lsiface() command
   raise "No config.yml found in your 'platform: #{PLATFORM}' driver" unless driver_config = YAML.load_file("./app/drivers/#{PLATFORM}/config.yml")
   iface_arr = "[" + driver_config['ifaces'].map!{|e| "'#{e}'"}.join(", ") + "]"
-  puts `echo "function lsiface() { return #{iface_arr}; }}" >> #{output}`
+  puts `echo "function lsiface() { return #{iface_arr}; }" >> #{output}`
 end
 
 task :build_world do
@@ -92,25 +92,16 @@ task :build_world do
    `rake build BUILD_PATH=#{driver_build_path}`
   end
 
-  #2. All files in `./app/config/.*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/0config.js`
-  glob("js", './app/config', "#{BUILD_PATH}/glob/0config.js")
+  #2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/1kern_config.js`
+  glob("js", './app/kern/config', "#{BUILD_PATH}/glob/1kern_config.js")
 
-  #3. All js files in `./app/libkern/` are globbed togeather and sent to `./products/$PLATFORM/glob/1libkern.js`
-  glob("js", './app/libkern', "#{BUILD_PATH}/glob/1libkern.js")
-
-  #4. All js files in `./app/kern/` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.js`
+  #3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.js`
   glob("js", './app/kern', "#{BUILD_PATH}/glob/2kern.js")
 
-  #5. All js files in `./app/user/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/3user_config.js`
-  glob("js", './app/user/config', "#{BUILD_PATH}/glob/3user_config.js")
-
-  #6. All js files in `./app/user/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/4user.js`
-  glob("js", './app/user', "#{BUILD_PATH}/glob/4user.js")
-
-  #7. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
+  #4. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
   glob("js", "#{BUILD_PATH}/glob", "#{BUILD_PATH}/application.js")
 
-  #Add custom commands
+  #5. Add custom commands
   add_etc_commands "#{BUILD_PATH}/application.js"
 
   `rm -rf #{BUILD_PATH}/glob`
