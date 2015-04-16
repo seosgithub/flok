@@ -3,9 +3,10 @@
 
 require 'execjs'
 require 'helpers'
+require 'flok/build'
 
 def build_world_for_platform platform
-  system!("rake build_world PLATFORM=#{platform}")
+  Flok.system!("rake build_world PLATFORM=#{platform}")
 end
 
 RSpec.describe "Emitted build products are valid for all platforms" do
