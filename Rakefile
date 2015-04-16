@@ -1,6 +1,7 @@
 require 'rspec/core/rake_task'
 require "bundler/gem_tasks"
 require "fileutils"
+require './lib/flok'
 
 # Default directory to look in is `/specs`
 # Run with `rake spec`
@@ -58,52 +59,11 @@ end
 
 #Compliation
 #######################################################################################################################################################
-#Accepts a folder and will mix all those files into one file
-def glob type, dir_path, output_path
-  out = ""
-  FileUtils.mkdir_p(dir_path)
-  FileUtils.mkdir_p(File.dirname(output_path))
-  Dir[File.join(dir_path, "*.#{type}")].each do |f|
-    out << File.read(f) << "\n"
-  end
-
-  File.write(output_path, out)
-end
-
-require 'yaml'
-require 'json'
-def add_etc_commands output
-  #Add the lsiface() command
-  raise "No config.yml found in your 'platform: #{PLATFORM}' driver" unless driver_config = YAML.load_file("./app/drivers/#{PLATFORM}/config.yml")
-  iface_arr = "[" + driver_config['ifaces'].map!{|e| "'#{e}'"}.join(", ") + "]"
-  puts `echo "function lsiface() { return #{iface_arr}; }" >> #{output}`
-end
-
 task :build_world do
   #What platform are we working with?
-  raise "No $PLATFORM given" unless PLATFORM = ENV["PLATFORM"]
-  BUILD_PATH = "./products/#{PLATFORM}"
-  `rm -rf #{BUILD_PATH}`
+  raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
+  build_path = "./products/#{platform}"
 
-  #1. `rake build` is run inside `./app/drivers/$PLATFORM` with the environmental variables set to BUILD_PATH=`./produts/$PLATFORM/driver` (and folder
-  driver_build_path = File.expand_path("drivers", BUILD_PATH)
-  FileUtils.mkdir_p driver_build_path
-  Dir.chdir("./app/drivers/#{PLATFORM}") do 
-   `rake build BUILD_PATH=#{driver_build_path}`
-  end
-
-  #2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/1kern_config.js`
-  glob("js", './app/kern/config', "#{BUILD_PATH}/glob/1kern_config.js")
-
-  #3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.js`
-  glob("js", './app/kern', "#{BUILD_PATH}/glob/2kern.js")
-
-  #4. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
-  glob("js", "#{BUILD_PATH}/glob", "#{BUILD_PATH}/application.js")
-
-  #5. Add custom commands
-  add_etc_commands "#{BUILD_PATH}/application.js"
-
-  `rm -rf #{BUILD_PATH}/glob`
+  Flok.build_world(build_path, platform)
 end
 #######################################################################################################################################################
