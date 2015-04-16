@@ -19,6 +19,7 @@ A work in progress
  * [Platform Drivers](./docs/platform_drivers.md)
  * [Architecture](./docs/architecture.md)
  * [Compilation](./docs/compilation.md)
+ * [System Interface](./docs/interface.md)
 
 ## Requirements
 
