@@ -1,8 +1,9 @@
 require 'fileutils'
 
 #Compile all the *.js files into one file
-BUILD_PATH = '../../../products/drivers/browser.js'
 task :build do
+  raise "No BUILD_PATH given" unless BUILD_PATH=ENV["BUILD_PATH"]
+
   out = "/* THIS IS AN AUTOGENETARED FILE, DO NOT EDIT THIS */\n"
   Dir["./vendor/*.js"].each do |js|
     code = File.read(js)
@@ -16,9 +17,5 @@ task :build do
     out << "\n"
   end
 
-  Dir.chdir File.dirname(__FILE__) do
-    FileUtils.rm_f BUILD_PATH
-    FileUtils.mkdir_p File.dirname(BUILD_PATH)
-    File.write BUILD_PATH, out
-  end
+  File.write File.join(BUILD_PATH, "chrome.js"), out
 end
