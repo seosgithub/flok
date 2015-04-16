@@ -9,6 +9,10 @@
 
 A work in progress
 
+# Supported platforms
+ * iOS 8 (iPhone)
+ * HTML5
+
 ## Docs
 
  * [Project Layout](./docs/project_layout.md)
