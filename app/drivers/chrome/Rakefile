@@ -1,21 +1,17 @@
 require 'fileutils'
+require 'flok/build'
+require 'securerandom'
 
 #Compile all the *.js files into one file
 task :build do
   raise "No BUILD_PATH given" unless BUILD_PATH=ENV["BUILD_PATH"]
 
-  out = "/* THIS IS AN AUTOGENETARED FILE, DO NOT EDIT THIS */\n"
-  Dir["./vendor/*.js"].each do |js|
-    code = File.read(js)
-    out << code
-    out << "\n"
+  my_path = File.expand_path(File.dirname(__FILE__))
+  Dir.mktmpdir(SecureRandom.hex) do |dir|
+    Dir.chdir dir do
+      Flok.src_glob("js", "#{my_path}/src/vendor", "0src_vendor.js")
+      Flok.src_glob("js", "#{my_path}/src/", "1src.js")
+      Flok.src_glob("js", ".", File.join(BUILD_PATH, "chrome.js"))
+    end
   end
-
-  Dir["*.js"].each do |js|
-    code = File.read(js)
-    out << code
-    out << "\n"
-  end
-
-  File.write File.join(BUILD_PATH, "chrome.js"), out
 end

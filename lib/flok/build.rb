@@ -1,6 +1,7 @@
 require 'yaml'
 require 'json'
 
+
 ##################################################################
 #This file contains everything relating to compiling source files
 ##################################################################
@@ -29,7 +30,7 @@ module Flok
     driver_build_path = File.expand_path("drivers", build_path)
     FileUtils.mkdir_p driver_build_path
     Dir.chdir("./app/drivers/#{platform}") do 
-    `rake build BUILD_PATH=#{driver_build_path}`
+    system!("rake build BUILD_PATH=#{driver_build_path}")
     end
 
     #2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$platform/glob/1kern_config.js`
@@ -58,5 +59,20 @@ module Flok
     ################################################################################################################
 
     `rm -rf #{build_path}/glob`
+  end
+
+  def self.system! cmd
+    res = system(cmd)
+    out = ""
+    out << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+    out << "SHELL ERROR\n"
+    out << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
+      out << "\t(user@localhost) #{cmd}\n"
+      out << "\t(user@localhost) echo $?\n"
+      out << "\t#{res}\n"
+      out << "\t(user@localhost) pwd\n\t"
+      out << `pwd`
+    out << "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+    raise out unless res
   end
 end
