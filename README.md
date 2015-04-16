@@ -9,26 +9,9 @@
 
 A work in progress
 
-
-
 ### [Project Layout](./docs/project_layout.md)
 ### [Platform Drivers](./docs/platform_drivers.md)
 ### [Architecture](./docs/architecture.md)
-
-# Compilation
-Flok does not rely on ruby for the final produced `application.js` file.  The output file is pure javascript and written in javascript (not transcoded).  Ruby only serves as a compilation assistant.
-
-# Task
-The task is the base unit in flok, similar to a rack module except that rack is a stack and flok is a party.  Based on concepts borrowed from XNU®, FreeBSD®, and GNU HURD®; tasks are combined in flok to produce behavior by many tasks inter-cooperating.  Efficiency has been provided through virtualizing the task communication so that no message passing takes place inside flok and all modules are combined into an efficient monolithic module.
-
-### Task Facilities
-Tasks are able to
- - send and receive events from a global or internal source.
- - set interval and timeout timers.
- - store temporary data in it's own heap '$__'
-
-### Default modules
-This flok project contains the 'micro-task-kernel', the 'ui', and the 'operations' modules.
 
 ## Requirements
 
