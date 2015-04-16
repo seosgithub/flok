@@ -29,7 +29,7 @@ Flok's architecture is a non-pre-emptive (realtime) event-driven tickless monoli
 * (c) - This layer handles all generic activity like setting up pipes between tasks, etc.
 
 # Project layout
-# Please see [Project Layout](./docs/project_layout)
+# Please see [Project Layout](./docs/project_layout.md)
 
 # Platform Drivers		 # Platform Drivers
   Each platform has it's own set of drivers. You do not have to implement *all* the drivers on a platform and you may create your own drivers to suite your own needs.  Platform drivers sit in `app/drivers/$PLATFORM` and *must* contain at least the following files.		+Plase see [[Platform Drivers|PlatformDrivers]].
