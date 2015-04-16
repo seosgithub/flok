@@ -14,6 +14,7 @@ A work in progress
  * [Project Layout](./docs/project_layout.md)
  * [Platform Drivers](./docs/platform_drivers.md)
  * [Architecture](./docs/architecture.md)
+ * [Compilation](./docs/compilation.md)
 
 ## Requirements
 
