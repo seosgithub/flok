@@ -46,3 +46,10 @@ end
 task :test_env do
   puts ENV["FUCK"]
 end
+
+task :udocs do
+  `git add ./docs/*`
+  `git add README.md`
+  `git commit -a -m "Update docs"`
+  `git push`
+end
