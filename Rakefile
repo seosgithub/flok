@@ -42,3 +42,7 @@ task :compile do
   `ruby -Ilib ./bin/flok build`
   `osascript -e 'tell application "Keyboard Maestro Engine" to do script "3B15D84D-30B0-4DC5-91BA-91BBE0AA340B"'`
 end
+
+task :test_env do
+  puts ENV["FUCK"]
+end
