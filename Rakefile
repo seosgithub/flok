@@ -47,6 +47,7 @@ task :test_env do
   puts ENV["FUCK"]
 end
 
+#Update documents to github
 task :udocs do
   `git add ./docs/*`
   `git add README.md`
