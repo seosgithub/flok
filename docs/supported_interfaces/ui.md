@@ -2,9 +2,6 @@
 
 ###Functions
 
-
-------
-
 `if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a `surface pointer`, abbreviated as `sp`.  A `surface pointer` is an opaque type that is platform defined.
 
 `if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
