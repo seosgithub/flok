@@ -13,6 +13,7 @@
 //}
 
 //Create a new surface based on a prototype name and information. Should return a surface pointer
+if_create_surface(protoName, info)
 drivers.ui.createSurface = function(protoName, info) {
   return sp;
 }
