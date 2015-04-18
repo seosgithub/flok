@@ -5,8 +5,8 @@
 There is no standard communication protocol or interface for drivers.  The driver stack operates by 
 
 1. The platform drivers bundle, e.g. `./app/drivers/CHROME/` will declare it's `ifaces` in `config.yml`
-2. During compilation, the `application.js` file is embedded with `lsiface()`
-3. Your application may now use `lsiface()` to dynamically alter it's behavior to be suitable.  The application may then make function calls that are specified in the `./app/drivers/iface/$YOUR_INTERFACE.js`.
+2. During compilation, the `application.js` file is embedded with `IFACES`
+3. Your application may now use `IFACES` to dynamically alter it's behavior to be suitable.
 
 #What are Driver Interfaces?
 An interface is just a javascript file with a set of function definitions a-lot like C header files.  They are located in `./app/drivers/iface`.  These are not actually used in your compiled program but serve as a reference to other developers on how to implement your interface.  We have future plans to use the interface files themselves so please, please, please... implement the interface files.
