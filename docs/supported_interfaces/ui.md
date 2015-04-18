@@ -16,6 +16,8 @@ Yes, you read that correctly. A `View` only represents a blank area in a `Surfac
 is answered by the *view*.
 
 Here's a concrete example to clear any remaining confusion.
+
 ![](../images/ui_surface_and_views.png)
+
 In this diagram, you are seeing something akin to a `Navigation` controller that has a permanent navigation bar at the top. Inside this surface, there are two views named `topView`, and `btmView`.
 This surface can then accept two sub-surfaces in those two views.
