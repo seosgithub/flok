@@ -21,7 +21,7 @@ A work in progress
  * [Architecture](./docs/architecture.md)
  * [Compilation](./docs/compilation.md)
  * [System Interface](./docs/interface.md)
- * [Supported Interfaces](./docs/supported_interfaces.md)
+ * [Supported Interfaces](./docs/supported_interfaces/index.md)
  * [Testing](./docs/testing.md)
 
 ## Requirements
