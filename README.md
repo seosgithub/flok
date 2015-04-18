@@ -36,6 +36,10 @@ A work in progress
 
 ## Installation
 
+RVM users:
+Run `gem install flok`
+
+System ruby installation?
 Run `sudo gem install flok`
 
 ---
