@@ -25,7 +25,7 @@ A work in progress
 
 ## Requirements
 
-- Mac OS X 10.9+ (Untested)
+- Modern *nix* (FreeBSD, Mac, or Linux)
 - Ruby 2.1 or Higher
 
 ## Communication
