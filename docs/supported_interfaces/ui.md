@@ -16,8 +16,6 @@ This driver controls the **semantics** of the visuals shown on screen.  There is
  1. Surfaces
  2. Views
 
-------
-
 ###Surfaces
 A `Surface` is somewhat analagous to View Controller's from iOS® with the exception that sa surface is embedded within other surfaces.
 
