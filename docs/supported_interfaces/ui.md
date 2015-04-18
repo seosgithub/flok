@@ -6,7 +6,10 @@
 
 `if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
 
-`if_embed_surface(source_sp, dest_sp, view_name, animated, animationDidComplete)`
+`if_embed_surface(source_sp, dest_sp, view_name)` - A request to embed a surface (`source_sp`) into another surface (`dest_sp`) in the `dest_sp`'s `view` named `view_name`. Animations can be added here, especially if you are embedding into a view that already contains a surface, in which case you need to swap the surfaces out (but not destroy the other). On completion of any animations, you need to call `int_embed_surface` which stands for **Interrupt: Embed Surface Complete**. If you are not doing animations, it is advised that you call `int_embed_surface` immediately in the same thread of execute that `if_embed_surface` was called on to avoid any graphical glitches or latency. Flok will suspend execution until `int_embed_surface` is received.
+
+###Interrupts
+`int_embed_surface` - An interrupt that signals that the surface has completed animations (or is just ready).
 
 ### Overview 
 
@@ -32,5 +35,5 @@ Here's a concrete example to clear any remaining confusion.
 In this diagram, you are seeing something akin to a `Navigation` controller that has a permanent navigation bar at the top. Inside this surface, there are two views named `topView`, and `btmView`.
 This surface can then accept two sub-surfaces in those two views.
 
-###Communication back to floc kernel
-Each surface has a communication pipe connected to the kernel. For a typical user initiated event, like a button tap or gesture detection, the surface controller (platform defined), will notify that platform's `ui` driver that an event has occurred and pass a valid `surface pointer` for the event.  Flok will then receive the `surface pointer` through the `pipe` subsystem and redirect the message to the `sc` subsystem (Surface Controller).
+###Communication back to flok kernel
+Each surface has a communication pipe connected to the kernel. For a typical user initiated event, like a button tap or gesture detection, the surface controller (platform defined), will notify that platform's `ui` driver through the `int_send_event(sp, event)` that an event has occurred and pass a valid `surface pointer` for the destination of the event.  Flok will then receive the `surface pointer` through the `pipe` subsystem and redirect the message to the `sc` subsystem (Surface Controller). Events going **to** the surface will be received by `if_handle_event(sp, event)`.  All these event related functions are in the [pipe interface](pipe.md)
