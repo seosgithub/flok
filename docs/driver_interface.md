@@ -46,6 +46,9 @@ let if_print: @objc_block String -> Int = { str in
 context.setObject(unsafeBitCast(if_print, AnyObject.self), forKeyedSubscript: "if_print")
 ```
 
+#Writing good driver interfaces
+A good driver interface, and driver for that matter, implement no logic beyond what is necessary for the completion of that action.  There are exceptions to this rule and they usually are around performant code where it is necessary to use native drivers to number crunch, parse, etc. 
+
 #States & Opaque Pointers
 If it can be avoided, it is best to avoid using any state information in your drivers.  Opaque pointers can assist with this.  E.g. the `if_print` function as described above returns an `opaque pointer` that is compatible with `if_cancel_print`.  The driver that implements this interface is free to implement opaque pointers in any way that seems sensible. The only restriction is that the pointers are able to be read by javascript itself and regurgetated in a useful form. Try to avoid using a hash table if possible if you can directly feed native pointers as there are performance benefits and less state information.
 
