@@ -75,6 +75,23 @@ RSpec.describe "Emitted build products are valid for all platforms" do
 
       end
     end
+  end
 
+  it "The outputted code has all the code located in ./app/kern/int/ for relavent interfaces" do
+    #get a list of the platforms based on the drev folder names
+    platforms = (Dir["./app/drivers/*"]).map!{|e| File.basename(e)} - ["iface"]
+
+    platforms.each do |p|
+      build_world_for_platform(p)
+
+      app_output = File.read "./products/#{p}/application.js"
+
+      ifaces = YAML.load_file("./app/drivers/#{p}/config.yml")["ifaces"]
+
+      ifaces.each do |iface|
+        intf = File.read("./app/kern/int/#{iface}.js")
+        expect(app_output).to include(intf)
+      end
+    end
   end
 end
