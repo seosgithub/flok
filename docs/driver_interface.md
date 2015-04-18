@@ -31,6 +31,7 @@ As you can see, there is no implementation in this code.  This is not just an ab
 1. You must add this driver to your driver's `config.yml` file in the `ifaces`.  In this case, you would add  `printer` to the `ifaces` array.
 2. You must ensure that when the application makes a call to any functions declared in the interface, they are handled appropriately.  For full javascripts systems (like HTML5), this is accomplished by simply defining the needed functions.  For other platforms that use native code, the functions are usually implemented by exporting a native function into the javascript space.
 
+Here is an example of an iOS implementation of the print driver, specifically the `if_print` function.
 ```swift
 let if_print: @objc_block String -> Int = { str in
     var mutableString = NSMutableString(string: str) as CFMutableStringRef
@@ -45,6 +46,7 @@ let if_print: @objc_block String -> Int = { str in
 
 context.setObject(unsafeBitCast(if_print, AnyObject.self), forKeyedSubscript: "if_print")
 ```
+[Courtesy goes to NSHpister](http://nshipster.com/javascriptcore/)
 
 #Writing good driver interfaces
 A good driver interface, and driver for that matter, implement no logic beyond what is necessary for the completion of that action.  There are exceptions to this rule and they usually are around performant code where it is necessary to use native drivers to number crunch, parse, etc. 
