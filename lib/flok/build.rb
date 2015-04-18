@@ -55,6 +55,7 @@ module Flok
 
     #Append this to our output file
     `echo "function lsiface() { return #{iface_arr}; }" >> #{build_path}/application.js`
+    `echo "IFACES = #{iface_arr};" >> #{build_path}/application.js`
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
