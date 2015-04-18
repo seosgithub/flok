@@ -6,8 +6,7 @@ During compliation all platform drivers must respect enviorenmental variables. F
 
 Your build path may contain additional files as you see fit.  These files will be available in the user's project in `./products/$PLATFORM/xxxxx` with the exception of the javascript outputfile which will be merged at the beginning of the complete source.		
   
-Additionally, the full application contains the function `lsdrivers()` which will return an array of all the drivers that are supported`
-
+Additionally, the full application contains the function `IFACES` which will return an array of all the drivers that are supported`
 
 ### $PLATFORM
 The 'platform' naming convention is for it to be completely upper-case.
@@ -34,3 +33,6 @@ You may access this list in a compiled kernel via `IFACES`. See [Interface secti
 
 ### Platform specifics
 See the ./app/drivers/$PLATFORM/README.md file for information on each individual platforms specifics.
+
+### Interfaces
+See [Interfaces](driver_interface.md) for more information.
