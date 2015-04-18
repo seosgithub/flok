@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'flok/build'
 require 'securerandom'
+require 'tmpdir'
 
 #Compile all the *.js files into one file
 task :build do

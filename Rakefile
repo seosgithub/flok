@@ -1,7 +1,6 @@
 require 'rspec/core/rake_task'
 require "bundler/gem_tasks"
 require "fileutils"
-require 'tmpdir'
 require './lib/flok'
 
 # Default directory to look in is `/specs`
