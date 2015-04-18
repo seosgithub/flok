@@ -25,7 +25,7 @@ A work in progress
 
 ## Requirements
 
-- Modern *nix* (FreeBSD, Mac, or Linux)
+- Modern **nix** (FreeBSD, Mac, or Linux)
 - Ruby 2.1 or Higher
 
 ## Communication
