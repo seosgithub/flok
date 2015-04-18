@@ -50,13 +50,23 @@ module Flok
     raise "No config.yml found in your 'platform: #{platform}' driver" unless  driver_config
 
     #Create array that looks like a javascript array with single quotes
-    iface_arr = "[" + driver_config['ifaces'].map!{|e| "'#{e}'"}.join(", ") + "]"
+    ifaces = driver_config['ifaces']
+    iface_arr = "[" + ifaces.map{|e| "'#{e}'"}.join(", ") + "]"
 
     #Append this to our output file
     `echo "IFACES = #{iface_arr};" >> #{build_path}/application.js`
     `echo "PLATFORM = \'#{platform}\';" >> #{build_path}/application.js`
     #---------------------------------------------------------------------------------------
     ################################################################################################################
+
+    #6. Append relavent interrupt codes for supported interfaces
+    ifaces.each do |iface|
+      s = File.read("./app/kern/int/#{iface}.js")
+      open("#{build_path}/application.js", "a") do |f|
+        f.puts s
+      end
+
+    end
 
     `rm -rf #{build_path}/glob`
   end
