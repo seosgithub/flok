@@ -15,11 +15,8 @@ RSpec.describe "Emitted build products are valid for all platforms" do
     platforms = (Dir["./app/drivers/*"]).map!{|e| File.basename(e)} - ["iface"]
 
     platforms.each do |p|
-      puts "testing #{p}"
-      puts "\t-building world for $platform=#{p}"
       build_world_for_platform(p)
 
-      puts "\t-executing world"
       ctx = ExecJS.compile(File.read("./products/#{p}/application.js"))
     end
   end
@@ -29,12 +26,9 @@ RSpec.describe "Emitted build products are valid for all platforms" do
     platforms = (Dir["./app/drivers/*"]).map!{|e| File.basename(e)} - ["iface"]
 
     platforms.each do |p|
-      puts "testing #{p}"
-      puts "\t-building world for $platform=#{p}"
       build_world_for_platform(p)
 
       #IFACES
-      puts "\t-executing world"
       ctx = ExecJS.compile(File.read("./products/#{p}/application.js"))
       ifaces = ctx.eval("IFACES")
       driver_ifaces = YAML.load_file("./app/drivers/#{p}/config.yml")["ifaces"]
@@ -47,12 +41,9 @@ RSpec.describe "Emitted build products are valid for all platforms" do
     platforms = (Dir["./app/drivers/*"]).map!{|e| File.basename(e)} - ["iface"]
 
     platforms.each do |p|
-      puts "testing #{p}"
-      puts "\t-building world for $platform=#{p}"
       build_world_for_platform(p)
 
       #IFACES
-      puts "\t-executing world"
       ctx = ExecJS.compile(File.read("./products/#{p}/application.js"))
       platform = ctx.eval("PLATFORM")
       expect(platform).to eq(p)
