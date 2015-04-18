@@ -14,4 +14,5 @@ as necessary.*
  2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/1kern_config.js`
  3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.js`
  4. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
- 5. Auto-generated code is placed at the end (like uname_p)
+ 5. Auto-generated code is placed at the end (like PLATFORM global)
+ 6. Interrupt handlers are appended based on the `ifaces` that are supported and taken from `./kern/iface/.*js`
