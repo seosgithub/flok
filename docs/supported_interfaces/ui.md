@@ -11,6 +11,8 @@
 ###Interrupts
 `int_embed_surface()` - An interrupt that signals that the surface has completed animations (or is just ready).
 
+------
+
 ### Overview 
 
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
