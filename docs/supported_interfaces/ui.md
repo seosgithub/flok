@@ -11,6 +11,8 @@
 
 `if_embed_surface(source_sp, dest_sp, view_name, animated, animationDidComplete)`
 
+------
+
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
 
  1. Surfaces
