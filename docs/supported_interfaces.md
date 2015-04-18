@@ -1,4 +1,4 @@
-#Supported Interfaces
+#Supported (Driver) Interfaces
 There are a number of standard interfaces. Please see [Driver Interface](driver_interface.md) for more information on what an `interface` is.
 
 ### Required
