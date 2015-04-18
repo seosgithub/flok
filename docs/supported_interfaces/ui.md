@@ -6,7 +6,9 @@
 ------
 
 `if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a `surface pointer`, abbreviated as `sp`.  A `surface pointer` is an opaque type that is platform defined.
+
 `if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
+
 `if_embed_surface(source_sp, dest_sp, view_name, animated, animationDidComplete)`
 
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
