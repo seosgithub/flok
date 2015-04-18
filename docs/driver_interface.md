@@ -48,6 +48,9 @@ context.setObject(unsafeBitCast(if_print, AnyObject.self), forKeyedSubscript: "i
 ```
 [Courtesy goes to NSHpister](http://nshipster.com/javascriptcore/)
 
+3.  You must add any necessary *interrupts* when you want your native enviorment to call back to the kernel.  These are defined in `./app/kern/iface/$IFACE.js`.  All interrupts have the nomenclature of `int_XXXXX`.
+4.  If you are publishing this on the core flok distribution, please add necessary pages to [Supported Interfaces](./supported_interfaces.md)
+
 #Writing good driver interfaces
 A good driver interface, and driver for that matter, implement no logic beyond what is necessary for the completion of that action.  There are exceptions to this rule and they usually are around performant code where it is necessary to use native drivers to number crunch, parse, etc. 
 
