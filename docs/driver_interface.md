@@ -48,7 +48,7 @@ context.setObject(unsafeBitCast(if_print, AnyObject.self), forKeyedSubscript: "i
 ```
 [Courtesy goes to NSHpister](http://nshipster.com/javascriptcore/)
 
-3.  You must add any necessary *interrupts* when you want your native enviorment to call back to the kernel.  These are defined in `./app/kern/iface/$IFACE.js`.  All interrupts have the nomenclature of `int_XXXXX`.
+3.  You must add any necessary *interrupts* when you want your native enviorment to call back to the kernel.  Even if you don't need interrupts, **You must atleast add a blank file**.  These are defined in `./app/kern/int/$IFACE.js`.  All interrupts have the nomenclature of `int_XXXXX`.  **I can't say this enough, if you have a file named `./app/drivers/Zune/do_nothing.js` then you **Must** have a file called `./app/kern/int/do_nothing.js`. If you have multiple platforms that support the `do_nothing` driver, they all have *one* `./app/kern/int/do_nothing.js` because the interrupt file is platform independent.
 4.  If you are publishing this on the core flok distribution, please add necessary pages to [Supported Interfaces](./supported_interfaces.md)
 
 #Writing good driver interfaces
