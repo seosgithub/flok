@@ -9,7 +9,7 @@
 `if_embed_surface(source_sp, dest_sp, view_name)` - A request to embed a surface (`source_sp`) into another surface (`dest_sp`) in the `dest_sp`'s `view` named `view_name`. Animations can be added here, especially if you are embedding into a view that already contains a surface, in which case you need to swap the surfaces out (but not destroy the other). On completion of any animations, you need to call `int_embed_surface` which stands for **Interrupt: Embed Surface Complete**. If you are not doing animations, it is advised that you call `int_embed_surface` immediately in the same thread of execute that `if_embed_surface` was called on to avoid any graphical glitches or latency. Flok will suspend execution until `int_embed_surface` is received.
 
 ###Interrupts
-`int_embed_surface()` - An interrupt that signals that the surface has completed animations (or is just ready).
+`int_embed_surface(sp)` - An interrupt that signals that the surface has completed animations (or is just ready).
 
 ------
 
