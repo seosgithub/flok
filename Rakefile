@@ -3,9 +3,33 @@ require "bundler/gem_tasks"
 require "fileutils"
 require './lib/flok'
 
-# Default directory to look in is `/specs`
-# Run with `rake spec`
-RSpec::Core::RakeTask.new(:spec)
+#Testing
+#############################################################################
+#spec:core
+core_spec = RSpec::Core::RakeTask.new(:spec_core)
+core_spec.pattern = './spec/*.rb'
+
+#spec:iface
+task 'spec:iface' do
+
+end
+
+#spec
+task :spec do
+  #Get a list of platforms
+  Dir.chdir('./app/drivers') { @platforms = Dir["*"]-["iface"]}
+
+  #Run each platform specific spec
+  @platforms.each do |p|
+    Dir.chdir "./app/drivers/#{p}" do
+      tasks = `rake -P`.split("\n").map{|e| e.split(" ")[1]}
+      if tasks.include? 'spec'
+        Flok.system!('rake spec')
+      end
+    end
+  end
+end
+#############################################################################
 
 #Gem things
 #############################################################################
