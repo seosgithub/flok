@@ -1,3 +1,4 @@
 ifaces:
   - ui
   - event
+  - net
