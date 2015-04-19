@@ -1,6 +1,8 @@
 # Testing
 The best way to describe testing is by describing the commands that control testing and the procedures used to process testing for each command.
 
+------
+
 ##### `cd ./app/drivers/$PLATFORM/; rake spec`
 Each driver can optionally have a spec rake task that only operates on it's files in `./app/drivers/$PLATFORM/**/*` alone. These files should **not** test the interface as that is delegated to a different part of the testing systems which provides a generic set of tests for interfaces.
 
