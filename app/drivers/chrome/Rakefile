@@ -2,6 +2,8 @@ require 'fileutils'
 require 'flok/build'
 require 'securerandom'
 require 'tmpdir'
+require 'phantomjs'
+require 'tempfile'
 
 #Compile all the *.js files into one file
 task :build do
@@ -15,4 +17,48 @@ task :build do
       Flok.src_glob("js", ".", File.join(BUILD_PATH, "chrome.js"))
     end
   end
+end
+
+#Make sure it runs
+task :spec do
+  Dir.chdir "../../../products/chrome/drivers"
+  `phantomjs chrome.js`
+end
+
+#Establish an environment with a pipe assuming the world is built
+#Should return the input pipe file location when exiting to stdout and
+#return the PID of the process 2nd seperated by a space.
+#Like "/tmp/30p043.pipe 3020" which is "stdin_pipe pid"
+#and should not write anything to stdout other than this
+#SHOULD NOT LOAD application.js, just the driver necessities and this
+task :pipe do
+  #Go into the correct directory
+  Dir.chdir "../../../products/chrome"
+
+  #Dump both application.js and chrome.js into one file for phantomjs
+  tmp = Tempfile.new(SecureRandom.hex)
+  tmp.write File.read("./drivers/chrome.js")
+
+  #Get a random path for a stdin and stdout pipe
+  pf0 = Tempfile.new(SecureRandom.hex) #stdin
+  pf1 = Tempfile.new(SecureRandom.hex) #stdout
+  pp0 = pf0.path
+  pp1 = pf1.path
+  pf0.unlink
+  pf1.unlink
+  `mkfifo #{pp0}`
+  `mkfifo #{pp1}`
+
+  #Launch phantomJS
+  pid = fork do
+    begin
+      system("tail -f #{pp0} | #{Phantomjs.path} 1>#{pp1} 2>#{pp1}")
+    rescue => e
+      $stderr.puts e.inspect
+    end
+  end
+
+  #Wait for load
+  puts "#{pp0} #{pp1} #{pid}"
+  sleep 10
 end

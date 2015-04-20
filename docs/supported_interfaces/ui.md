@@ -2,14 +2,13 @@
 
 ###Functions
 
-`if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a `surface pointer`, abbreviated as `sp`.  A `surface pointer` is an opaque type that is platform defined.
+`if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a hash containing  a key called `sp` with a `surface pointer` and any named views will need to have the required keys as the view's name in the key and the value will be a pointer to that view.
 
 `if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
 
-`if_embed_surface(source_sp, dest_sp, view_name)` - A request to embed a surface (`source_sp`) into another surface (`dest_sp`) in the `dest_sp`'s `view` named `view_name`. Animations can be added here, especially if you are embedding into a view that already contains a surface, in which case you need to swap the surfaces out (but not destroy the other). On completion of any animations, you need to call `int_embed_surface` which stands for **Interrupt: Embed Surface Complete**. If you are not doing animations, it is advised that you call `int_embed_surface` immediately in the same thread of execute that `if_embed_surface` was called on to avoid any graphical glitches or latency. Flok`s subsystems, such as `vc` will suspend some of their tasks until a proper `int_embed_surface` is received. In `vc`'s case, any child of a incomplete 
+`if_detach_surface(sp)` - Remove a surface from it's current view
 
-###Interrupts
-`int_embed_surface(sp)` - An interrupt that signals that the surface has completed animations (or is just ready).
+`if_attach_surface(sp, vp)` - A request to embed a surface (`sp`) into the top of a view located at `vp` provided during `if_init_surface`.
 
 ------
 
@@ -37,5 +36,9 @@ Here's a concrete example to clear any remaining confusion.
 In this diagram, you are seeing something akin to a `Navigation` controller that has a permanent navigation bar at the top. Inside this surface, there are two views named `topView`, and `btmView`.
 This surface can then accept two sub-surfaces in those two views.
 
-###Communication back to flok kernel
-Each surface has a communication pipe connected to the kernel. For a typical user initiated event, like a button tap or gesture detection, the surface controller (platform defined), will notify that platform's `ui` driver through the `int_send_event(sp, event)` that an event has occurred and pass a valid `surface pointer` for the destination of the event.  Flok will then receive the `surface pointer` through the `pipe` subsystem and redirect the message to the `sc` subsystem (Surface Controller). Events going **to** the surface will be received by `if_handle_event(sp, event)`.  All these event related functions are in the [event](event.md) Interface.
+
+###A note on free and remove
+The `if_free_surface` must always be preceeded by a `if_detach_surface` if the surface is already attached. Failure to do so is undefined.
+Additionally, `detach` and `free` will only be called on the root of the hierarchy and should effect all children. Most platforms have a reference
+counting implementation that can handle this, like `ARC` on iOS and the `DOM` on HTML5. For other platforms, there is planned support for a compilation
+hint that will shim this driver to automatically destroy and detach surfaces in reverse hierarchical order.
