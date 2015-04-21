@@ -7,14 +7,15 @@ require 'tempfile'
 
 #Compile all the *.js files into one file
 task :build do
-  raise "No BUILD_PATH given" unless BUILD_PATH=ENV["BUILD_PATH"]
+  raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
+  build_path = File.expand_path(build_path)
 
   my_path = File.expand_path(File.dirname(__FILE__))
   Dir.mktmpdir(SecureRandom.hex) do |dir|
     Dir.chdir dir do
       Flok.src_glob("js", "#{my_path}/src/vendor", "0src_vendor.js")
       Flok.src_glob("js", "#{my_path}/src/", "1src.js")
-      Flok.src_glob("js", ".", File.join(BUILD_PATH, "chrome.js"))
+      Flok.src_glob("js", ".", File.join(build_path, "chrome.js"))
     end
   end
 end
@@ -32,33 +33,20 @@ end
 #and should not write anything to stdout other than this
 #SHOULD NOT LOAD application.js, just the driver necessities and this
 task :pipe do
+  system("rake build BUILD_PATH='../../../products/chrome/drivers'")
+
   #Go into the correct directory
   Dir.chdir "../../../products/chrome"
 
   #Dump both application.js and chrome.js into one file for phantomjs
   tmp = Tempfile.new(SecureRandom.hex)
-  tmp.write File.read("./drivers/chrome.js")
+  tmp.puts File.read("./drivers/chrome.js")
+  tmp.close
 
-  #Get a random path for a stdin and stdout pipe
-  pf0 = Tempfile.new(SecureRandom.hex) #stdin
-  pf1 = Tempfile.new(SecureRandom.hex) #stdout
-  pp0 = pf0.path
-  pp1 = pf1.path
-  pf0.unlink
-  pf1.unlink
-  `mkfifo #{pp0}`
-  `mkfifo #{pp1}`
-
-  #Launch phantomJS
-  pid = fork do
-    begin
-      system("tail -f #{pp0} | #{Phantomjs.path} 1>#{pp1} 2>#{pp1}")
-    rescue => e
-      $stderr.puts e.inspect
-    end
+  timeout = ENV['TIMEOUT']
+  if timeout
+    system("boojs -t #{timeout} #{tmp.path}")
+  else
+    system("boojs #{tmp.path}")
   end
-
-  #Wait for load
-  puts "#{pp0} #{pp1} #{pid}"
-  sleep 10
 end

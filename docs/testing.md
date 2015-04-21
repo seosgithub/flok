@@ -21,5 +21,5 @@ This will execute any files in `./spec/**/*` with the exception of files in `./s
 ##### `cd ./; rake spec`
 This will execute:
  1. Execute `rake spec` for every platform inside the platform's `./app/drivers/$PLATFORM/` folder
- 2. Execute 'rake spec:iface` at `./`
+ 2. Execute 'rake spec:iface` at `./` for ever platform with PLATFORM=$PLATFORM
  2. Execute `rake spec:core` at `./`

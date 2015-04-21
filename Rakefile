@@ -9,9 +9,10 @@ require './lib/flok'
 core_spec = RSpec::Core::RakeTask.new(:spec_core)
 core_spec.pattern = './spec/*.rb'
 
-#spec:iface
+#spec:iface, accepts PLATFORM
 task 'spec:iface' do
-
+  raise "No platform given" unless platform=ENV['PLATFORM']
+  exit system("rspec ./spec/iface")
 end
 
 #spec

@@ -1,46 +1,24 @@
-//$(document).ready(function() {
-  //flok_request("GET", "http://test.services.fittr.com/ping", {}, null);
-//})
-
-//All requests are bound to this table and removed when cancelled
-flok.net = {};
-flok.net.callbackTable = {};
-flok.net.socketIndex = 0  //The current index of the socket, incremented for new sockets
+//Socket descriptor, each new socket should increment *before* using it
+var if_net_request_socket_index = 0
 
 //A basic get request that supports callbacks
-flok.net.request = function(verb, url, params, completion) {
-  //Store callback in the table
-  var socketIndex = flok.net.socketIndex++
-  flok.net.callbackTable[socketIndex] = true
+if_net_request = function(verb, url, params) {
+  //Get a new socket descriptor
+  if_net_request_socket_index += 1
+  fd = if_net_request_socket_index
 
-  $.ajax({
-    url: url,
-    type: verb,
-    data: params,
-    success: function(data) {
-      data = JSON.parse(data);
-      completion = completion || function() {}
-      if (completion != null) {
-        //Callback if possible
-        if (flok.net.callbackTable[socketIndex] === true) { 
-          delete flok.net.callbackTable[socketIndex];
-          completion(data, false); 
-        }
-      }
-    },
-    error: function(xhr, status, err) {
-      if (flok.net.callbackTable[socketIndex] === true) { 
-          delete flok.net.callbackTable[socketIndex];
-          completion({"message":status}, true); 
-        }
-    }
-  })
+  system.stderr.writeLine("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+  $.ajax({url: url, type: verb, data: params}).success(function(data) {
+      system.stderr.writeLine("+++++++++++++++++++++++++++++++++++++++++++")
+      //int_net_callback(0, 0, 0);
+      //data = JSON.parse(data);
+    }).error(function(xhr, status, err) {
+      system.stderr.writeLine("+++++++++++++++++++++++++++++++++++++++++++")
+      console.log("he")
+    }).always(function(e) {
+      system.stderr.writeLine("------------------------------------")
+    })
 
-  return socketIndex
-}
 
-flok.net.cancel_request = function(socket) {
-  res = flok.net.callbackTable[socket];
-  //Clear callback
-  delete flok.net.callbackTable[socket]
+  return fd
 }

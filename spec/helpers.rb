@@ -1,5 +1,8 @@
 require 'securerandom'
+require 'json'
 require 'phantomjs'
+require 'shellwords'
+require 'webrick'
 
 #Duplex pipe
 ###################################################################################################################
@@ -66,7 +69,7 @@ module Webbing
       @pipe = IO.duplex_pipe
       @pid = fork do
         @pipe.claim_high
-        @server = WEBrick::HTTPServer.new :Port => @port, :DocumentRoot => ".", :StartCallback => Proc.new {
+        @server = ::WEBrick::HTTPServer.new :Port => @port, :DocumentRoot => ".", :StartCallback => Proc.new {
           @pipe.puts("ready")
         }
         @server.mount_proc '/' do |req, res|
@@ -93,7 +96,7 @@ module Webbing
             @pipe.puts res.to_json
           end
         rescue => e
-          puts "Exception: #{e.inspect}"
+          $stderr.puts "Exception: #{e.inspect}"
         end
       end
     end
@@ -110,23 +113,24 @@ end
 class ChromeRunner
   #Load a javascript file
   def initialize fn
-    @code = File.read(fn)
-    @code << "\n"
+    @file = fn
     @@phantomjs_path ||= Phantomjs.path
   end
 
-  def eval(code)
-    @code << code
-    @code << "\n"
-  end
+  def eval cmd
+    of = Tempfile.new(SecureRandom.hex)
+    of.puts File.read(@file)
+    of.puts cmd
+    of.close
 
-  def commit
-    file = Tempfile.new SecureRandom.hex
-    file.write @code
+    out = Tempfile.new(SecureRandom.hex)
+    out.close
+    ret=system("boojs -t 4 #{of.path} >#{out.path} 2>&1")
+    of.unlink
+    output = File.read(out.path)
+    out.unlink
 
-    @pid = fork do
-      system("#{@@phantomjs_path} #{file.path}")
-    end
+    return output
   end
 
   def kill
