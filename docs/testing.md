@@ -9,12 +9,12 @@ Each driver can optionally have a spec rake task that only operates on it's file
 ------
 
 ##### `rake spec:iface PLATFORM=$PLATFORM`
-This rake task will allow you to test one platform's interface compatability. The files run by this spec task are located in `./spec/iface/**/*`
+This rake task will allow you to test one platform's interface compatability. The files run by this spec task are located in `./spec/iface/*.rb`. Additionally, this spec runs `cd ./app/drivers/$PLATFORM; rake pipe` which expects a bi-directional pipe which can be written javascript statements to and read back the responses.
 
 ------
 
 ##### `cd ./; rake spec:core`
-This will execute any files in `./spec/**/*` with the exception of files in `./spec/iface/**/*`.
+This will execute any files in `./spec/*.rb` with the exception of files in `./spec/iface/*.rb`.
 
 ------
 

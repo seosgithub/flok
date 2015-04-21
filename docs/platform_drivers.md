@@ -12,12 +12,10 @@ Additionally, the full application contains the function `IFACES` which will ret
 The 'platform' naming convention is for it to be completely upper-case.
 
 ### Testing
-All drivers must pass the driver test suite located in `./spec/driver_interface/*_spec.rb` for any drivers they have enabled in their config.yml
-
-In order to run the *interface* driver test suite you must run `rake test:driver_iface` or `rake test:driver_iface PLATFORM=MY_PLATFORM`.  For running a test suite for the specific driver, that is accomplished through `rake test:driver PLATFORM=MY_PLATFORM`
+Please see [Testing](testing.md) for informaiton on how testing is accomplished.
 
 ### Files
-  * ./Rakefile - You must at least have the tasks `test` and `build`.  Note that if you're writing custom drivers in your own project folder, this does not apply to you. Also, you must observe the rules in the platform's README.md		
+  * ./Rakefile - You must at least have the tasks `build` and `pipe`. Optionally, you may have the task `spec`.
   * ./README.md - A description of this platform driver, how to extend it with custom drivers, and how it is deployed correctly.		
   * ./config.yml - Must contain a list of the supported interfaces for a driver.
 
