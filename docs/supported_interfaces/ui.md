@@ -8,7 +8,7 @@
 
 `if_detach_surface(vp)` - Remove a view from it's current view
 
-`if_attach_surface(vp, vp)` - A request to embed a view (`vp`) into the top of a view or area located at `vp` provided during `if_init_surface`.
+`if_attach_surface(vp, vp)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp` provided during `if_init_surface`.
 
 ------
 
@@ -17,7 +17,7 @@
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
 
  1. **View** - A **view** holds your content.
- 2. **Area** - Views can have blank **areas**s where other views can be placed.
+ 2. **Spot** - Views can have blank **Spot**s where other views can be placed.
 
 ## Analogy
 Here is an *analougy* in HTML. **This is not the way it's actually defined, the code here is never actually used in flok, but something similar is**
@@ -34,7 +34,7 @@ Here is an *analougy* in HTML. **This is not the way it's actually defined, the 
 ```
 
 ```html
-<!-- A nav view with an area for content -->
+<!-- A nav view with a spot for content -->
 <div class='view' data-name='nav_container'>
   <div class='nav_bar'>
     <a href='#'>Home</a>
