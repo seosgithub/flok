@@ -47,7 +47,4 @@ Here is an *analougy* in HTML. **This is not the way it's actually defined, the 
 
 
 ###A note on free and remove
-The `if_free_surface` must always be preceeded by a `if_detach_surface` if the surface is already attached. Failure to do so is undefined.
-Additionally, `detach` and `free` will only be called on the root of the hierarchy and should effect all children. Most platforms have a reference
-counting implementation that can handle this, like `ARC` on iOS and the `DOM` on HTML5. For other platforms, there is planned support for a compilation
-hint that will shim this driver to automatically destroy and detach surfaces in reverse hierarchical order.
+If `free` is called on a view, that view is always already detached. If a *view* receives `free`, that *view* must call `free` on all of it's children before itself.
