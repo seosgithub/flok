@@ -12,7 +12,7 @@
 
 ------
 
-### Overview 
+# Overview 
 
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
 
@@ -21,10 +21,10 @@ This driver controls the **semantics** of the visuals shown on screen.  There is
 
 ---------------------------------------------------------------------------
 
-###View
+#View
 A view holds your content.
 
-###Spot
+#Spot
 Views can have blank **spot**s where other views can be placed.
 ---------------------------------------------------------------------------
 
