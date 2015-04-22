@@ -17,7 +17,7 @@
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
 
  1. **View** - A **view** holds your content.
- 2. **Spot** - Views can have blank **spot**s where other views can be placed.
+ 2. **Area** - Views can have blank **areas**s where other views can be placed.
 
 ## Analogy
 Here is an *analougy* in HTML. **This is not the way it's actually defined, the code here is never actually used in flok, but something similar is**
