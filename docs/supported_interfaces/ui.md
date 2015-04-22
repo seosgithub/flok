@@ -14,7 +14,7 @@
 
 ## Overview 
 
-This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
+This driver controls two things called a **view** and a **spot**. 
 
  1. **View** - A **view** holds your content.
  2. **Spot** - Views can have blank **Spot**s where other views can be placed.
