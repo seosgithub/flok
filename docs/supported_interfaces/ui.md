@@ -19,8 +19,8 @@ This driver controls two things called a **view** and a **spot**.
  1. **View** - A **view** holds your content.
  2. **Spot** - Views can have blank **Spot**s where other views can be placed.
 
-## Analogy
-Here is an *analougy* in HTML. **This is not the way it's actually defined, the code here is never actually used in flok, but something similar is**
+## Examples
+Here is a `view` named `login` in HTML5 (`chrome` driver)
 ```html
 <!-- A login view -->
 <div class='view' data-name='login'>
@@ -33,6 +33,7 @@ Here is an *analougy* in HTML. **This is not the way it's actually defined, the 
 </div>
 ```
 
+Here is  a `view` named `nav_container` in HTML5 (`chrome driver)
 ```html
 <!-- A nav view with a spot for content -->
 <div class='view' data-name='nav_container'>
