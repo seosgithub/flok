@@ -27,11 +27,6 @@ task :spec do
 end
 
 #Establish an environment with a pipe assuming the world is built
-#Should return the input pipe file location when exiting to stdout and
-#return the PID of the process 2nd seperated by a space.
-#Like "/tmp/30p043.pipe 3020" which is "stdin_pipe pid"
-#and should not write anything to stdout other than this
-#SHOULD NOT LOAD application.js, just the driver necessities and this
 task :pipe do
   system("rake build BUILD_PATH='../../../products/chrome/drivers'")
 
@@ -43,10 +38,5 @@ task :pipe do
   tmp.puts File.read("./drivers/chrome.js")
   tmp.close
 
-  timeout = ENV['TIMEOUT']
-  if timeout
-    system("boojs -t #{timeout} #{tmp.path}")
-  else
-    system("boojs #{tmp.path}")
-  end
+  exec "boojs #{tmp.path}"
 end
