@@ -16,11 +16,42 @@
 
 This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
 
- 1. Surfaces
- 2. Views
+ 1. **View**
+ 2. **Spot**
 
-###Surfaces
-A `Surface` is somewhat analagous to View Controller's from iOS® with the exception that sa surface is embedded within other surfaces.
+---------------------------------------------------------------------------
+
+###View
+A view holds your content.
+
+###Spot
+Views can have blank **spot**s where other views can be placed.
+---------------------------------------------------------------------------
+
+Here is an *analougy* in HTML. **This is not the way it's actually defined, the code here is never actually used in flok, but something similar is**
+```html
+<!-- A login view -->
+<div class='view' data-name='login'>
+  <h1>Login</h1>
+  <div class='form'>
+    <input type='text' placeholder='email' />
+    <input type='password' placeholder='password' />
+    <button>
+  </div>
+</div>
+```
+
+```html
+<!-- A nav view with an area for content -->
+<div class='view' data-name='nav_container'>
+  <div class='nav_bar'>
+    <a href='#'>Home</a>
+    <a href='#'>About</a>
+  </div>
+  
+  <div class='spot' data-name='content'></div>
+</div>
+```
 
 ###Views
 Views are *only* embedded within a surface.  You can have one view, one hundred views, or zero views within a `Surface`. Now you might be asking yourself,
