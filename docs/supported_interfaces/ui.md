@@ -6,13 +6,12 @@
 ```js
 (main)>s = if_init_view('nav_container', {title: "Home"})
 
-
 (main)>console.log(s);
-={
-=  vp: 3492934923,      //The root view
-=  content: 293493493,  //A content 'spot'
-=  top_bar: 39293932    //A top_bar 'spot'
-=}
+{
+  vp: 3492934923,      //The root view
+  content: 293493493,  //A content 'spot'
+  top_bar: 39293932    //A top_bar 'spot'
+}
 ```
 
 `if_free_view(vp)` - Destroy a view with a `view pointer`.
