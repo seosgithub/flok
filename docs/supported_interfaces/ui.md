@@ -33,7 +33,7 @@ Here is a `view` named `login` in HTML5 (`chrome` driver)
 </div>
 ```
 
-Here is  a `view` named `nav_container` in HTML5 (`chrome` driver). This `view` has one `spot` called `content`.
+Here is  a `view` named `tab_container` in HTML5 (`chrome` driver). This `view` has one `spot` called `content`.
 ```html
 <!-- A nav view with a spot for content -->
 <div class='view' data-name='tab_container'>
