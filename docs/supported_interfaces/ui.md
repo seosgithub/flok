@@ -21,7 +21,8 @@ This driver controls two things called a **view** and a **spot**.
 
 ## Examples
 Here is an example for the `chrome` driver of a live view built from two views.
-[!](images/view_and_spot.png)
+![](../images/view_and_spot.png)
+
 
 
 ###A note on free and remove
