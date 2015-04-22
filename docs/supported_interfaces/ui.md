@@ -2,13 +2,13 @@
 
 ###Functions
 
-`if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a hash containing  a key called `sp` with a `surface pointer` and any named views will need to have the required keys as the view's name in the key and the value will be a pointer to that view.
+`if_init_view(name, info)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  Returns a hash containing  a key called `sp` with a `view pointer` and any named views will need to have the required keys as the view's name in the key and the value will be a pointer to that view.
 
-`if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
+`if_free_surface(vp)` - Destroy a view with a `view pointer`.
 
-`if_detach_surface(sp)` - Remove a surface from it's current view
+`if_detach_surface(vp)` - Remove a view from it's current view
 
-`if_attach_surface(sp, vp)` - A request to embed a surface (`sp`) into the top of a view located at `vp` provided during `if_init_surface`.
+`if_attach_surface(vp, vp)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp` provided during `if_init_surface`.
 
 ------
 
