@@ -2,43 +2,27 @@
 
 ###Functions
 
-`if_init_surface(name, info)` - Create a surface based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the surface yet.  Returns a hash containing  a key called `sp` with a `surface pointer` and any named views will need to have the required keys as the view's name in the key and the value will be a pointer to that view.
+`if_init_view(name, info)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  Returns a hash containing  a key called `sp` with a `view pointer` and any named views will need to have the required keys as the view's name in the key and the value will be a pointer to that view.
 
-`if_free_surface(sp)` - Destroy a surface with a `surface pointer`.
+`if_free_view(vp)` - Destroy a view with a `view pointer`.
 
-`if_detach_surface(sp)` - Remove a surface from it's current view
+`if_attach_view(vp, vsp)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`.
 
-`if_attach_surface(sp, vp)` - A request to embed a surface (`sp`) into the top of a view located at `vp` provided during `if_init_surface`.
+`if_detach_view(vp)` - Remove a view from it's current view
 
 ------
 
-### Overview 
+## Overview 
 
-This driver controls the **semantics** of the visuals shown on screen.  There is no defined layouts, styles, or anything relating to rendering. There is however, a hierarchy description composed of two elements:
+This driver controls two things called a **view** and a **spot**. 
 
- 1. Surfaces
- 2. Views
+ 1. **View** - A **view** holds your content.
+ 2. **Spot** - Views can have blank **Spot**s where other views can be placed.
 
-###Surfaces
-A `Surface` is somewhat analagous to View Controller's from iOS® with the exception that sa surface is embedded within other surfaces.
-
-###Views
-Views are *only* embedded within a surface.  You can have one view, one hundred views, or zero views within a `Surface`. Now you might be asking yourself,
-wait, I thought you just said a *surface* is embedded in a *surface*, and now you're saying that a *view* is embedded within a *surface*?.
-
-Yes, you read that correctly. A `View` only represents a blank area in a `Surface`; when you embed one `surface` in another `surface` you *must* say *where*. The *where*
-is answered by the *view*.
-
-Here's a concrete example to clear any remaining confusion.
-
-![](../images/ui_surface_and_views.png)
-
-In this diagram, you are seeing something akin to a `Navigation` controller that has a permanent navigation bar at the top. Inside this surface, there are two views named `topView`, and `btmView`.
-This surface can then accept two sub-surfaces in those two views.
+## Examples
+Here is an example for the `chrome` driver of a live view built from two views.
+[!](images/view_and_spot.png)
 
 
 ###A note on free and remove
-The `if_free_surface` must always be preceeded by a `if_detach_surface` if the surface is already attached. Failure to do so is undefined.
-Additionally, `detach` and `free` will only be called on the root of the hierarchy and should effect all children. Most platforms have a reference
-counting implementation that can handle this, like `ARC` on iOS and the `DOM` on HTML5. For other platforms, there is planned support for a compilation
-hint that will shim this driver to automatically destroy and detach surfaces in reverse hierarchical order.
+If `free` is called on a view, that view is always already detached. If a *view* receives `free`, that *view* must call `free` on all of it's children before itself.
