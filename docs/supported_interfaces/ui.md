@@ -8,7 +8,7 @@
 
 `if_detach_surface(vp)` - Remove a view from it's current view
 
-`if_attach_surface(vp, vp)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp` provided during `if_init_surface`.
+`if_attach_surface(vp, vp)` - A request to embed a view (`vp`) into the top of a view or area located at `vp` provided during `if_init_surface`.
 
 ------
 
