@@ -16,7 +16,7 @@
 
 `if_free_view(vp)` - Destroy a view with a `view pointer`.
 
-`if_attach_view(vp, vsp)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`.
+`if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`
 
 `if_detach_view(vp)` - Remove a view from it's current view
 
