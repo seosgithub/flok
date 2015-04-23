@@ -30,3 +30,7 @@ function set_int_dispatch_spec_2(new_a, new_b) {
   int_dispatch_spec_a = new_a;
   int_dispatch_spec_b = new_b;
 }
+
+function ping() {
+  if_dispatch([3, 3, 3])
+}

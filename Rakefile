@@ -3,35 +3,6 @@ require "bundler/gem_tasks"
 require "fileutils"
 require './lib/flok'
 
-#Testing
-#############################################################################
-#spec:core
-core_spec = RSpec::Core::RakeTask.new('spec:core')
-core_spec.pattern = './spec/*.rb'
-
-#spec:iface, accepts PLATFORM
-task 'spec:iface' do
-  raise "No platform given" unless platform=ENV['PLATFORM']
-  exit system("rspec ./spec/iface")
-end
-
-#spec
-task :spec do
-  #Get a list of platforms
-  Dir.chdir('./app/drivers') { @platforms = Dir["*"]-["iface"]}
-
-  #Run each platform specific spec
-  @platforms.each do |p|
-    Dir.chdir "./app/drivers/#{p}" do
-      tasks = `rake -P`.split("\n").map{|e| e.split(" ")[1]}
-      if tasks.include? 'spec'
-        Flok.system!('rake spec')
-      end
-    end
-  end
-end
-#############################################################################
-
 #Gem things
 #############################################################################
 #Upgrade version of gem
@@ -63,34 +34,73 @@ task :push do
   `gem push flok-#{version}.gem`
   `rm flok-#{version}.gem`
 end
-#############################################################################
 
-#Compliation
+#Compile
 #############################################################################
-task :build_world do
-  #What platform are we working with?
-  raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
-  build_path = "./products/#{platform}"
+namespace :build do
+  task :world do
+    #What platform are we working with?
+    raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
+    build_path = "./products/#{platform}"
 
-  Flok.build_world(build_path, platform)
+    Flok.build_world(build_path, platform)
+  end
 end
+
+#Server Pipe
 #############################################################################
-
-#Pipes
-#############################################################################
-task 'pipe:server' do
-  #Get the platform we are on
-  platform = ENV["PLATFORM"]
-  raise "No $PLATFORM given" unless platform
-
-  #Build the platform
-  Flok.system!('rake build_world')
-
-  exec "ruby", "-e", %{
-    require 'flok'
+namespace :pipe do
+  task :server => 'build:world' do
+    #Get the platform we are on
     platform = ENV["PLATFORM"]
-    server = Flok::InteractiveServer.new File.join ['products', platform, 'application.js']
-    server.begin_pipe
-  }
+    raise "No $PLATFORM given" unless platform
+
+    exec "ruby", "-e", %{
+      require 'flok'
+      platform = ENV["PLATFORM"]
+      server = Flok::InteractiveServer.new File.join ['products', platform, 'application.js']
+      server.begin_pipe
+    }
+  end
+
+  task :driver do
+    #Get the platform we are on
+    platform = ENV["PLATFORM"]
+    raise "No $PLATFORM given" unless platform 
+
+    build_path = File.join ["products", platform, "driver"]
+    Flok.system! "cd ./app/drivers/#{platform}; rake pipe BUILD_PATH=#{build_path}"
+  end
 end
+
+#Testing
 #############################################################################
+namespace :spec do
+  RSpec::Core::RakeTask.new(:_kern) do |t|
+    t.rspec_opts = '-r ./spec/env/kern.rb'
+    t.pattern = "./spec/kern/*_spec.rb"
+  end
+  task :kern => ['build:world', :_kern]
+
+  RSpec::Core::RakeTask.new(:_iface) do |t|
+    t.rspec_opts = '-r ./spec/env/iface.rb'
+    t.pattern = "./spec/iface/**/*_spec.rb"
+  end
+  task :iface => ['build:world', :_iface]
+
+  RSpec::Core::RakeTask.new(:_etc) do |t|
+    t.rspec_opts = '-r ./spec/env/etc.rb'
+    t.pattern = "./spec/etc/*_spec.rb"
+  end
+  task :etc => ['build:world', :_etc] 
+
+  #Nice helper link
+  task :driver do
+    platform = ENV['PLATFORM']
+    Flok.system! "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
+  end
+
+  task :world => ['etc', 'kernel', 'iface', 'driver'] do
+    puts "done"
+  end
+end

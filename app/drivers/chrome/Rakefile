@@ -22,13 +22,11 @@ end
 
 #Make sure it runs
 task :spec do
-  Dir.chdir "../../../products/chrome/drivers"
-  `phantomjs chrome.js`
 end
 
 #Establish an environment with a pipe assuming the world is built
-task :pipe do
-  system("rake build BUILD_PATH='../../../products/CHROME/drivers'")
+task :pipe => :build do
+  raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
 
   exec "ruby", "-e", %{
     require './pipe'

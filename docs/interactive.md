@@ -3,7 +3,7 @@
 ##Pipes
 ###Starting pipes
   * #####Client (Driver/Platform)
-    * `cd ./app/drivers/$PLATFORM/; rake pipe`
+    * `cd ./app/drivers/$PLATFORM/; rake pipe` *or* `cd ./; rake pipe:driver PLATFORM=$PLATFORM`
   * #####Server
     * `cd ./; rake pipe:server PLATFORM=$PLATFORM`
 

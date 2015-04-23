@@ -23,6 +23,7 @@ A work in progress
  * [Kernel API](./docs/kernel_api.md)
  * [Rake Tasks](./docs/rakefile.md)
  * [Interactive (Mostly debugging)](./docs/interactive.md)
+ * [Testing](./docs/testing.md)
  * [Modules](./docs/modules.md)
   * [Event (event.js)](./mod/event.md) - Send and receive events to arbitrary objects
   * [User Interface (ui.js)](./mod/ui.md) - Support displaying views and view hierarchies
