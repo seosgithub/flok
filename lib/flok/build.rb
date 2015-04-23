@@ -43,25 +43,25 @@ module Flok
 
     #5. Add custom commands
     ################################################################################################################
-    #lsiface() - List interfaces for driver config.yml
+    #MODS - List mods listed in config.yml
     #---------------------------------------------------------------------------------------
     #Load the driver config.yml
     driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
     raise "No config.yml found in your 'platform: #{platform}' driver" unless  driver_config
 
     #Create array that looks like a javascript array with single quotes
-    ifaces = driver_config['ifaces']
-    iface_arr = "[" + ifaces.map{|e| "'#{e}'"}.join(", ") + "]"
+    mods = driver_config['mod']
+    mods_js_arr = "[" + mods.map{|e| "'#{e}'"}.join(", ") + "]"
 
     #Append this to our output file
-    `echo "IFACES = #{iface_arr};" >> #{build_path}/application.js`
+    `echo "MODS = #{mods_js_arr};" >> #{build_path}/application.js`
     `echo "PLATFORM = \'#{platform}\';" >> #{build_path}/application.js`
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
-    #6. Append relavent interrupt codes for supported interfaces
-    ifaces.each do |iface|
-      s = File.read("./app/kern/int/#{iface}.js")
+    #6. Append relavent mods code in kernel
+    mods.each do |mod|
+      s = File.read("./app/kern/mod/#{mod}.js")
       open("#{build_path}/application.js", "a") do |f|
         f.puts s
       end

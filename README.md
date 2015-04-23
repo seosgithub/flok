@@ -16,13 +16,19 @@ A work in progress
 ## Docs
 
  * [Project Layout](./docs/project_layout.md)
- * [Platform Drivers](./docs/platform_drivers.md)
- * [Driver Interface](./docs/driver_interface.md)
  * [Architecture](./docs/architecture.md)
  * [Compilation](./docs/compilation.md)
- * [System Interface](./docs/interface.md)
- * [Supported Interfaces](./docs/supported_interfaces/README.md)
+ * [Messaging](./docs/messaging.md)
+ * [Drivers](./docs/drivers.md)
+ * [Kernel API](./docs/kernel_api.md)
  * [Testing](./docs/testing.md)
+ * [Modules](./docs/modules.md)
+  * [Event (event.js)](./mod/event.md) - Send and receive events to arbitrary objects
+  * [User Interface (ui.js)](./mod/ui.md) - Support displaying views and view hierarchies
+  * [Net (net.js)](./mod/net.md) - Support asynchronous network connections
+  * [Timer (timer.js)](./mod/timer.md) - A tick to keep the system up-to-date and support timeout callbacks
+  * [Persistance (store.js)](./mod/store.md) - A way to store data in a key value system as well as larger blobs
+  * [Transitions (transition.js)](./mod/transition.md) - Works with `ui` to provide interception of segues
 
 ## Requirements
 

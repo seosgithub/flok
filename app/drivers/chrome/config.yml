@@ -1,4 +1,4 @@
-ifaces:
+mods:
   - ui
   - event
   - net

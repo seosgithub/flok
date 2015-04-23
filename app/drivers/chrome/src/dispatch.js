@@ -6,7 +6,7 @@
 //  [1, 'print', 'hello world']
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
-function int_dispatch(q) {
+function if_dispatch(q) {
   //Where there is still things left on the queue
   while (q.length > 0) {
     //Grab the first thing off the queue, this is the arg count
