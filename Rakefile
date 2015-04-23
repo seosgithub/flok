@@ -6,7 +6,7 @@ require './lib/flok'
 #Testing
 #############################################################################
 #spec:core
-core_spec = RSpec::Core::RakeTask.new(:spec_core)
+core_spec = RSpec::Core::RakeTask.new('spec:core')
 core_spec.pattern = './spec/*.rb'
 
 #spec:iface, accepts PLATFORM

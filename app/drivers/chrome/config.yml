@@ -2,3 +2,4 @@ ifaces:
   - ui
   - event
   - net
+  - dispatch
