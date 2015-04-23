@@ -28,15 +28,11 @@ end
 
 #Establish an environment with a pipe assuming the world is built
 task :pipe do
-  system("rake build BUILD_PATH='../../../products/chrome/drivers'")
+  system("rake build BUILD_PATH='../../../products/CHROME/drivers'")
 
-  #Go into the correct directory
-  Dir.chdir "../../../products/chrome"
-
-  #Dump both application.js and chrome.js into one file for phantomjs
-  tmp = Tempfile.new(SecureRandom.hex)
-  tmp.puts File.read("./drivers/chrome.js")
-  tmp.close
-
-  exec "boojs #{tmp.path}"
+  exec "ruby", "-e", %{
+    require './pipe'
+    server = InteractiveServer.new "../../../products/chrome/drivers/chrome.js"
+    server.begin_pipe
+  }
 end

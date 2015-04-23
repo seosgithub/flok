@@ -16,3 +16,7 @@ function if_dispatch(q) {
     this[q.shift()].apply(null, q.splice(0, argc));
   }
 }
+
+function if_dispatch_spec() {
+  console.log('hi')
+}

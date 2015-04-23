@@ -10,7 +10,7 @@ Driver configuration file.  Contains the following keys:
 Contains the following tasks:
   * `build` - A request for this driver to build it's files into the folder `$BUILD_PATH`
   * `spec`  - Run any unit tests that the implementor deems necessary
-  * `pipe`  - Establish a 2-way pipe on standard io to a javascript context that this driver defines.
+  * `pipe`  - Establish a 2-way pipe on standard io where input goes to `if_dispatch` and `int_dispatch` goes to output.
 
 ## Minimum interface
 Every driver *must* be able to accept a js function call for `if_dispatch` (See [Messaging](./messaging.md)). The `if_dispatch`
