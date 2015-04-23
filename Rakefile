@@ -75,3 +75,22 @@ task :build_world do
   Flok.build_world(build_path, platform)
 end
 #############################################################################
+
+#Pipes
+#############################################################################
+task :pipe do
+  #Get the platform we are on
+  platform = ENV["PLATFORM"]
+  raise "No $PLATFORM given" unless platform
+
+  #Build the platform
+  Flok.system!('rake build_world')
+
+  exec "ruby", "-e", %{
+    require 'flok'
+    platform = ENV["PLATFORM"]
+    server = Flok::InteractiveServer.new File.join ['products', platform, 'application.js']
+    server.begin_pipe
+  }
+end
+#############################################################################

@@ -21,7 +21,7 @@ A work in progress
  * [Messaging](./docs/messaging.md)
  * [Drivers](./docs/drivers.md)
  * [Kernel API](./docs/kernel_api.md)
- * [Testing](./docs/testing.md)
+ * [Rake Tasks](./docs/rakefile.md)
  * [Modules](./docs/modules.md)
   * [Event (event.js)](./mod/event.md) - Send and receive events to arbitrary objects
   * [User Interface (ui.js)](./mod/ui.md) - Support displaying views and view hierarchies

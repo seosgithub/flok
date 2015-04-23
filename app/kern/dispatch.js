@@ -23,10 +23,10 @@ function int_dispatch(q) {
 ////////////////////////////////////////////////////////
 function set_int_dispatch_spec_1(new_a) {
   int_dispatch_spec_a = new_a;
+  if_dispatch([1, "hello", new_a]);
 }
 
 function set_int_dispatch_spec_2(new_a, new_b) {
   int_dispatch_spec_a = new_a;
   int_dispatch_spec_b = new_b;
 }
-////////////////////////////////////////////////////////

@@ -15,4 +15,4 @@ Contains the following tasks:
 ## Minimum interface
 Every driver *must* be able to accept a js function call for `if_dispatch` (See [Messaging](./messaging.md)). The `if_dispatch`
 implementation should handle messages appropriately so that the messages it receives can be fulfilled as stated in the modules
-contract.
+contract. The driver should also offer some way to call `int_dispatch` from outside the context.

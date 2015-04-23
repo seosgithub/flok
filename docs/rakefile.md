@@ -1,5 +1,6 @@
-# Testing
-The best way to describe testing is by describing the commands that control testing and the procedures used to process testing for each command.
+# Rakefile
+
+##Testing related
 
 ------
 
@@ -28,3 +29,10 @@ This will execute:
  1. Execute `rake spec` for every platform inside the platform's `./app/drivers/$PLATFORM/` folder
  2. Execute 'rake spec:iface` at `./` for ever platform with PLATFORM=$PLATFORM
  2. Execute `rake spec:core` at `./`
+
+------
+
+##Interactive
+
+####Open a flok server pipe for a particular platform. This will execute the flok server locally on your computer through the V8 runtime.
+`rake pipe PLATFORM=CHROME`
