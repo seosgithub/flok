@@ -1,6 +1,7 @@
 require 'json'
 require 'tempfile'
 require 'securerandom'
+require 'open3'
 
 #Interactive pipe for testing.
 #Creates a server that routes $stdin into if_dispatch and $stdout to int_dispatch.
@@ -18,11 +19,24 @@ class InteractiveServer
     tmp.close!
     File.write path, @app_js
 
-    p = IO.popen "boojs #{path}"
-    loop do
-      q = JSON.parse(gets)
-      p.puts "if_dispatch('#{q}')"
-      #$stdout.flush
+    p = Open3.popen3"boojs #{path}" do |inp, out, err, _|
+      loop do
+        rr, ww = select([out, err, STDIN], []); e = rr[0]
+        if e == err
+          $stderr.puts err.read
+          exit 1
+        end
+
+        if e == STDIN
+          q = gets.strip
+          inp.puts "if_dispatch(JSON.parse('#{q}'))"
+        end
+
+        if e == out
+          $stdout.puts out.readline
+          $stdout.flush
+        end
+      end
     end
   end
 

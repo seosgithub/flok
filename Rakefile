@@ -78,7 +78,7 @@ end
 
 #Pipes
 #############################################################################
-task :pipe do
+task 'pipe:server' do
   #Get the platform we are on
   platform = ENV["PLATFORM"]
   raise "No $PLATFORM given" unless platform

@@ -34,5 +34,5 @@ This will execute:
 
 ##Interactive
 
-####Open a flok server pipe for a particular platform. This will execute the flok server locally on your computer through the V8 runtime.
-`rake pipe PLATFORM=CHROME`
+`rake pipe:server PLATFORM=CHROME`
+See [Interactive] (./interactive.md) for information
