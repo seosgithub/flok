@@ -7,7 +7,7 @@
 `if_net_hint_cancel(fd)` - Cancel a currently running network request. If this is not supported, or fails, it is ok, because flok will not trigger any associated callbacks anyway.
 
 ###Interrupts
-`int_net_cb, success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value when successful and a string with an error message when `success` is false.
+`int_net_cb(success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value when successful and a string with an error message when `success` is false.
 
 ------
 
