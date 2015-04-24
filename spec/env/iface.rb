@@ -1,4 +1,5 @@
 require 'json'
+require './spec/lib/rspec_extensions'
 require 'open3'
 require 'timeout'
 
