@@ -4,28 +4,44 @@ require 'open3'
 require 'timeout'
 
 shared_context "kern" do
-  before(:each) { @pipe = IO.popen("rake pipe:kern", "r+") }
+  before(:each) do
+    @pipe = IO.popen("rake pipe:kern", "r+")
+    @pid = @pipe.pid
+  end
+
+  after(:each) do
+    begin
+      Process.kill(:KILL, @pid)
+    rescue Errno::ESRCH
+    end
+  end
 end
 
 shared_context "driver" do
-  before(:each) { @pipe = IO.popen("rake pipe:driver", "r+") }
+  before(:each) do 
+    @pipe = IO.popen("rake pipe:driver", "r+") 
+    @pid = @pipe.pid
+  end
+
+  after(:each) do
+    begin
+      Process.kill(:KILL, @pid)
+    rescue Errno::ESRCH
+    end
+  end
 end
 
 #Testing the ping function as outlined in ./docs/messaging.md
 def ping_suite
   it "supports ping" do
     @pipe.puts [0, "ping"].to_json
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([0, "pong"])
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 5.seconds)
   end
 
   it "supports ping1" do
     arg = SecureRandom.hex
     @pipe.puts [1, "ping1", arg].to_json
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong1", arg])
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong1", arg], 5.seconds)
   end
 
   it "supports ping2" do
@@ -94,21 +110,9 @@ end
 #Testing the pipe to make sure it matches the specs outlined in ./docs/interface.md
 def pipe_suite 
   it "does close the read back pipe when when a syntax error occurs" do
-    pid = @pipe.pid
     @pipe.puts "a"
 
-    expect(@pipe).to raise_eof_within(5.seconds)
-
-    #Timeout::timeout(5) do
-      #begin
-        #expect { @pipe.readline }.to raise_error(EOFError)
-      #rescue Timeout::Error => e
-        #@did_timeout = true
-        #raise e
-      #ensure
-        #Process.kill(:KILL, pid)
-      #end
-    #end
+    expect(@pipe).to raise_eof_from_readline_within(5.seconds)
   end
 
   it "does terminate the proccess when a syntax error occurs" do
