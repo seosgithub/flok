@@ -97,16 +97,18 @@ def pipe_suite
     pid = @pipe.pid
     @pipe.puts "a"
 
-    Timeout::timeout(5) do
-      begin
-        expect { @pipe.readline }.to raise_error(EOFError)
-      rescue Timeout::Error => e
-        @did_timeout = true
-        raise e
-      ensure
-        Process.kill(:KILL, pid)
-      end
-    end
+    expect(@pipe).to raise_eof_within(5.seconds)
+
+    #Timeout::timeout(5) do
+      #begin
+        #expect { @pipe.readline }.to raise_error(EOFError)
+      #rescue Timeout::Error => e
+        #@did_timeout = true
+        #raise e
+      #ensure
+        #Process.kill(:KILL, pid)
+      #end
+    #end
   end
 
   it "does terminate the proccess when a syntax error occurs" do
@@ -115,37 +117,10 @@ def pipe_suite
     expect(pid).to die_within(5.seconds)
   end
 
-  it "does terminate the proccess when a syntax error occurs" do
-    pid = @pipe.pid
-    @pipe.puts "a"
-
-    Timeout::timeout(5) do
-      begin
-        Process.waitpid(pid)
-      rescue Timeout::Error
-        @did_timeout = true
-        Process.kill(:KILL, pid)
-      rescue Errno::ECHILD
-      end
-    end
-
-    expect(@did_timeout).to eq(nil)
-  end
-
   it "does terminate the proccess when the pipe is closed" do
     pid = @pipe.pid
     @pipe.close
 
-    Timeout::timeout(5) do
-      begin
-        Process.waitpid(pid)
-      rescue Timeout::Error
-        @did_timeout = true
-        Process.kill(:KILL, pid)
-      rescue Errno::ECHILD
-      end
-    end
-
-    expect(@did_timeout).to eq(nil)
+    expect(pid).to die_within(5.seconds)
   end
 end

@@ -13,12 +13,12 @@ RSpec::Matchers.define :die_within do |seconds|
     rescue Timeout::Error
       return false
     rescue Errno::ECHILD => e
-      $stderr.puts "Process with pid: #{pid} does not exist (or may be part of another process group)"
-      raise e
+      #Process no longer exists (waitpid)
     ensure
       begin
         Process.kill(:KILL, pid)
       rescue Errno::ESRCH
+        #Process no longer exists (tried signal)
       end
     end
 
@@ -30,23 +30,32 @@ RSpec::Matchers.define :die_within do |seconds|
   end
 end
 
-RSpec::Matchers.define :raise_within do |seconds|
-  match do |pid|
+RSpec::Matchers.define :raise_eof_within do |seconds|
+  match do |pipe|
+    pid = pipe.pid
+
     begin
-      Timeout::timeout(seconds) { Process.waitpid(pid) }
+      Timeout::timeout(seconds) do
+        pipe.readline
+      end
     rescue Timeout::Error
       return false
     rescue Errno::ECHILD => e
-      $stderr.puts "Process with pid: #{pid} does not exist (or may be part of another process group)"
-      raise e
+      #Process no longer exists (waitpid)
+    rescue EOFError
+      return true
     ensure
-      Process.kill(:KILL, pid)
+      begin
+        Process.kill(:KILL, pid)
+      rescue Errno::ESRCH
+        #Process no longer exists (tried signal)
+      end
     end
 
-    return true
+    return false
   end
 
   description do
-    "die within #{seconds.inspect}"
+    "raise EOF within #{seconds.inspect}"
   end
 end
