@@ -39,7 +39,8 @@ Both the client and server are responsible for being able to reply to 3 test mes
 
   - `ping` - Reply with [0, "pong"]
   - `ping1(arg)` - Reply with [1, "pong1", arg]
-  - `ping2(arg1, arg2)` - Reply with [2, "pong2", arg1, arg2]
+  - `ping2(arg1, arg2)` - Reply with [1, "pong2", arg1] and then [2, "pong2", arg1, arg2]
+  - 
 
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.
