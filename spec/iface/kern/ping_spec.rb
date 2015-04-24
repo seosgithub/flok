@@ -1,3 +1,4 @@
+require './spec/env/iface.rb'
 require 'securerandom'
 
 RSpec.describe "kern:ping_spec" do

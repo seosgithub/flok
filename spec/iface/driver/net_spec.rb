@@ -1,3 +1,4 @@
+require './spec/env/iface.rb'
 require './spec/lib/helpers.rb'
 
 RSpec.describe "driver:net" do

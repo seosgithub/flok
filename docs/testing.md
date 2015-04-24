@@ -24,6 +24,7 @@ See the section on *Spec* in [Drivers](./drivers.md). Driver tests can be execut
 Kernel tests only operate on the kernel and should **never** include tests that can be accomplished through using the kernel's pipe interface. Kernel tests are given a pre-build `V8` context that has the `application.js` loaded through `therubyracer`.
 
  * Running - `rake spec:kern PLATFORM=$PLATFORM`
+ * Requires - `./spec/etc/kern.rb`
  * Location - `./spec/kern/*_spec.rb`
  * Environment
    * `@ctx` - Access to a V8 runtime that has `application.js` preloaded. See [therubyracer](https://github.com/cowboyd/therubyracer)
@@ -33,6 +34,7 @@ Kernel tests only operate on the kernel and should **never** include tests that 
 ##Interface
 Interface tests are used for things that can be tested through either only the kernel pipe, driver pipe, or both.
   * Running - `rake spec:iface PLATFORM=$PLATFORM`
+  * Requires - `./spec/etc/iface.rb`
   * Location
     * `./spec/iface/kern` - Tests only need the server pipe
     * `./spec/iface/driver` - Tests only need the client pipe
@@ -51,6 +53,7 @@ Tests that do not fit into any of the categories (e.g. build output tests), shou
 These tests are runnable via `rake spec:etc PLATFORM=$PLATFORM`
 
   * Running - `rake spec:etc PLATFORM=$PLATFORM`
+  * Requires - `./spec/etc/etc.rb`
   * Location - `./spec/etc/`
   * Environment
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
