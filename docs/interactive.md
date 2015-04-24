@@ -18,6 +18,10 @@
   
 All communication *coming* from `$stdin` and *going* to `$stdout` is in un-escaped JSON formatting that follows the conventions mentioned in [Messaging](./messaging.md).
 
+The test suites assume particular behavior of the pipes.
+  * When the pipe encounters an error, that pipe is required to close it's write pipe (so that the receiver gets an eof)
+  * When the pipe encounters an error, or the pipe's stdin is closed, that pipe is required to die.
+
 ####Examples
 
 #####Server ➜ Client

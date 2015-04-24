@@ -19,29 +19,37 @@ class InteractiveServer
     tmp.close!
     File.write path, @app_js
 
-    p = Open3.popen3"boojs #{path}" do |inp, out, err, _|
-      loop do
-        rr, ww = select([out, err, STDIN], []); e = rr[0]
-        if e == err
-          $stderr.puts err.read
-          exit 1
-        end
-
-        if e == STDIN
-          begin
-            q = gets.strip
-            inp.puts "if_dispatch(JSON.parse('#{q}'))"
-          rescue Errno::EIO
-            #Can't say anything here, we don't have a pipe
-            exit 1
-          rescue NoMethodError
+    p = Open3.popen3 "boojs #{path}" do |inp, out, err, t|
+      pid = t[:pid]
+      begin
+        loop do
+          rr, ww = select([out, err, STDIN], []); e = rr[0]
+          if e == err
+            $stderr.puts err.read
             exit 1
           end
-        end
 
-        if e == out
-          $stdout.puts out.readline
-          $stdout.flush
+          if e == STDIN
+            begin
+              q = gets.strip
+              inp.puts "if_dispatch(JSON.parse('#{q}'))"
+            rescue Errno::EIO
+              #Can't say anything here, we don't have a pipe
+              exit 1
+            rescue NoMethodError
+              exit 1
+            end
+          end
+
+          if e == out
+            res = out.readline
+            puts res
+          end
+        end
+      ensure
+        begin
+          Process.kill :KILL, pid
+        rescue Errno::ESRCH
         end
       end
     end

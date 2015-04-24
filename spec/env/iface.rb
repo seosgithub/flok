@@ -1,5 +1,6 @@
 require 'json'
 require 'open3'
+require 'timeout'
 
 shared_context "kern" do
   before(:each) { @pipe = IO.popen("rake pipe:kern", "r+") }
@@ -9,6 +10,7 @@ shared_context "driver" do
   before(:each) { @pipe = IO.popen("rake pipe:driver", "r+") }
 end
 
+#Testing the ping function as outlined in ./docs/messaging.md
 def ping_suite
   it "supports ping" do
     @pipe.puts [0, "ping"].to_json
@@ -85,5 +87,75 @@ def ping_suite
     res = @pipe.readline
     res = JSON.parse(res)
     expect(res).to eq([2, "pong2", secret2, secret1])
+  end
+end
+
+#Testing the pipe to make sure it matches the specs outlined in ./docs/interface.md
+def pipe_suite 
+  it "does close the read back pipe when when a syntax error occurs" do
+    pid = @pipe.pid
+    @pipe.puts "a"
+
+    Timeout::timeout(5) do
+      begin
+        expect { @pipe.readline }.to raise_error(EOFError)
+      rescue Timeout::Error => e
+        @did_timeout = true
+        raise e
+      ensure
+        Process.kill(:KILL, pid)
+      end
+    end
+  end
+
+  it "does terminate the proccess when a syntax error occurs" do
+    pid = @pipe.pid
+    @pipe.puts "a"
+
+    Timeout::timeout(5) do
+      begin
+        Process.waitpid(pid)
+      rescue Timeout::Error
+        @did_timeout = true
+        Process.kill(:KILL, pid)
+      rescue Errno::ECHILD
+      end
+    end
+
+    expect(@did_timeout).to eq(nil)
+  end
+
+  it "does terminate the proccess when a syntax error occurs" do
+    pid = @pipe.pid
+    @pipe.puts "a"
+
+    Timeout::timeout(5) do
+      begin
+        Process.waitpid(pid)
+      rescue Timeout::Error
+        @did_timeout = true
+        Process.kill(:KILL, pid)
+      rescue Errno::ECHILD
+      end
+    end
+
+    expect(@did_timeout).to eq(nil)
+  end
+
+  it "does terminate the proccess when the pipe is closed" do
+    pid = @pipe.pid
+    @pipe.close
+
+    Timeout::timeout(5) do
+      begin
+        Process.waitpid(pid)
+      rescue Timeout::Error
+        @did_timeout = true
+        Process.kill(:KILL, pid)
+      rescue Errno::ECHILD
+      end
+    end
+
+    expect(@did_timeout).to eq(nil)
   end
 end
