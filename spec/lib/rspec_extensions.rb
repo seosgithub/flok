@@ -2,6 +2,10 @@ require 'timeout'
 require 'rspec/expectations'
 require 'active_support'
 require 'active_support/core_ext/numeric'
+
+#Useful RSpec helpers
+
+#Make sure that a PROCESS at some PID is no longer active within N seconds
 RSpec::Matchers.define :die_within do |seconds|
   match do |pid|
     begin
@@ -12,7 +16,10 @@ RSpec::Matchers.define :die_within do |seconds|
       $stderr.puts "Process with pid: #{pid} does not exist (or may be part of another process group)"
       raise e
     ensure
-      Process.kill(:KILL, pid)
+      begin
+        Process.kill(:KILL, pid)
+      rescue Errno::ESRCH
+      end
     end
 
     return true

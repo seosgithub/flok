@@ -112,18 +112,7 @@ def pipe_suite
   it "does terminate the proccess when a syntax error occurs" do
     pid = @pipe.pid
     @pipe.puts "a"
-
-    Timeout::timeout(5) do
-      begin
-        Process.waitpid(pid)
-      rescue Timeout::Error
-        @did_timeout = true
-        Process.kill(:KILL, pid)
-      rescue Errno::ECHILD
-      end
-    end
-
-    expect(@did_timeout).to eq(nil)
+    expect(pid).to die_within(5.seconds)
   end
 
   it "does terminate the proccess when a syntax error occurs" do
