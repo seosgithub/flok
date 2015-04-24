@@ -49,25 +49,15 @@ def ping_suite
     arg2 = SecureRandom.hex
     @pipe.puts [2, "ping2", arg1, arg2].to_json
 
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong2", arg1])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([2, "pong2", arg1, arg2]) 
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong2", arg1], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([2, "pong2", arg1, arg2], 5.seconds)
   end
 
   it "supports multi-ping" do
     @pipe.puts [0, "ping", 0, "ping"].to_json
 
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([0, "pong"])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([0, "pong"])
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 5.seconds)
   end
 
   it "supports multi-ping1" do
@@ -75,13 +65,8 @@ def ping_suite
     secret2 = SecureRandom.hex
     @pipe.puts [1, "ping1", secret1, 1, "ping1", secret2].to_json
 
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong1", secret1])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong1", secret2])
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong1", secret1], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong1", secret2], 5.seconds)
   end
 
   it "supports multi-ping2" do
@@ -89,21 +74,10 @@ def ping_suite
     secret2 = SecureRandom.hex
     @pipe.puts [2, "ping2", secret1, secret2, 2, "ping2", secret2, secret1].to_json
 
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong2", secret1])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([2, "pong2", secret1, secret2])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([1, "pong2", secret2])
-
-    res = @pipe.readline
-    res = JSON.parse(res)
-    expect(res).to eq([2, "pong2", secret2, secret1])
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong2", secret1], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([2, "pong2", secret1, secret2], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong2", secret2], 5.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([2, "pong2", secret2, secret1], 5.seconds)
   end
 end
 
