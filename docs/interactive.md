@@ -2,17 +2,17 @@
 
 ##Pipes
 ###Starting pipes
-  * #####Client (Driver/Platform)
+  * Client (Driver/Platform)
     * `cd ./app/drivers/$PLATFORM/; rake pipe` *or* `cd ./; rake pipe:driver PLATFORM=$PLATFORM`
-  * #####Server
+  * Server
     * `cd ./; rake pipe:server PLATFORM=$PLATFORM`
 
 ###What $stdout and $stdin does for pipes
 
-  * #####Server
+  * Server
   	- `$stdin` => `int_dispatch`
   	- `if_dispatch` => `$stdout`
-  * #####Client
+  * Client
   	- `$stdin` => `if_dispatch`
   	- `int_dispatch` => `$stdout`
   
