@@ -42,6 +42,22 @@ RSpec::Matchers.define :raise_eof_from_readline_within do |seconds|
     return false
   end
 
+  match_when_negated do |pipe|
+    begin
+      Timeout::timeout(seconds) do
+        pipe.readline
+      end
+    rescue Timeout::Error
+      return true
+    rescue Errno::ECHILD
+      #Process no longer exists (waitpid)
+    rescue EOFError
+      return false
+    end
+
+    return true
+  end
+
   description do
     "raise EOF within #{seconds.inspect}"
   end

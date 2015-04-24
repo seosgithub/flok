@@ -69,7 +69,7 @@ namespace :pipe do
     raise "No $PLATFORM given" unless platform 
 
     build_path = File.join ["../../../", "products", platform, "drivers"]
-    system "cd ./app/drivers/#{platform}; rake pipe BUILD_PATH=#{build_path}"
+    exec "cd ./app/drivers/#{platform}; rake pipe BUILD_PATH=#{build_path}"
   end
 end
 

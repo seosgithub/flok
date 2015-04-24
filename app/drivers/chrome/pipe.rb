@@ -23,13 +23,13 @@ class InteractiveServer
       pid = t[:pid]
       begin
         loop do
-          rr, ww = select([out, err, STDIN], []); e = rr[0]
-          if e == err
+          results = select([out, err, STDIN], [])
+          if results[0].include? err
             $stderr.puts err.read
             exit 1
           end
 
-          if e == STDIN
+          if results[0].include? STDIN
             begin
               q = gets.strip
               inp.puts "if_dispatch(JSON.parse('#{q}'))"
@@ -41,9 +41,10 @@ class InteractiveServer
             end
           end
 
-          if e == out
+          if results[0].include? out
             res = out.readline
-            puts res
+            $stdout.puts res
+            $stdout.flush
           end
         end
       ensure
