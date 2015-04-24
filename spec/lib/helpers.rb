@@ -1,7 +1,5 @@
 require 'securerandom'
 require 'json'
-require 'phantomjs'
-require 'shellwords'
 require 'webrick'
 
 #Duplex pipe
@@ -48,8 +46,8 @@ end
 #RESTful mock
 ###################################################################################################################
 module Webbing
-  def self.get path, &block
-    Webbing.new "GET", path, &block
+  def self.get path, port=nil, &block
+    Webbing.new "GET", path, port, &block
   end
 
   class Webbing
@@ -60,11 +58,11 @@ module Webbing
       Process.kill("KILL", @pid)
     end
 
-    def initialize verb, path, &block
+    def initialize verb, path, port=nil, &block
       @verb = verb
       @path = path
       @block = block
-      @port = rand(30000)+3000
+      @port = port || rand(30000)+3000
 
       @pipe = IO.duplex_pipe
       @pid = fork do
@@ -104,37 +102,3 @@ module Webbing
 end
 ###################################################################################################################
 
-#Mock chrome javascript running  (Will not do anything until you run commit)
-#Meant to be for one shot tests
-#(1) load with                       --- cr = ChromeRunner.new('code.js')
-#(2) queue execute with              --- cr.eval('console.log("hello world");')
-#(3) run in it's own process via     --- cr.commit
-###################################################################################################################
-class ChromeRunner
-  #Load a javascript file
-  def initialize fn
-    @file = fn
-    @@phantomjs_path ||= Phantomjs.path
-  end
-
-  def eval cmd
-    of = Tempfile.new(SecureRandom.hex)
-    of.puts File.read(@file)
-    of.puts cmd
-    of.close
-
-    out = Tempfile.new(SecureRandom.hex)
-    out.close
-    ret=system("boojs -t 4 #{of.path} >#{out.path} 2>&1")
-    of.unlink
-    output = File.read(out.path)
-    out.unlink
-
-    return output
-  end
-
-  def kill
-    Process.kill("KILL", @pid)
-  end
-end
-###################################################################################################################
