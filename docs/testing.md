@@ -25,23 +25,21 @@ Kernel tests only operate on the kernel and should **never** include tests that 
 
  * Running - `rake spec:kern PLATFORM=$PLATFORM`
  * Location - `./spec/kern/*_spec.rb`
- * Requires - `require ./env`
  * Environment
-   * `@ctx` - Access to a V8 runtime that has `application.js` preloaded. See [therubyracer
+   * `@ctx` - Access to a V8 runtime that has `application.js` preloaded. See [therubyracer](https://github.com/cowboyd/therubyracer)
    * `$PLATFORM` - Current platform the `application.js` was built for.
    * `$PWD` - `./`
 
 ##Interface
 Interface tests are used for things that can be tested through either only the kernel pipe, driver pipe, or both.
   * Running - `rake spec:iface PLATFORM=$PLATFORM`
-  * Requires - `require ../env.rb`
   * Location
     * `./spec/iface/kern` - Tests only need the server pipe
     * `./spec/iface/driver` - Tests only need the client pipe
     * `./spec/iface/all` - Tests need both pipes
   * Environment
-   * `@kern` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
-   * `@driver` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
+   * `get_kern` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
+   * `get_driver` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
    * `$PWD` - `./`
 

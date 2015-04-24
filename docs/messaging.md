@@ -34,6 +34,13 @@ live in `./app/kern/mod/` and have the convention of being called `int_*`.
 On the client, the driver decides on how messages are handled. At a minimum, the client must support the `if_dispatch` function
 call.
 
+### Ping
+Both the client and server are responsible for being able to reply to 3 test messages called `ping`, `ping1`, and `ping2` which have the following rules
+
+  - `ping` - Reply with [0, "pong"]
+  - `ping1(arg)` - Reply with [1, "pong1", arg]
+  - `ping2(arg1, arg2)` - Reply with [2, "pong2", arg1, arg2]
+
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.
 

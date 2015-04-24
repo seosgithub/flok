@@ -28,8 +28,15 @@ class InteractiveServer
         end
 
         if e == STDIN
-          q = gets.strip
-          inp.puts "if_dispatch(JSON.parse('#{q}'))"
+          begin
+            q = gets.strip
+            inp.puts "if_dispatch(JSON.parse('#{q}'))"
+          rescue Errno::EIO
+            #Can't say anything here, we don't have a pipe
+            exit 1
+          rescue NoMethodError
+            exit 1
+          end
         end
 
         if e == out

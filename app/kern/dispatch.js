@@ -19,18 +19,15 @@ function int_dispatch(q) {
   }
 }
 
-//For unit tests
-////////////////////////////////////////////////////////
-function set_int_dispatch_spec_1(new_a) {
-  int_dispatch_spec_a = new_a;
-  if_dispatch([1, "hello", new_a]);
-}
-
-function set_int_dispatch_spec_2(new_a, new_b) {
-  int_dispatch_spec_a = new_a;
-  int_dispatch_spec_b = new_b;
-}
-
 function ping() {
-  if_dispatch([3, 3, 3])
+  if_dispatch([0, "pong"])
+}
+
+function ping1(arg1) {
+  if_dispatch([1, "pong1", arg1])
+}
+
+function ping2(arg1, arg2) {
+  if_dispatch([1, "pong2", arg1])
+  if_dispatch([2, "pong2", arg1, arg2])
 }

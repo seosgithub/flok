@@ -50,7 +50,7 @@ end
 #Server Pipe
 #############################################################################
 namespace :pipe do
-  task :server => 'build:world' do
+  task :kern => 'build:world' do
     #Get the platform we are on
     platform = ENV["PLATFORM"]
     raise "No $PLATFORM given" unless platform
@@ -68,8 +68,8 @@ namespace :pipe do
     platform = ENV["PLATFORM"]
     raise "No $PLATFORM given" unless platform 
 
-    build_path = File.join ["products", platform, "driver"]
-    Flok.system! "cd ./app/drivers/#{platform}; rake pipe BUILD_PATH=#{build_path}"
+    build_path = File.join ["../../../", "products", platform, "drivers"]
+    system "cd ./app/drivers/#{platform}; rake pipe BUILD_PATH=#{build_path}"
   end
 end
 
@@ -100,7 +100,14 @@ namespace :spec do
     Flok.system! "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
   end
 
-  task :world => ['etc', 'kernel', 'iface', 'driver'] do
+  task :world => ['etc', 'kern', 'iface', 'driver'] do
     puts "done"
+  end
+end
+
+task :spec do
+  platforms = Dir["./app/drivers/*"].map{|e| File.basename(e)}
+  platforms.each do |p|
+    Flok.system! "rake spec:world PLATFORM=#{p}"
   end
 end

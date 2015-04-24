@@ -7,7 +7,6 @@
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
 function if_dispatch(q) {
-  console.log('ready')
   //Where there is still things left on the queue
   while (q.length > 0) {
     //Grab the first thing off the queue, this is the arg count
@@ -18,11 +17,15 @@ function if_dispatch(q) {
   }
 }
 
-function if_dispatch_ping() {
-  console.log("pong start");
-  console.log(arguments.length)
-  for (var i = 0; i < arguments.length; ++i) {
-    console.log(arguments[i])
-  }
-  console.log("pong end")
+function ping() {
+  int_dispatch([0, "pong"])
+}
+
+function ping1(arg1) {
+  int_dispatch([1, "pong1", arg1])
+}
+
+function ping2(arg1, arg2) {
+  int_dispatch([1, "pong2", arg1])
+  int_dispatch([2, "pong2", arg1, arg2])
 }
