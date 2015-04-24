@@ -38,10 +38,13 @@ Interface tests are used for things that can be tested through either only the k
     * `./spec/iface/driver` - Tests only need the client pipe
     * `./spec/iface/all` - Tests need both pipes
   * Environment
-   * `get_kern` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
-   * `get_driver` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
+   * `include_context "kern"` 
+     * `@kern` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
+   * `include_context "driver"`
+     * `@driver` - An `IO` pipe that talks to the kernel (server) as described in [Interactive](./interactive.md)
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
    * `$PWD` - `./`
+   
 
 ##Etc
 Tests that do not fit into any of the categories (e.g. build output tests), should be placed in `./spec/etc`
