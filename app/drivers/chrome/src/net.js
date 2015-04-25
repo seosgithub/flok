@@ -9,7 +9,8 @@ if_net_req = function(verb, url, params) {
     method: verb,
     data: params,
     success: function(data) {
-      console.error("success")
+      data = JSON.parse(data);
+      int_dispatch([3, "int_net_cb", true, data]);
     },
     error: function(xhr, textStatus, err) {
       console.error(err);
