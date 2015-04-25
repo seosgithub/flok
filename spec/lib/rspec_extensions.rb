@@ -110,3 +110,37 @@ RSpec::Matchers.define :readline_and_equal_json_x_within_y_seconds do |json, sec
     "readline and equal #{str.inspect} within #{seconds.inspect}"
   end
 end
+
+#Attempt to readline from IO, it should return something that a custom validate_proc returns true within SECONDS
+RSpec::Matchers.define :readline_and_equal_proc_x_within_y_seconds do |validate_proc, seconds|
+  match do |pipe|
+    begin
+      Timeout::timeout(seconds) do
+        @res = pipe.readline.strip
+        @sol = validate_proc.call(@res)
+        return @res
+      end
+    rescue Timeout::Error #Time out
+      @timeout = true
+    rescue EOFError #Couldn't read pipe
+      @eof = true
+      $stderr.puts "eof"
+    end
+
+    return false
+  end
+
+  failure_message do |actual|
+    if @timeout
+      "expected a readline, but none was returned from the pipe within #{seconds.inspect}"
+    elsif @eof
+      "expected a readline, but an eof was thrown from the pipe"
+    else
+      "expected that the value of #{@res.inspect} to return true via your custom proc #{validate_proc}, got back #{@sol}"
+    end
+  end
+
+  description do
+    "readline and match a custom_proc within #{seconds.inspect}"
+  end
+end

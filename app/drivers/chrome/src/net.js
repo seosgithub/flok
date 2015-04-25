@@ -13,7 +13,7 @@ if_net_req = function(verb, url, params, tp_base) {
       int_dispatch([3, "int_net_cb", true, data, tp_base]);
     },
     error: function(xhr, textStatus, err) {
-      console.error(err);
+      int_dispatch([3, "int_net_cb", false, textStatus, tp_base]);
     }
   })
 }
