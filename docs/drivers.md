@@ -13,9 +13,8 @@ Contains the following tasks:
   * `pipe`  - Establish a 2-way pipe on standard io where input goes to `if_dispatch` and `int_dispatch` goes to output.  
 
 ## Minimum interface
-Every driver *must* be able to accept a js function call for `if_dispatch` (See [Messaging](./messaging.md)). The `if_dispatch`
-implementation should handle messages appropriately so that the messages it receives can be fulfilled as stated in the modules
-contract. The driver should also offer some way to call `int_dispatch` from outside the context.
+Every driver *must* export `if_dispatch` into the context managing `application.js` (See [Messaging](./messaging.md)). The driver should then handle `if_dispatch` and it's implementation should handle messages appropriately so that the messages it receives can be fulfilled as stated in the modules
+contract. The driver should also offer some way to call `int_dispatch` *inside* the `application.js` context from the outside world.
 
 ## Spec (Testing)
 Driver tests are chosen by the platform implementor.  The only requriements for a driver test are that it be run when `rake spec` is executed within the `./app/driver/$PLATFORM/` folder. These tests should **never** do anything that can be tested by only using the driver's pipe interface. Tests that can be done through the pipe interface should be done through the **Driver Interface** tests (See the section on *Interface* in [Testing](./testing.md).

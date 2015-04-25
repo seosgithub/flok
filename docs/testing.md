@@ -30,7 +30,8 @@ Kernel tests only operate on the kernel and should **never** include tests that 
  * Requires - `./spec/etc/kern.rb`
  * Location - `./spec/kern/*_spec.rb`
  * Environment
-   * `@ctx` - Access to a V8 runtime that has `application.js` preloaded. See [therubyracer](https://github.com/cowboyd/therubyracer)
+   * `include_context "kern"` - Access `@ctx`, a V8 runtime that has `application.js` preloaded. See [therubyracer](https://github.com/cowboyd/therubyracer)
+   * `mock(function_name, &block)` - Override a function of `@ctx` with a ruby method
    * `$PLATFORM` - Current platform the `application.js` was built for.
    * `$PWD` - `./`
 
@@ -43,6 +44,10 @@ Interface tests are used for things that can be tested through either only the k
     * `./spec/iface/driver` - Tests only need the client pipe
     * `./spec/iface/all` - Tests need both pipes
   * Environment
+   * `include_context "iface:kern"` - Access `@pipe` matching the description for kernel pipe [Interactive](./interactive.md)
+   * `include_context "iface:driver"` - Access `@pipe` matching the description for driver pipe [Interactive](./interactive.md)
+   * `pipe_suite()` - Run a test suite against `@pipe` for the `dispatch` interface mentioned in [Messaging](./messaging.md)
+   * `ping_suite()` - Run a test suite against `@pipe` for the `ping` extensions mentioned in [Messaging](./messaging.md)
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
    * `$PWD` - `./`
 
