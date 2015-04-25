@@ -4,8 +4,8 @@ require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
-RSpec.describe "driver:net" do
-  include_context "kern"
+RSpec.describe "iface:kern:net" do
+  include_context "iface:kern"
 
   #A callback was registered in the kernel for testing purposes
   it "A mock network callback should invoke the '-3209284741' telepointer callback and set int_net_cb_spec" do

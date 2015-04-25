@@ -4,8 +4,8 @@ require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
-RSpec.describe "driver:net" do
-  include_context "driver"
+RSpec.describe "iface:driver:net" do
+  include_context "iface:driver"
 
   it "Can call a network request" do
     web = Webbing.get "/" do

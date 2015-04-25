@@ -4,7 +4,7 @@ require 'open3'
 require 'timeout'
 require 'securerandom'
 
-shared_context "kern" do
+shared_context "iface:kern" do
   before(:each) do
     @pipe = IO.popen("rake pipe:kern", "r+")
     @pid = @pipe.pid
@@ -18,7 +18,7 @@ shared_context "kern" do
   end
 end
 
-shared_context "driver" do
+shared_context "iface:driver" do
   before(:each) do 
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
