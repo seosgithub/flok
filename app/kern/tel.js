@@ -34,3 +34,7 @@ function tel_del(tp) {
 function tel_deref(tp) {
   return tel_table[tp];
 }
+
+function tel_exists(tp) {
+  return tp in tel_table;
+}

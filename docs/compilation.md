@@ -1,6 +1,6 @@
 # Compliation
 
-Compilation is handled by the `rake build_world PLATFORM=YOUR_PLATFORM` and then end result of that compliation is put in ./products/
+Compilation is handled by the `rake build:world PLATFORM=YOUR_PLATFORM` and then end result of that compliation is put in ./products/
 Compilation *always* results in a `./products/$PLATFORM/application.js` file along with other files in `./products/$PLATFORM/drivers/` that
 were deemed necessary by the platform driver `build` scripts.
 

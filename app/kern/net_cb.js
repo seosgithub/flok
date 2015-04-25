@@ -1,9 +1,12 @@
 //Network Callback Related
 
-function get_req(url, params, callback) {
+function get_req(owner, url, params, callback) {
   //Register callback
   var tp = tel_reg(function(success, info) {
-    return callback(info);
+    //Only let a callback go through if the owner still exists
+    if (tel_exists(owner) === true) {
+      return callback(info);
+    }
   });
 
   //Create request
