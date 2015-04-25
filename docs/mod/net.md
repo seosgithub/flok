@@ -6,7 +6,8 @@
 `if_net_req(verb, url, params, tp_base)` - Perform an HTTP network request with the given VERB. Assign the network request with the correct telepathy pointer.
 
 ###Interrupts
-`int_net_cb(tp, success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value when successful and a string with an error message when `success` is false. `tp` is the telepathy pointer passed in via `if_net_req`
+`int_net_cb(tp, success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value
+when successful and a string with an error message (string thats not false) when `success` is false. `tp` is the telepathy pointer passed in via `if_net_req`
 
 ------
 

@@ -7,7 +7,6 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "driver:net" do
   include_context "driver"
 
-  
   it "Can call a network request" do
     web = Webbing.get "/" do
       @hit = true
@@ -68,19 +67,13 @@ RSpec.describe "driver:net" do
     @ptr = SecureRandom.hex
     @pipe.puts [4, "if_net_req", "GET", "http://no_such_url#{SecureRandom.hex}.com", {}, @ptr].to_json
 
-    #The message is not defined in the implementation, so as long as there is a message, we are good
-    #[3, "int_net_cb", false, "{{some error string}}", @ptr]
     matcher = proc do |x|
       x = JSON.parse(x)
-      expect(x[0]).to eq(3)
-      expect(x[1]).to eq("int_net_cb")
-      expect(x[2]).to eq(false)
-      expect(x[3].class).to eq(String) #Message is a string
-      expect(x[3].length).not_to eq(0) #Message is not 0 length
-      expect(x[4]).to eq(@ptr)
-
+      a = ->(e){e.class == String && e.length > 0} #Error message should be a string that's not blank
+      expect(x).to look_like [3, "int_net_cb", false, a, @ptr]
       true
     end
+
     expect(@pipe).to readline_and_equal_proc_x_within_y_seconds(matcher, 5.seconds)
   end
 end
