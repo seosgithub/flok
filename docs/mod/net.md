@@ -2,12 +2,11 @@
 
 ###Functions
 
-`if_net_req(verb, url, params)` - Perform an HTTP network request with the given VERB. Returns a `opaque object` that represents this network request. We will call this pointer `fd`
-
-`if_net_hint_cancel(fd)` - Cancel a currently running network request. If this is not supported, or fails, it is ok, because flok will not trigger any associated callbacks anyway.
+**@telepathy[2]**
+`if_net_req(verb, url, params, tp_base)` - Perform an HTTP network request with the given VERB. Assign the network request with the correct telepathy pointer.
 
 ###Interrupts
-`int_net_cb(success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value when successful and a string with an error message when `success` is false.
+`int_net_cb(tp, success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value when successful and a string with an error message when `success` is false. `tp` is the telepathy pointer passed in via `if_net_req`
 
 ------
 

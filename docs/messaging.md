@@ -40,12 +40,14 @@ Both the client and server are responsible for being able to reply to 3 test mes
   - `ping` - Reply with [0, "pong"]
   - `ping1(arg)` - Reply with [1, "pong1", arg]
   - `ping2(arg1, arg2)` - Reply with [1, "pong2", arg1] and then [2, "pong2", arg1, arg2]
-  - 
 
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.
 
-##### @telepathy [N+2, "if_*", ..., tp_base, tp_targets, ...]
+##### @telepathy(2)
+  1. `[N+2, "if_*", ... , tp_base, tp_targets, ...]` - Multiple targets
+  2. `[N+1, "if_*", ..., tp_base, ...]` - One target (acts as same above but only one target)
+
 This protocol supports virtual de-referencing.  When an entity is initialized, the server notifies the client that it (the client) should be able to dereference that entity via the telepathic pointer (tele-pointer for short) the server
 just gave in the initialization.
 
