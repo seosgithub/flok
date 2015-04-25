@@ -16,6 +16,9 @@ The `spec` folder contains all tests with the exception of **Driver** tests (See
       - `iface.rb` (for `./spec/iface/**/*_spec.rb`)
       - `etc.rb` (for `./spec/etc/*_spec.rb`)
 
+For each `_spec.rb` file in the `./spec` folder, make sure to change the directory root to the project root. For example, if your spec file was
+`./spec/iface/kern/pipe_spec.rb` then you would put `Dir.chdir File.join File.dirname(__FILE__), '../../../'` at the top. RSpec needs to be able to
+execute anywhere.
 
 ##Drivers
 See the section on *Spec* in [Drivers](./drivers.md). Driver tests can be executed from the global rakefile by the convenience task `rake spec:driver PLATFORM=$PLATFORM`

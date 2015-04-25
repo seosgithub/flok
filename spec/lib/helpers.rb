@@ -55,7 +55,7 @@ module Webbing
     attr_accessor :port
 
     def kill
-      Process.kill("KILL", @pid)
+      Process.kill(:KILL, @pid)
     end
 
     def initialize verb, path, port=nil, &block

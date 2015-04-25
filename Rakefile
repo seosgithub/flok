@@ -77,19 +77,16 @@ end
 #############################################################################
 namespace :spec do
   RSpec::Core::RakeTask.new(:_kern) do |t|
-    t.rspec_opts = '-r ./spec/env/kern.rb'
     t.pattern = "./spec/kern/*_spec.rb"
   end
   task :kern => ['build:world', :_kern]
 
   RSpec::Core::RakeTask.new(:_iface) do |t|
-    t.rspec_opts = '-r ./spec/env/iface.rb'
     t.pattern = "./spec/iface/**/*_spec.rb"
   end
   task :iface => ['build:world', :_iface]
 
   RSpec::Core::RakeTask.new(:_etc) do |t|
-    t.rspec_opts = '-r ./spec/env/etc.rb'
     t.pattern = "./spec/etc/*_spec.rb"
   end
   task :etc => ['build:world', :_etc] 

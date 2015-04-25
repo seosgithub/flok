@@ -3,14 +3,16 @@ var if_net_request_socket_index = 0
 
 //A basic get request that supports callbacks
 if_net_req = function(verb, url, params) {
+  console.error(url)
   $.ajax({
     url: url,
-    data: params,
     method: verb,
-    success: function(data, status, xhr) {
-
+    data: params,
+    success: function(data) {
+      console.error("success")
     },
-    error: function(xhr, status, err) {
+    error: function(xhr, textStatus, err) {
+      console.error(err);
     }
   })
 }

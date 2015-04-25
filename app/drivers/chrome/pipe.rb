@@ -25,8 +25,9 @@ class InteractiveServer
         loop do
           results = select([out, err, STDIN], [])
           if results[0].include? err
-            $stderr.puts err.read
-            exit 1
+            err_msg = err.readline
+            $stderr.puts err_msg
+            #exit 1 unless err_msg =~ /[debug]/
           end
 
           if results[0].include? STDIN
@@ -61,7 +62,7 @@ class InteractiveServer
   def inject_dispatch_shims
     @app_js << %{
       function int_dispatch(q) {
-        console.log(JSON.stringify(q))
+        system.stdout.writeLine(JSON.stringify(q));
       }
     }
   end

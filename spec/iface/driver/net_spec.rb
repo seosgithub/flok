@@ -1,28 +1,38 @@
+Dir.chdir File.join File.dirname(__FILE__), '../../../'
 require './spec/env/iface.rb'
 require './spec/lib/helpers.rb'
 
 RSpec.describe "driver:net" do
   include_context "driver"
 
-  #it "Can call a network request" do
-    #@pipe.puts [3, "if_net_req", "GET", "http://some_url.com", {}].to_json
-    #sleep 3
+  it "Can call a network request" do
+    web = Webbing.get "/" do
+      @hit = true
+    end
 
-    #Timeout.timeout(1) { @pipe.eof? } rescue "ok"
-  #end
+    @pipe.puts [3, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {}].to_json
 
-  #it "Can make a network request" do
-    #begin
-      #@called = false
-      #web = Webbing.get "/" do
-        #@called = true
-      #end
+    #Wait for response
+    @pipe.puts [0, "ping"].to_json; @pipe.readline
 
-      #@pipe.puts [3, "if_net_req", "GET", "http://localhost:#{web.port}", {}].to_json
-      #select [@pipe], [], [], 12
-      #expect(@called).to eq(true)
-    #ensure
-      #Process.kill(:KILL, web.pid)
-    #end
-  #end
+    expect(@hit).to eq(true)
+
+    web.kill
+  end
+
+  it "Can call a network request with parameters" do
+    @secret = SecureRandom.hex
+    web = Webbing.get "/" do |params|
+      @rcv_secret = params['secret']
+    end
+
+    @pipe.puts [3, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}].to_json
+
+    #Wait for response
+    @pipe.puts [0, "ping"].to_json; @pipe.readline
+
+    expect(@rcv_secret).to eq(@secret)
+
+    web.kill
+  end
 end
