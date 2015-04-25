@@ -22,6 +22,11 @@ shared_context "driver" do
   before(:each) do 
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
+    
+    if ENV['RUBY_PLATFORM'] =~ /darwin/
+      `killall phantomjs`
+      `killall rspec`
+    end
   end
 
   after(:each) do
