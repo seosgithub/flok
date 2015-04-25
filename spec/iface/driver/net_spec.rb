@@ -13,7 +13,8 @@ RSpec.describe "driver:net" do
       "{}"
     end
 
-    @pipe.puts [3, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {}].to_json
+    @ptr = SecureRandom.hex
+    @pipe.puts [4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {}, @ptr].to_json
 
     #Wait for response
     @pipe.puts [0, "ping"].to_json; @pipe.readline_timeout
@@ -30,7 +31,8 @@ RSpec.describe "driver:net" do
       "{}"
     end
 
-    @pipe.puts [3, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}].to_json
+    @ptr = SecureRandom.hex
+    @pipe.puts [4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr].to_json
 
     #Wait for response
     @pipe.puts [0, "ping"].to_json; @pipe.readline_timeout
@@ -51,9 +53,10 @@ RSpec.describe "driver:net" do
     end
 
     #Wait for response
-    @pipe.puts [3, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}].to_json
+    @ptr = SecureRandom.hex
+    @pipe.puts [4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr].to_json
 
-    res = [3, "int_net_cb", true, @secret2msg]
+    res = [3, "int_net_cb", true, @secret2msg, @ptr]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
 
     web.kill
