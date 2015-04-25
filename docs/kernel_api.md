@@ -9,7 +9,8 @@
 instead.
 
 ##Networking
-`get_req(url, params, callback)` - Request some RESTFUL get request.  The callback receives `(info)` with a data payload.
+`get_req(url, params, callback)` - Request some RESTFUL get request.  The callback receives `(info)` with a data payload. Will retry until successful,
+will never fail.
 
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
