@@ -10,7 +10,7 @@ RSpec.describe "iface:driver:net" do
   it "Can call a network request" do
     web = Webbing.get "/" do
       @hit = true
-      "{}"
+      {}
     end
 
     @ptr = SecureRandom.hex
@@ -28,7 +28,7 @@ RSpec.describe "iface:driver:net" do
     @secret = SecureRandom.hex
     web = Webbing.get "/" do |params|
       @rcv_secret = params['secret']
-      "{}"
+      {}
     end
 
     @ptr = SecureRandom.hex
@@ -49,7 +49,7 @@ RSpec.describe "iface:driver:net" do
     web = Webbing.get "/" do |params|
       @rcv_secret = params['secret']
 
-      @secret2msg.to_json
+      @secret2msg
     end
 
     #Wait for response
