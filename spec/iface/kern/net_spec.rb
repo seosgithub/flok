@@ -18,7 +18,7 @@ RSpec.describe "iface:kern:net" do
     @pipe.puts [3, "int_net_cb", -3209284741, true, {"secret" => @secret}].to_json
     @pipe.puts [0, "get_int_net_cb_spec"].to_json
 
-    res = [0, -3209284741, [true, {"secret"=>@secret}]]
+    res = [0, [-3209284741, true, {"secret"=>@secret}]]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 end

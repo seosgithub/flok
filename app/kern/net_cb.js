@@ -4,8 +4,8 @@ var tp_to_info = {};
 
 function get_req(owner, url, params, callback) {
   //Even though it's the same function, create a tp because we need to track owner somehow.
-  var tp = get_req_callback;
-  tp_to_owner[tp] = {
+  var tp = tel_reg(get_req_callback);
+  tp_to_info[tp] = {
     owner: owner,
     callback: callback
   };
@@ -15,11 +15,11 @@ function get_req(owner, url, params, callback) {
 }
 
 function get_req_callback(tp, success, info) {
-  var info = tp_to_info[tp];
-  if (tel_exists(info.owner) === true) {
-    info.callback(success, info);
+  var _info = tp_to_info[tp];
+  if (tel_exists(_info.owner) === true) {
+    _info.callback(info);
   }
 
   tel_del(tp);
-  remove tp_to_info[tp];
+  delete tp_to_info[tp];
 }
