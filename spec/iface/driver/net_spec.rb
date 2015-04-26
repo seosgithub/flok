@@ -56,7 +56,7 @@ RSpec.describe "iface:driver:net" do
     @ptr = SecureRandom.hex
     @pipe.puts [4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr].to_json
 
-    res = [3, "int_net_cb", true, @secret2msg, @ptr]
+    res = [3, "int_net_cb", @ptr, true, @secret2msg]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
 
     web.kill
@@ -70,7 +70,7 @@ RSpec.describe "iface:driver:net" do
     matcher = proc do |x|
       x = JSON.parse(x)
       a = ->(e){e.class == String && e.length > 0} #Error message should be a string that's not blank
-      expect(x).to look_like [3, "int_net_cb", false, a, @ptr]
+      expect(x).to look_like [3, "int_net_cb", @ptr, false, a]
       true
     end
 
