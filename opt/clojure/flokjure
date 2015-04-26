@@ -1,0 +1,53 @@
+#!/bin/sh
+####################################################################
+#Flok helper scripts for clojure compiler
+####################################################################
+
+COMPILER_JAR=`dirname pwd`
+
+#Usage statement
+function usage() {
+  echo >&2 "Usage: flokjure [-o outfile] file"
+  exit 1
+}
+
+#Process switches
+while getopts o: arg
+do
+  case $arg in
+  o)
+    outfile=$OPTARG
+    ;;
+  [?])
+    usage
+    ;;
+  esac
+done
+
+#If a file is not given, then output it to a temporary file and write to stdout
+if [ -z "$outfile" ]
+then
+  outfile=/tmp/$RANDOM.flokjure
+  stdout=true
+fi
+
+echo $stdout
+
+touch $outfile
+if [ $? -ne 0 ]; then
+  echo >&2 "Couldn't write to output file $outfile"
+  exit 1
+fi
+
+#After switches, get file
+shift $(($OPTIND-1))
+
+#Make sure we have a file
+if [ -z "$@" ]; then usage; fi
+
+#TARGET=$1
+#shift
+
+echo $0
+COMPILER_JAR=compiler.jar
+#java -jar $COMPILER_JAR --js $TARGET --js_output_file $TARGET.out --compilation_level ADVANCED $@
