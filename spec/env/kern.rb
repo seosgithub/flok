@@ -45,12 +45,27 @@ shared_context "kern" do
     function function_name, &block
 
     #Create the if_dispatch table, replaces with same if it already exists, but that's ok
-    function "if_dispatch" do |q|
-      q.shift #num args
-      name = q.shift
+    function "if_dispatch" do |qq|
+      #Array of arrays
+      qq.each do |q|
+        queue = q.shift
 
-      #Send a call to a function, we inject a context here because our function expects the (weird) behavior of scope
-      @ctx["__extern__#{name}"].call({}, *q)
+        block = lambda do
+          q.shift #num args
+          name = q.shift
+
+          #Send a call to a function, we inject a context here because our function expects the (weird) behavior of scope
+          @ctx["__extern__#{name}"].call({}, *q)
+        end
+
+        if queue == 0
+          block.call
+        else
+          Thread.new do
+            block.call
+          end
+        end
+      end
     end
   end
 

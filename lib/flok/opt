@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cd `dirname $0`
-
-OUTPUT_NAME=main.compiled.js
-INPUT_NAME=main.js
-COMPILER_JAR=compiler.jar
-java -jar $COMPILER_JAR --js $INPUT_NAME --js_output_file $OUTPUT_NAME --compilation_level ADVANCED $@
-cat $OUTPUT_NAME

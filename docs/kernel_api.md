@@ -15,3 +15,6 @@ instead.
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
 `PLATFORM` - The platform that this kernel was compiled with
+
+#Messaging
+`QUEUE(queue_index, message_name, *params)` - Queue a message to be sent out. This is a macro, careful how you type it, and it should be on one line!

@@ -46,8 +46,6 @@ Interface tests are used for things that can be tested through either only the k
   * Environment
    * `include_context "iface:kern"` - Access `@pipe` matching the description for kernel pipe [Interactive](./interactive.md)
    * `include_context "iface:driver"` - Access `@pipe` matching the description for driver pipe [Interactive](./interactive.md)
-   * `pipe_suite()` - Run a test suite against `@pipe` for the `dispatch` interface mentioned in [Messaging](./messaging.md)
-   * `ping_suite()` - Run a test suite against `@pipe` for the `ping` extensions mentioned in [Messaging](./messaging.md)
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
    * `$PWD` - `./`
 

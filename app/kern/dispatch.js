@@ -17,17 +17,27 @@ function int_dispatch(q) {
     //Grab the next thing and look that up in the function table. Pass args left
     this[q.shift()].apply(null, q.splice(0, argc));
   }
+
+  if_dispatch([main_queue]);
 }
 
 function ping() {
-  if_dispatch([0, "pong"])
+  SEND("main", "pong");
 }
 
 function ping1(arg1) {
-  if_dispatch([1, "pong1", arg1])
+  SEND("main", "pong1", arg1);
 }
 
 function ping2(arg1, arg2) {
-  if_dispatch([1, "pong2", arg1])
-  if_dispatch([2, "pong2", arg1, arg2])
+  SEND("main", "pong2", arg1);
+  SEND("main", "pong2", arg1, arg2);
 }
+
+//Queue something to be sent out
+main_queue = [0];
+net_queue = [0];
+disk_queue = [0];
+cpu_queue = [0];
+gpu_queue = [0];
+ram_queue = [0];

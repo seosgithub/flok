@@ -13,12 +13,15 @@ RSpec.describe "iface:kern:net" do
 
 
     #Wait for response
-    @pipe.puts [0, "ping"].to_json; @pipe.readline_timeout
+    @kern.puts [0, "ping"].to_json; @kern.readline_timeout
 
-    @pipe.puts [3, "int_net_cb", -3209284741, true, {"secret" => @secret}].to_json
-    @pipe.puts [0, "get_int_net_cb_spec"].to_json
+    @kern.puts [3, "int_net_cb", -3209284741, true, {"secret" => @secret}].to_json
+    @kern.puts [0, "get_int_net_cb_spec"].to_json
 
-    res = [0, [-3209284741, true, {"secret"=>@secret}]]
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
+    res = [
+      [0, 0, [-3209284741, true, {"secret"=>@secret}]]
+    ]
+
+    expect(@kern).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 end

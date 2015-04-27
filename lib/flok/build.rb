@@ -35,13 +35,17 @@ module Flok
     #2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$platform/glob/1kern_config.js`
     Flok.src_glob("js", './app/kern/config', "#{build_path}/glob/1kern_config.js")
 
-    #3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$platform/glob/2kern.js`
-    Flok.src_glob("js", './app/kern', "#{build_path}/glob/2kern.js")
+    #3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$platform/glob/2kern.pre_macro.js`
+    Flok.src_glob("js", './app/kern', "#{build_path}/glob/2kern.pre_macro.js")
 
-    #4. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/application.js`
+    #4. All js files in `./products/$PLATFORM/glob/2kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/2kern.js 
+    require './app/kern/macro.rb'
+    File.write("#{build_path}/glob/2kern.pre_macro.js", macro_process(File.read("#{build_path}/glob/2kern.pre_macro.js")))
+
+    #5. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/application.js`
     Flok.src_glob("js", "#{build_path}/glob", "#{build_path}/application.js")
 
-    #5. Add custom commands
+    #6. Add custom commands
     ################################################################################################################
     #MODS - List mods listed in config.yml
     #---------------------------------------------------------------------------------------
@@ -59,7 +63,7 @@ module Flok
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
-    #6. Append relavent mods code in kernel
+    #7. Append relavent mods code in kernel
     mods.each do |mod|
       s = File.read("./app/kern/mod/#{mod}.js")
       open("#{build_path}/application.js", "a") do |f|

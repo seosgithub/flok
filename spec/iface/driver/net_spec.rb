@@ -14,10 +14,10 @@ RSpec.describe "iface:driver:net" do
     end
 
     @ptr = SecureRandom.hex
-    @pipe.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {}, @ptr]].to_json
+    @driver.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {}, @ptr]].to_json
 
     #Wait for response
-    @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+    @driver.puts [[0, 0, "ping"]].to_json; @driver.readline_timeout
 
     expect(@hit).to eq(true)
 
@@ -32,10 +32,10 @@ RSpec.describe "iface:driver:net" do
     end
 
     @ptr = SecureRandom.hex
-    @pipe.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr]].to_json
+    @driver.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr]].to_json
 
     #Wait for response
-    @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+    @driver.puts [[0, 0, "ping"]].to_json; @driver.readline_timeout
 
     expect(@rcv_secret).to eq(@secret)
 
@@ -54,10 +54,10 @@ RSpec.describe "iface:driver:net" do
 
     #Wait for response
     @ptr = SecureRandom.hex
-    @pipe.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr]].to_json
+    @driver.puts [[1, 4, "if_net_req", "GET", "http://127.0.0.1:#{web.port}", {'secret' => @secret}, @ptr]].to_json
 
     res = [3, "int_net_cb", @ptr, true, @secret2msg]
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
+    expect(@driver).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
 
     web.kill
   end
@@ -65,7 +65,7 @@ RSpec.describe "iface:driver:net" do
   it "Does send a network interupt int_net_cb with error and the correct payload" do
     #Wait for response
     @ptr = SecureRandom.hex
-    @pipe.puts [[1, 4, "if_net_req", "GET", "http://no_such_url#{SecureRandom.hex}.com", {}, @ptr]].to_json
+    @driver.puts [[1, 4, "if_net_req", "GET", "http://no_such_url#{SecureRandom.hex}.com", {}, @ptr]].to_json
 
     matcher = proc do |x|
       x = JSON.parse(x)
@@ -74,6 +74,6 @@ RSpec.describe "iface:driver:net" do
       true
     end
 
-    expect(@pipe).to readline_and_equal_proc_x_within_y_seconds(matcher, 5.seconds)
+    expect(@driver).to readline_and_equal_proc_x_within_y_seconds(matcher, 5.seconds)
   end
 end
