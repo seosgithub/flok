@@ -6,14 +6,23 @@
 //  [1, 'print', 'hello world']
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
-function if_dispatch(q) {
-  //Where there is still things left on the queue
-  while (q.length > 0) {
-    //Grab the first thing off the queue, this is the arg count
-    var argc = q.shift();
+function if_dispatch(qq) {
+  //Get a priority queue
+  while (qq.length > 0) {
+    var q = qq.shift();
 
-    //Grab the next thing and look that up in the function table. Pass args left
-    this[q.shift()].apply(null, q.splice(0, argc));
+    //The very first thing is the queue type
+    var queueType = q.shift();
+
+    //Where there is still things left on the queue
+    while (q.length > 0) {
+      //Grab the first thing off the queue, this is the arg count
+      var argc = q.shift();
+      console.error(argc);
+
+      //Grab the next thing and look that up in the function table. Pass args left
+      this[q.shift()].apply(null, q.splice(0, argc));
+    }
   }
 }
 

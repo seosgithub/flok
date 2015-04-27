@@ -23,6 +23,7 @@ shared_context "iface:driver" do
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
     
+    $stderr.puts "starting, PID = #{@pid}"
     if ENV['RUBY_PLATFORM'] =~ /darwin/
       `killall phantomjs`
       `killall rspec`
@@ -30,9 +31,11 @@ shared_context "iface:driver" do
   end
 
   after(:each) do
+    $stderr.puts "killing, PID = #{@pid}"
     begin
-      Process.kill(:KILL, @pid)
+      Process.kill(:INT, @pid)
     rescue Errno::ESRCH
+      $stderr.puts "err, no process"
     end
   end
 end

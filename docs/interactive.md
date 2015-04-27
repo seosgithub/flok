@@ -23,10 +23,10 @@ The test suites assume particular behavior of the pipes. Please review [./spec/e
 ####Examples
 
 #####Server ➜ Client
- 1. **Server** calls `if_dispjatch([0, 'hello'])`
- 2. **Server** `$stdout` *writes* `[0, 'hello']\n`
- 3. **Client** `$stdin` *gets* `[0, 'hello']\n`
- 4. **Client** calls `if_dispatch([0, 'hello'])`
+ 1. **Server** calls `if_disptatch([[0, 0, 'hello']])` (**The additional 0 at the beginning is the queue, 0 in this case is the main queue**)
+ 2. **Server** `$stdout` *writes* `[0, 0, 'hello']\n`
+ 3. **Client** `$stdin` *gets* `[0, 0, 'hello']\n`
+ 4. **Client** calls `if_dispatch([0, 0, 'hello'])`
 
 #####Client ➜ Server
  1. **Client** calls `int_dispatch([0, 'hello'])`

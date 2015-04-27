@@ -1,6 +1,9 @@
 #Messaging
 Flok uses two endpoints named `if_dispatch` and `int_dispatch` to communicate between the flok server and client. When the flok server wants to message the client, the flok server
-calls `if_dispatch`.  When the client wants to message the flok server, the client calls `int_disptach`.
+calls `if_dispatch`.  When the client wants to message the flok server, the client calls `int_disptach`. These two receive virtually the same formats
+with the difference being that `if_dispatch` receives a multi-array queue where each array has a number pre-pended to the front that indicates the
+queue the message is supposed to be interpreted in. `int_dispatch` always run synchronously, so it does not have a multi-dimensional array, only one
+array that has no integer in the front.
 
 #Scheme
 Each message is composed of 3 parts.
@@ -32,7 +35,8 @@ On the server, all messages come through `int_dispatch`. Messages are then turne
 live in `./app/kern/mod/` and have the convention of being called `int_*`.
 
 On the client, the driver decides on how messages are handled. At a minimum, the client must support the `if_dispatch` function
-call.
+call. The driver is given a queue suggestion based on the first number for each message queue in the `if_dispatch` call. See
+[Scheduling](./scheduling.md) for more information.
 
 ### Ping
 Both the client and server are responsible for being able to reply to 3 test messages called `ping`, `ping1`, and `ping2` which have the following rules

@@ -50,7 +50,7 @@ class InteractiveServer
         end
       ensure
         begin
-          Process.kill :KILL, pid
+          Process.kill :INT, pid
         rescue Errno::ESRCH
         end
       end
