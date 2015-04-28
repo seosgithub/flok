@@ -9,7 +9,7 @@ before your `application.js` file.
 There is excatly (1) divider that is used to place everything inside of that is visible.  This divider *must* have the following HTML code:
 ```html
 <!-- Mount point for view hierarchy, fully managed, do not touch -->
-<div id='flok-root'></div>
+<div id='root'></div>
 
 <div id='prototypes' style='display: none'>
   <!-- Insert your prototypes inside here -->
