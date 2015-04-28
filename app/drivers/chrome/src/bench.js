@@ -7,6 +7,7 @@ function bench() {
 }
 
 function startRequest(owner) {
+
   get_req(owner, "http://test.services.fittr.com/ping", {}, function(info) {
     res.push(info);
     console.log(res.count);
