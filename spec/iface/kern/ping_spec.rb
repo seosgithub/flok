@@ -108,7 +108,10 @@ RSpec.describe "iface:kern:ping_spec" do
         @pipe.puts ([1, "ping4", name]*6).to_json
         expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, *[0, "pong4"]*5]], 6.seconds)
         @pipe.puts ([1, "ping4", name]).to_json
-        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([], 6.seconds)
+
+        #Semantics aren't exact, but it should be nothing happens after 2 seconds (no response)
+        expect(@pipe).not_to readline_and_equal_json_x_within_y_seconds([], 1.seconds)
+
         @pipe.puts ([1, "ping4_int", name]).to_json
         expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, 0, "pong4"]], 6.seconds)
       else
