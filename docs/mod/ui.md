@@ -2,16 +2,9 @@
 
 ###Functions
 
-`if_init_view(name, info)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  Returns a hash containing  a key called `vp` (`view pointer`) and any spots will have a key, value pair namedb after their spot.  e.g.
+`if_init_view(name, info, tp_base, *tp_targets)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  `tp_targets` will look like `["root", "contentA", ...]` where everything after `root` is a spot.
 ```js
-(main)>s = if_init_view('nav_container', {title: "Home"})
-
-(main)>console.log(s);
-{
-  vp: 3492934923,      //The root view
-  content: 293493493,  //A content 'spot'
-  top_bar: 39293932    //A top_bar 'spot'
-}
+(main)>if_init_view('nav_container', {title: "Home"}, 333, ["root", "content"]);
 ```
 
 `if_free_view(vp)` - Destroy a view with a `view pointer`.
