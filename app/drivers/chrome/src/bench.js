@@ -7,10 +7,13 @@ function bench() {
 }
 
 function startRequest(owner) {
-
-  get_req(owner, "http://test.services.fittr.com/ping", {}, function(info) {
+  get_req(owner, "http://api.randomuser.me/", {}, function(info) {
+    console.log(info);
     res.push(info);
-    console.log(res.count);
+    var url = info.results[0].user.picture.thumbnail;
+    $("body").append("<img class='box' src='" + url + "' />");
     tel_del(owner);
   });
+
+  int_dispatch(0, "ping");
 }

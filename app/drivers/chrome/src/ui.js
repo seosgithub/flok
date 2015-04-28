@@ -1,87 +1,120 @@
-/*drivers = window.drivers || {}*/
-//drivers.ui = {}
+//Create a new surface based on a prototype name and information.
+//Store that view in our own pointer table that uses selectors
+if_ui_tp_to_selector = {};
 
-////Create a new surface based on a prototype name and information. Should return a surface pointer
-//drivers.ui.createSurface = function(protoName, info) {
-  //var $proto = $("#surface-prototypes").find(".surface[data-name=\'"+protoName+"\']");
-  //if ($proto.length === 0) {
-    //throw "Couldn't find a surface prototype named: \(protoName)";
-  //}
+function if_init_view(name, info, tp_base, tp_targets) {
+  //Get the prototype that matches
+  var $proto = $("#prototypes").find(".view[data-name=\'"+name+"\']");
+  if ($proto.length === 0) { throw "Couldn't find a surface prototype named: "+name; }
 
-  ////Get a UUID, move the surface to the 'body' element and hidden
-  //var uuid = UUID()
-  //$proto.attr("data-uuid", uuid);
-  //$("body").append($proto[0].outerHTML);
-  //$proto.removeAttr("data-uuid");
+  //Get a UUID, move the surface to the 'body' element and hidden
+  var uuid = UUID();
+  $proto.attr("data-uuid", uuid);
+  $proto.attr("data-tp", tp_base);
+  $("body").append($proto[0].outerHTML);
+  $proto.removeAttr("data-uuid");
+  $proto.removeAttr("data-tp");
 
-  //$sel = $("[data-uuid='" + uuid + "']");
-  //$sel.addClass("hidden");
+  var $sel = $("[data-uuid='" + uuid + "']");
+  $sel.hide();
 
-  ////Does this have a controller?
-  //var scc = drivers.ui.scc[protoName];
+  //Put the base view inside
+  var tp_idx = tp_base; //Start with the base pointer
+  tp_targets.forEach(function(target) {
+    //The actual view, or lookup the spot and store it's selector
+    if (target == "main") {
+      if_ui_tp_to_selector[tp_idx] = $sel;
+    } else {
+      var $spot_sel = $sel.find('.spot[data-name='+target+']');
+      if ($spot_sel.length == 0) { throw "Couldn't find a spot with the name: "+target}
 
-  //(function() {
-    //var _sel = $sel;
-    //var p = pipe(function(msg) {
-      //console.log("CLICKED!");
-      //if (msg === "sign_in_clicked") {
-        //var source = drivers.ui.createSurface("nav_container", {color: "blue"});
-        //var source2 = drivers.ui.createSurface("login", {color: "blue"});
-        //drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
-        //drivers.ui.embedSurface(source2, source, "content", false, null);
+      if_ui_tp_to_selector[tp_idx] = $spot_sel;
+      $spot_sel.attr("data-tp", tp_idx);
+    }
 
-      //} else if (msg === "login") {
-        //var source = drivers.ui.createSurface("loading");
-        //drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
+    tp_idx += 1;
+  });
 
-        //var callback = function() {
-          //alert("error!");
-        //var source = drivers.ui.createSurface("nav_container", {color: "blue"});
-        //var source2 = drivers.ui.createSurface("login", {color: "blue"});
-        //drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
-        //drivers.ui.embedSurface(source2, source, "content", false, null);
-        //}
-        //setTimeout(callback, 400);
+  //Our surface pointers are selectors
+  return $sel
+}
 
-      //} else {
-        //var source = drivers.ui.createSurface("splash");
-        //drivers.ui.embedSurface(source, $("#root-surface"), "main", false, null);
-      //}
-    //});
+function if_attach_view(vp, p) {
+  var $target = null;
+  if (p == 0) {
+    $target = $("#root")
+  } else {
+    //Lookup view selector
+    $target = if_ui_tp_to_selector[p];
+  }
 
-    //if (scc != undefined) {
-      //new scc($sel, info, p);
-    //}
-  //})();
+  //Inject the view into p
+  var $view = if_ui_tp_to_selector[vp];
+  $view.show();
+  $view.appendTo($target);
+}
 
-  ////Our surface pointers are selectors
-  //return $sel
-//}
+//Spec related////////////////////////////////////////////////
+function if_ui_spec_init() {
+  //Set the body HTML
+  var body_html = "                                  \
+    <div id='root'></div>                            \
+                                                     \
+    <div id='prototypes' style='display: none'>      \
+      <div class='view' data-name='spec_blank'>      \
+      </div>                                         \
+      <div class='view' data-name='spec_one_spot'>   \
+        <div class='spot' data-name='content'></div> \
+      </div>                                         \
+      <div class='view' data-name='spec_two_spot'>   \
+        <div class='spot' data-name='a'></div>       \
+        <div class='spot' data-name='b'></div>       \
+      </div>                                         \
+    </div>                                           \
+                                                     \
+  "
+  $("body").html(body_html);
+}
 
-////Delete a surface which removes it from the UI
-//drivers.ui.deleteSurface = function(sp) {
-  //sp.remove();
-//}
+function if_ui_spec_views_at_spot(p) {
+  //Find target////////////////////////
+  var $target = null;
 
-////Embed a surface into another surface in the view with the correct name
-////source_sp - The surface we are embedding
-////dest_sp - The surface we are embedding into
-////animated - If true, a segue is allowed to take place
-////animationDidComplete - Call this funtction if animated is true when you are done animating.
-//drivers.ui.embedSurface = function(source_sp, dest_sp, viewName, animated, animationDidComplete) {
-  ////Lookup view selector
-  //var $view = dest_sp.find(".view[data-name=" + viewName + "]");
-  //if ($view.length === 0) {
-    //throw "Found surface, but couldn't find a view *inside* a surface named: " + viewName;
-  //}
+  //Root view
+  if (p == 0) {
+    $target = $("#root")
+  } else {
+    //Lookup telepointer for selector
+    $target = if_ui_tp_to_selector[p]
+  }
+  ////////////////////////////////////
 
-  //$view.html("");
-  //source_sp.appendTo($view);
-  //source_sp.removeClass('hidden');
-//}
+  //Pull the telepointers from each child node
+  var res = $target.children().map(function() {
+    return parseInt($(this).attr("data-tp"));
+  });
+  res = $.makeArray(res);
 
-////Surface controller constructors
-//drivers.ui.scc = {};
-//drivers.ui.regController = function(surfaceName, constructor) {
-  //drivers.ui.scc[surfaceName] = constructor;
-/*}*/
+  //Dispatch info
+  var out = [res.length, "spec"];
+  out = out.concat(res);
+  int_dispatch(out);
+}
+
+function if_ui_spec_view_is_visible(p) {
+  //Find target////////////////////////
+  var $target = null;
+
+  //Root view
+  if (p == 0) {
+    $target = $("#root")
+  } else {
+    //Lookup telepointer for selector
+    $target = if_ui_tp_to_selector[p]
+  }
+  ////////////////////////////////////
+
+  console.error($target.css("display"));
+  int_dispatch([1, "spec", !($target.css("display") === "none")]);
+}
+/////////////////////////////////////////////////////////////

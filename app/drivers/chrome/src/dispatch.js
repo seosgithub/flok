@@ -18,7 +18,6 @@ function if_dispatch(qq) {
     while (q.length > 0) {
       //Grab the first thing off the queue, this is the arg count
       var argc = q.shift();
-      console.error(argc);
 
       //Grab the next thing and look that up in the function table. Pass args left
       this[q.shift()].apply(null, q.splice(0, argc));

@@ -39,11 +39,17 @@ end
 #############################################################################
 namespace :build do
   task :world do
+    `rm -f ../FittrFlok/app/assets/javascripts/flok.js`
+    `rm -f ../FittrFlok/app/assets/javascripts/flok-chrome.js`
+
     #What platform are we working with?
     raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
     build_path = "./products/#{platform}"
 
     Flok.build_world(build_path, platform)
+
+    `cp ./products/#{platform}/application.js ../FittrFlok/app/assets/javascripts/flok.js`
+    `cp ./products/#{platform}/drivers/chrome.js ../FittrFlok/app/assets/javascripts/flok-chrome.js`
   end
 end
 

@@ -2,13 +2,13 @@
 
 ###Functions
 
-`if_init_view(name, info)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  Returns a hash containing  a key called `vp` (`view pointer`) and any spots will have a key, value pair namedb after their spot.  e.g.
+`if_init_view(name, info, vp_base, vp_names)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  Returns a hash containing  a key called `vp` (`view pointer`) and any spots will have a key, value pair namedb after their spot.  e.g.
 ```js
 (main)>s = if_init_view('nav_container', {title: "Home"})
 
 (main)>console.log(s);
 {
-  vp: 3492934923,      //The root view
+  root: 3492934923,      //The root view
   content: 293493493,  //A content 'spot'
   top_bar: 39293932    //A top_bar 'spot'
 }
@@ -19,6 +19,15 @@
 `if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`
 
 `if_detach_view(vp)` - Remove a view from it's current view
+
+###Spec related
+`if_ui_spec_init` - Setup anything necessary for the spec tests, this may include adding prototype views to your hierarchy, etc.
+`if_ui_spec_views_at_spot(p)` - Sends a packet back that contains a listing of all the view pointers inside of a spot. If 0 is passed, the view pointers are from the root node. `[N(vp*), "spec", vp*]`
+
+#####You must be able to accept the following prototypes names:
+`spec_blank` - A blank view with no spots
+`spec_one_spot` - "A blank view with with one spot named `content` that takes up the entire view"
+`spec_two_spot` - "A blank view with with one spot named `a` and one spot named `b`.
 
 ------
 
