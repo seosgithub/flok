@@ -7,7 +7,7 @@ function int_net_cb(tp, success, info) {
 //Spec helpers
 /////////////////////////////////////////////////////
 function get_int_net_cb_spec() {
-  if_dispatch([0, int_net_cb_spec])
+  SEND("main", "get_int_net_cb_spec", int_net_cb_spec);
 }
 
 //Manually register pointer at special index for testing, int_net_cb

@@ -7,7 +7,7 @@
 
 ###Interrupts
 `int_net_cb(tp, success, info)` - An interrupt that a network request has completed (or failed). `success` is a bool vealue. `info` is a JSON value, `tp` is the pointer that started it
-`get_int_net_cb_spec()` - Sends [0, "get_int_net_cb_spec", int_net_cb_spec]
+`get_int_net_cb_spec()` - Sends [[0, 1, "get_int_net_cb_spec", int_net_cb_spec]]
 
 when successful and a string with an error message (string thats not false) when `success` is false. `tp` is the telepathy pointer passed in via `if_net_req`
 

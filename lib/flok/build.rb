@@ -63,11 +63,11 @@ module Flok
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
-    #7. Append relavent mods code in kernel
+    #7. Append relavent mods code in kernel with macros
     mods.each do |mod|
       s = File.read("./app/kern/mod/#{mod}.js")
       open("#{build_path}/application.js", "a") do |f|
-        f.puts s
+        f.puts macro_process(s)
       end
 
     end

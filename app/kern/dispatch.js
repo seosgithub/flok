@@ -87,7 +87,9 @@ function int_dispatch(q) {
     gpu_q_rem -= n;
   }
 
-  if_dispatch(dump);
+  if (dump.length != 0) {
+    if_dispatch(dump);
+  }
 }
 
 function ping() {
