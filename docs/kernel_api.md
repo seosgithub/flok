@@ -17,4 +17,4 @@ instead.
 `PLATFORM` - The platform that this kernel was compiled with
 
 #Messaging
-`QUEUE(queue_index, message_name, *params)` - Queue a message to be sent out. This is a macro, careful how you type it, and it should be on one line!
+`SEND(queue_index, message_name, *params)` - Queue a message to be sent out. This is a macro, careful how you type it, and it should be on one line!

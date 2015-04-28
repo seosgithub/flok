@@ -58,13 +58,7 @@ shared_context "kern" do
           @ctx["__extern__#{name}"].call({}, *q)
         end
 
-        if queue == 0
-          block.call
-        else
-          Thread.new do
-            block.call
-          end
-        end
+        block.call
       end
     end
   end

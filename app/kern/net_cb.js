@@ -11,7 +11,7 @@ function get_req(owner, url, params, callback) {
   };
 
   //Create request
-  if_dispatch([4, "if_net_req", "GET", url, params, tp]);
+  SEND("net", "if_net_req", "GET", url, params, tp)
 }
 
 function get_req_callback(tp, success, info) {
