@@ -29,7 +29,7 @@ RSpec.describe "macro" do
     text = macro_process original
 
     @arr = []
-    expected_code = %{main_queue.push.apply(main_queue, [3, "if_net_req", url, params, tp])}
+    expected_code = %{main_q.push([3, "if_net_req", url, params, tp])}
     expect(text.strip).to eq(expected_code)
   end
 end

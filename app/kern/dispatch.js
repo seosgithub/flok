@@ -23,8 +23,11 @@ function int_dispatch(q) {
 
   //Send main queue
   if (main_q.length > 0) {
-    main_q.unshift(0);
-    dump.push(main_q);
+    var out = [0];
+    for (var i = 0; i < main_q.length; ++i) {
+      out.push.apply(out, main_q[i]);
+    }
+    dump.push(out);
     main_q = [];
   }
 
@@ -32,8 +35,13 @@ function int_dispatch(q) {
     //Always pick the minimum between the amount remaining and the q length
     var n = net_q.length < net_q_rem ? net_q.length : net_q_rem;
 
-    net_q.unshift(1);
-    dump.push(net_q.splice(0, n+1));
+    var out = [1];
+    var piece = net_q.splice(0, n);
+    for (var i = 0; i < piece.length; ++i) {
+      out.push.apply(out, piece[i]);
+    }
+    dump.push(out);
+
     net_q_rem -= n;
   }
 
@@ -41,8 +49,13 @@ function int_dispatch(q) {
     //Always pick the minimum between the amount remaining and the q length
     var n = disk_q.length < disk_q_rem ? disk_q.length : disk_q_rem;
 
-    disk_q.unshift(2);
-    dump.push(disk_q.splice(0, n+1));
+    var out = [2];
+    var piece = disk_q.splice(0, n);
+    for (var i = 0; i < piece.length; ++i) {
+      out.push.apply(out, piece[i]);
+    }
+    dump.push(out);
+
     disk_q_rem -= n;
   }
 
@@ -50,8 +63,13 @@ function int_dispatch(q) {
     //Always pick the minimum between the amount remaining and the q length
     var n = cpu_q.length < cpu_q_rem ? cpu_q.length : cpu_q_rem;
 
-    cpu_q.unshift(3);
-    dump.push(cpu_q.splice(0, n+1));
+    var out = [3];
+    var piece = cpu_q.splice(0, n);
+    for (var i = 0; i < piece.length; ++i) {
+      out.push.apply(out, piece[i]);
+    }
+    dump.push(out);
+
     cpu_q_rem -= n;
   }
 
@@ -59,8 +77,13 @@ function int_dispatch(q) {
     //Always pick the minimum between the amount remaining and the q length
     var n = gpu_q.length < gpu_q_rem ? gpu_q.length : gpu_q_rem;
 
-    gpu_q.unshift(4);
-    dump.push(gpu_q.splice(0, n+1));
+    var out = [4];
+    var piece = gpu_q.splice(0, n);
+    for (var i = 0; i < piece.length; ++i) {
+      out.push.apply(out, piece[i]);
+    }
+    dump.push(out);
+
     gpu_q_rem -= n;
   }
 
@@ -91,6 +114,33 @@ function ping3(arg1) {
     SEND("cpu", "pong3");
   } else if (arg1 == "gpu") {
     SEND("gpu", "pong3");
+  }
+}
+
+function ping4(arg1) {
+  if (arg1 == "main") {
+    SEND("main", "pong4");
+  } else if (arg1 == "net") {
+    SEND("net", "pong4");
+  } else if (arg1 == "disk") {
+    SEND("disk", "pong4");
+  } else if (arg1 == "cpu") {
+    SEND("cpu", "pong4");
+  } else if (arg1 == "gpu") {
+    SEND("gpu", "pong4");
+  }
+}
+
+function ping4_int(arg1) {
+  if (arg1 == "main") {
+  } else if (arg1 == "net") {
+    ++net_q_rem;
+  } else if (arg1 == "disk") {
+    ++disk_q_rem;
+  } else if (arg1 == "cpu") {
+    ++cpu_q_rem;
+  } else if (arg1 == "gpu") {
+    ++gpu_q_rem;
   }
 }
 

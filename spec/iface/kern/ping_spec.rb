@@ -5,7 +5,7 @@ require 'securerandom'
 RSpec.describe "iface:kern:ping_spec" do
   include_context "iface:kern"
 
-  it "supports ping" do
+ it "supports ping" do
     @pipe.puts [0, "ping"].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[0, 0, "pong"]], 6.seconds)
   end
@@ -56,11 +56,7 @@ RSpec.describe "iface:kern:ping_spec" do
 
   it "supports ping3" do
     queue_name_to_index = {
-      "main" => 0,
-      "net" => 1,
-      "disk" => 2,
-      "cpu" => 3,
-      "gpu" => 4
+      
     }
     
     queue_name_to_index.each do |name, index|
@@ -105,4 +101,20 @@ RSpec.describe "iface:kern:ping_spec" do
   end
 
   #Now make sure the max_n queuing works correctly
+  queue_name_to_index.each do |name, index|
+    it "supports ping-over-commit" do
+      #Main queue always queues all
+      if name != "main" 
+        @pipe.puts ([1, "ping4", name]*6).to_json
+        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, *[0, "pong4"]*5]], 6.seconds)
+        @pipe.puts ([1, "ping4", name]).to_json
+        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([], 6.seconds)
+        @pipe.puts ([1, "ping4_int", name]).to_json
+        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, 0, "pong4"]], 6.seconds)
+      else
+        @pipe.puts ([1, "ping4", name]*6).to_json
+        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, *[0, "pong4"]*6]], 6.seconds)
+      end
+    end
+  end
 end

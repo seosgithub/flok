@@ -68,6 +68,10 @@ Both the client and server are responsible for being able to reply to a few test
   - Given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]`
   - Given `[1, "ping3", queue_nameA, 1, "ping3", queue_nameA, 1, "ping3", queue_nameB]` respond with `[[queue_indexA, 0, "pong3", 0, "pong3"], [queue_indexB, 0, "pong3"]]`
   - Given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]` and then given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]`
+  - Given `[1, "ping4", queue_index]x6` respond with `[[queue_index, *[0, "pong4"]*5]]
+      - Then given `[1, "ping4", queue_index]` respond with `[]`
+	  - Given `[0, "ping4_int"]` respond with `[[queue_index, 0, "pong4"]]`
+  - *If the queue_index is 0 (main), it should queue all 6*
 
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.
