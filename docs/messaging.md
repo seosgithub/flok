@@ -39,11 +39,35 @@ call. The driver is given a queue suggestion based on the first number for each 
 [Scheduling](./scheduling.md) for more information.
 
 ### Ping
-Both the client and server are responsible for being able to reply to 3 test messages called `ping`, `ping1`, and `ping2` which have the following rules
+Both the client and server are responsible for being able to reply to a few test messages.
 
-  - `ping` - Reply with [0, "pong"]
-  - `ping1(arg)` - Reply with [1, "pong1", arg]
-  - `ping2(arg1, arg2)` - Reply with [1, "pong2", arg1] and then [2, "pong2", arg1, arg2]
+#####For the client
+  - Given `[[0, 0, "ping"]]` respond with `[0, pong]`
+  - Given `[[0, 1, "ping1", arg]]` respond with `[1, pong1, arg]`
+  - Given `[[0, 2, "ping2", arg1, arg2]]` respond with `[1, "pong2", arg1]` and `[2, "pong2", arg1, arg2]`
+  - Given `[[0, 2, "ping2", arg1, arg2]]` respond with `[1, "pong2", arg1]` and `[2, "pong2", arg1, arg2]`
+  - Given `[[0, 0, "ping", 0, "ping"]]` respond with `[0, "pong"]` and `[0, "pong"]`
+  - Given `[[0, 1, "ping1", secret1, 1, "ping1", secret2]]` respond with `[1, "pong1", secret1]` and `[1, "pong1", secret2]` 
+  - Given `[[0, 1, "ping1", secret1, 1, "ping1", secret2]]` respond with `[1, "pong1", secret1]` and `[1, "pong1", secret2]` 
+  - Given `[[0, 2, "ping2", secret1, secret2, 2, "ping2", secret2, secret1]]` respond with:
+    1. `[1, "pong2", secret1]` 
+    2. `[2, "pong2", secret1, secret2]` 
+    3. `[1, "pong2", secret2]` 
+    4. `[2, "pong2", secret2, secret1]`
+
+#####For the server
+  - Given `[0, "ping"]` respond with `[[0, 0, pong]]`
+  - Given `[1, "ping1", arg]` respond with `[[0, 1, pong1, arg]]`
+  - Given `[2, "ping2", arg1, arg2]]` respond with `[[0, 1, "pong2", arg1, 2, "pong2", arg1, arg2]]`
+  - Given `[2, "ping2", arg1, arg2]]` respond with `[[0, 1, "pong2", arg1, 2, "pong2", arg1, arg2]]`
+  - Given `[0, "ping", 0, "ping"]` respond with `[[0, 0, "pong", 0, "pong"]]`
+  - Given `[1, "ping1", secret1, 1, "ping1", secret2]` respond with `[[0, 1, "pong1", secret1, 1, "pong1", secret2]]` 
+  - Given `[1, "ping1", secret1, 1, "ping1", secret2]` respond with `[[0, 1, "pong1", secret1, 1, "pong1", secret2]]` 
+  - Given `[2, "ping2", secret1, secret2, 2, "ping2", secret2, secret1]` respond with:
+    - `[[0, 1, "pong2", secret1, 2, "pong2", secret1, secret2, 1, "pong2", secret2, 2, "pong2", secret2, secret1]]` 
+  - Given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]`
+  - Given `[1, "ping3", queue_nameA, 1, "ping3", queue_nameA, 1, "ping3", queue_nameB]` respond with `[[queue_indexA, 0, "pong3", 0, "pong3"], [queue_indexB, 0, "pong3"]]`
+  - Given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]` and then given `[1, "ping3", queue_name]` respond with `[[queue_index, 0, "pong3"]]`
 
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.

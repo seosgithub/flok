@@ -1,4 +1,5 @@
 #Scheduling
+**This document has incorrect information. It is a document still under development**
 Flok is capable of loading 10k images simultaneously while maintaining 1ms response time on typical JS environments for UI. This is all accomplished through its scheduling system.
 
 ##History
@@ -13,7 +14,6 @@ The first departure from a traditional operating system scheduler is that *Flok*
   2. `disk` - Transferring things to/from disk
   3. `cpu` - Tasks that tax the cpu
   4. `gpu` - Tasks that tax the gpu
-  5. `ram` - Tasks that tax the ram
 
 ##Flok also has two priority classes (Does not effect `main` queue):
   * `high` - Things that need to happen soon.
@@ -41,18 +41,5 @@ The message is broken up into *3* distinct queues.  The first queue, queue 0, is
 means the *main* queue will always be synchronously executed before the rest of the queues are asynchronously dispatched. The `download_image` is
 apart of the `net` queue, and the *gpu* is part of queue 4.  Look above at *Resource Labels* to see what each queue is.
 
-##Unanswered questions
-
-1. What if we have two tasks, *Task A* and *Task B*.  Say that *Task A* is a `protein folding task` and *Task B* is a `2x2 task`. How do we divide these
-two tasks so that if they were the *same* level of priority, that there would be *fairness*.  What is *fair* in this example?
-  * This is not solvable.  If we assume that the *2x2* task is irrelavent, then it should *never* run because that wouldn't be *fair*.  But let's
-      assume that relevancy is built into the semantics of the priority.  These tasks should def. be interleaved.
-    * Ok, but what if you can only run two copies of the `protein folding taks` and 5 copies of the `2x2 taks`.  Let's say at one time, we can take 4
-        copies of the 2x2 task?
-      * In that example, it would be most efficient to run 1 `protein folding task` and then the `2x2` tasks. An algorithm that could implement this
-          would interleave tasks until there are no more units left. When a unit becomes free, something new is queued in it's place.
-        * Ok, but then if a *big* task gets replaced by a smaller one, then there will never be any room if we have a billion small tasks.
-          * Then if there are things pending in the queue, they will be a space saved for those tasks. If there is nothing pending in the queue,
-            then many tasks can execute simultaneously in it's place.  But once it's queued, you will lose a little bit of efficiency for
-            the wait time until a open space becomes available. If there are too many things queud to place, a rolling window opens for tasks.
-
+## message queue count
+Each time a message is sent, the queue the message to belongs to is decremented by 1.

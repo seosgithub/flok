@@ -13,7 +13,7 @@ def macro_process text
 
       queue_name = o.shift.gsub(/"/, "")
 
-      res = %{#{queue_name}_queue.push.apply(#{queue_name}_queue, [#{o.count-1}, #{o.join(", ")}])}
+      res = %{#{queue_name}_q.push.apply(#{queue_name}_q, [#{o.count-1}, #{o.join(", ")}])}
       out.puts res
     else
       out.puts l

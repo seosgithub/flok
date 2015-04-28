@@ -1,4 +1,6 @@
 function int_net_cb(tp, success, info) {
+  //Re-increase
+  ++net_q_rem;
   tel_deref(tp)(tp, success, info);
 }
 
