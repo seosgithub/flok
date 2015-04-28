@@ -9,13 +9,10 @@ before your `application.js` file.
 There is excatly (1) divider that is used to place everything inside of that is visible.  This divider *must* have the following HTML code:
 ```html
 <!-- Mount point for view hierarchy, fully managed, do not touch -->
-<div id='root_surface' class='surface'>
-  <div class='view' data-name='main'></div>
-  <div class='view' data-name='hidden' style='display: none'></div>
-</div>
+<div id='flok-root'></div>
 
-<!-- Insert your prototypes inside here -->
-<div id='surface-prototypes' style='display: none'>
+<div id='prototypes' style='display: none'>
+  <!-- Insert your prototypes inside here -->
 </div>
 
 ```
@@ -24,17 +21,17 @@ There is excatly (1) divider that is used to place everything inside of that is 
 You may add surface prototypes like so under your #surface-prototypes divider
 ```html
 <!-- Insert your prototypes inside here -->
-<div id='surface-prototypes' style='display: none'>
+<div id='prototypes' style='display: none'>
   <!-- A tab container with a sub-view -->
-  <div class='surface' data-name='tab_container'>
+  <div class='view' data-name='nav_container'>
     <h1>Title</h1>
     <button>Back</button>
     <hr />
-    <div class='view' data-name='main'>
+    <div class='spot' data-name='main'>
   </div>
 
   <!-- A login view -->
-  <div class='surface' data-name='login'>
+  <div class='view' data-name='login'>
     <input type='text' placeholder='email' />
     <input type='text' placeholder='password' />
     <button>Login</button>
@@ -42,9 +39,8 @@ You may add surface prototypes like so under your #surface-prototypes divider
 </div>
 ```
 
-### Binding a Controller to a surface
-You create a constructor for a controller and then pass `drivers.ui.regController("surface_name", ControllerConstructorName);` and it will
-automatically be bound when a new surface is created.
+### Binding a Controller to a view
+You create a constructor for a controller and then pass `drivers.ui.regController("surface_name", ControllerConstructorName);` and it will automatically be bound when a new surface is created.
 ```js
 //Constructor for a controller that will automatically bind to a surface with the attribute 'data-name=tab_controller'
 var TabController = function($sel, info, pipe) {
