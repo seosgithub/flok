@@ -2,3 +2,4 @@ mods:
   - ui
   - event
   - net
+  - segue
