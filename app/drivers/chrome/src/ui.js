@@ -11,12 +11,13 @@ function if_init_view(name, info, tp_base, tp_targets) {
   var uuid = UUID();
   $proto.attr("data-uuid", uuid);
   $proto.attr("data-tp", tp_base);
+  $proto.hide();
   $("body").append($proto[0].outerHTML);
   $proto.removeAttr("data-uuid");
   $proto.removeAttr("data-tp");
 
   var $sel = $("[data-uuid='" + uuid + "']");
-  $sel.hide();
+  $proto.show();
 
   //Put the base view inside
   var tp_idx = tp_base; //Start with the base pointer
@@ -52,6 +53,22 @@ function if_attach_view(vp, p) {
   var $view = if_ui_tp_to_selector[vp];
   $view.show();
   $view.appendTo($target);
+}
+
+function if_free_view(vp) {
+  var $view = if_ui_tp_to_selector[vp];
+
+  //Find any child view vps
+  var cvps = $.makeArray($view.find(".view").map(function() {
+    return parseInt($(this).attr("data-tp"));
+  }));
+
+  for (var i = 0; i < cvps.length; ++i) {
+    delete if_ui_tp_to_selector[cvps[i]];
+  }
+
+  $view.remove();
+  delete if_ui_tp_to_selector[vp];
 }
 
 //Spec related////////////////////////////////////////////////
@@ -114,7 +131,23 @@ function if_ui_spec_view_is_visible(p) {
   }
   ////////////////////////////////////
 
-  console.error($target.css("display"));
   int_dispatch([1, "spec", !($target.css("display") === "none")]);
+}
+
+function if_ui_spec_view_exists(p) {
+  //Find target////////////////////////
+  var $target = null;
+
+  //Root view
+  if (p == 0) {
+    $target = $("#root");
+  } else {
+    //Lookup telepointer for selector
+    $target = if_ui_tp_to_selector[p];
+  }
+  ////////////////////////////////////
+
+  var res = (if_ui_tp_to_selector[p] !== undefined);
+  int_dispatch([1, "spec", res]);
 }
 /////////////////////////////////////////////////////////////
