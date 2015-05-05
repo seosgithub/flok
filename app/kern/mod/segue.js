@@ -32,4 +32,5 @@ function intercept_if_necessary(bottom_view_name, top_view_name, from_vp, to_vp)
   }
 }
 
-reg("modal", "nav_container", "nav_container");
+reg("modal", "nav_container", "nav_container.detach");
+reg("unmodal", "nav_container", "nav_container.attach");
