@@ -17,6 +17,7 @@ The bulk of the controller logic is handled here. Each controller contains an ar
 dictate what happends when events come in, etc.
 ```javascript
 action_info {
+  on_entry      //A function that is called when this action is initialized.
   handlers      //A dictionary [String:f(context, info)] of event handlers for events that occur
 }
 ```

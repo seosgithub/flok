@@ -1,0 +1,14 @@
+//This template provides one controller
+
+ctable = {
+  <% @controllers.each do |c| %>
+      <%= c.name %>: {
+        root_view: '<%= c.root_view %>',
+        actions: {
+          <% actions_for_controller(c.name).each do |a| %>
+              <%= a.name %>: {},
+          <% end %>
+        },
+      },
+  <% end %>
+}
