@@ -8,11 +8,17 @@ require 'closure-compiler'
 class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
   def new path
+    #Name of this project
     name = File.basename(path)
-    Dir.chdir File.dirname(path) do
-      `bundle gem #{name}`
 
+    #Get the directory of the given path, if path is only 'foo', then this will go into '.' (nop)
+    Dir.chdir File.dirname(path) do
+      #Create the project folder
+      Dir.mkdir name
+
+      #Go into the project folder
       Dir.chdir name do
+        #Create any needed folders
         Dir.mkdir "app"
         Dir.mkdir "config"
       end
@@ -20,21 +26,15 @@ class FlokCLI < Thor
   end
 
   option :compress, type: :boolean
-  desc "build", "Build a flok project, you must be in the root of the project"
-  def build
-    Dir.mkdir("./public") unless File.exists?("./public")
-    FileUtils.touch "./products/application.js"
-    FileUtils.touch "../FlokTest/app/assets/javascripts/flok.js"
+  desc "build <path>", "Build the products for a project path"
+  def build path="."
+    #Go into the correct folder
+    Dir.chdir path
 
-    src = Flok::MergeSource.merge_all
+    #Create a products folder if it dosen't already exist
+    Dir.mkdir("./products") unless File.exists?("./products")
 
-    #Compress by writing to a temporary dir, run closure, and then put back
-    if options["compress"] == true
-      src = Closure::Compiler.new.compile(src)
-    end
-
-    File.write("./products/application.js", src)
-    File.write("../FlokTest/app/assets/javascripts/flok.js", src)
+    #Get a list of platforms this project supports
   end
 end
 
