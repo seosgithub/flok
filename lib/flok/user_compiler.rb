@@ -52,20 +52,30 @@ module Flok
     end
   end
 
+  #Event handler inside an action
+  class UserCompilerOn
+    attr_accessor :controller_name, :action_name, :name
+  end
+
   class UserCompilerAction
-    attr_accessor :controller_name, :name
+    attr_accessor :controller_name, :name, :on_entry_src, :ons
 
     def initialize controller_name, name, ctx, &block
       @controller_name = controller_name
       @name = name
       @ctx = ctx
+      @ons = [] #Event handlers
 
       self.instance_eval(&block)
     end
 
     def on_entry &block
       #returns a string
-      @on_entry = block.call
+      @on_entry_src = block.call
+    end
+
+    def on name, &block
+      @ons << {:name => name, :src => block.call}
     end
   end
 

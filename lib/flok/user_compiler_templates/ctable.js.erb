@@ -6,7 +6,18 @@ ctable = {
         root_view: '<%= c.root_view %>',
         actions: {
           <% actions_for_controller(c.name).each do |a| %>
-              <%= a.name %>: {},
+              <%= a.name %>: {
+                on_entry: function(p) {
+                  <%= a.on_entry_src.strip %>
+                },
+                handlers: {
+                  <% a.ons.each do |e| %>
+                    <%= e[:name] %>: function(p) {
+                      <%= e[:src] %>
+                    },
+                  <% end %>
+                }
+              },
           <% end %>
         },
       },

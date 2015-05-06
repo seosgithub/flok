@@ -42,8 +42,14 @@ RSpec.describe "User compiler" do
   end
 
   it "Can compile a controller with an action that contains an on_entry" do
-    ctx = compile "controller1"
-    on_entry = ctx.eval "ctable.my_controller.actions[0].on_entry"
+    ctx = compile "controller0"
+    on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
     expect(on_entry).not_to eq(nil)
+  end
+
+  it "Can compile a controller with an action that contains an event that responds to hello" do
+    ctx = compile "controller0"
+    hello_event_function = ctx.eval "ctable.my_controller.actions.my_action.handlers.hello"
+    expect(hello_event_function).not_to eq(nil)
   end
 end
