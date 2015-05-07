@@ -1,15 +1,10 @@
-#User Interface (ui.js)
+#Persist (persist.js)
+Persistance management. Storage of data, etc.  Loosely based on redis.  Refer to [redios.io](http://redis.io/commands) for more detailed
+descriptions.
 
-###Functions
-
-`if_init_view(name, info, tp_base, tp_targets)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  `tp_targets` will look like `["main", "contentA", ...]` where everything after `root` is a spot.
-```js
-(main)>if_init_view('nav_container', {title: "Home"}, 333, ["root", "content"]);
-```
-
-`if_free_view(vp)` - Destroy a view with a `view pointer`.
-
-`if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`.  If *p* is 0, then you should place this **inside** of the root view.
+###Messages
+`if_per_hdel key field [field...]` - Delete one or more hash fields
+`if_per_hmget key field [field...]` - Get the value of multiple fields
 
 ###Spec related
 `if_ui_spec_init` - Setup anything necessary for the spec tests, this may include adding prototype views to your hierarchy, etc.

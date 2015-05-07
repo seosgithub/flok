@@ -1,0 +1,26 @@
+//This template provides one controller
+
+ctable = {
+  <% @controllers.each do |c| %>
+      <%= c.name %>: {
+        root_view: '<%= c.root_view %>',
+        spots: <%= c.spots.to_json %>,
+        actions: {
+          <% actions_for_controller(c.name).each do |a| %>
+              <%= a.name %>: {
+                on_entry: function(p) {
+                  <%= a.on_entry_src.strip %>
+                },
+                handlers: {
+                  <% a.ons.each do |e| %>
+                    <%= e[:name] %>: function(p) {
+                      <%= e[:src] %>
+                    },
+                  <% end %>
+                }
+              },
+          <% end %>
+        },
+      },
+  <% end %>
+}

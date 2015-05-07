@@ -8,33 +8,56 @@ require 'closure-compiler'
 class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
   def new path
+    #Name of this project
     name = File.basename(path)
-    Dir.chdir File.dirname(path) do
-      `bundle gem #{name}`
 
-      Dir.chdir name do
-        Dir.mkdir "app"
-        Dir.mkdir "config"
+    #Get the directory of the given path, if path is only 'foo', then this will go into '.' (nop)
+    Dir.chdir File.dirname(path) do
+      Flok::Project.create name
+    end
+  end
+
+  desc "build <platform>", "Build the products for a platform"
+  def build platform
+    #Create a products folder if it dosen't already exist
+    Dir.mkdir("./products") unless File.exists?("./products")
+
+    ENV["PLATFORM"] = platform
+
+    #Go into the flok gem project
+    local_products_path = File.join(Dir.pwd, "products")
+    Dir.chdir(File.join(File.dirname(__FILE__), "../")) do
+      #1. Use the rake task
+      system('rake build:world')
+
+      #2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM
+      FileUtils.cp_r "./products/#{platform}", local_products_path
+    end
+
+    #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
+    controller_glob_path = "#{local_products_path}/#{platform}/glob/controllers.rb" 
+    Flok.src_glob("rb", './app/controllers', controller_glob_path)
+    user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
+
+    Dir.chdir File.join(local_products_path, platform) do
+      #3. Put user_compiler_js in glob folder
+      File.write "glob/user_compiler.js", user_compiler_js
+
+      #4. Move application.js to the glob folder
+      FileUtils.cp "application.js", "glob/application.js"
+      FileUtils.rm "application.js"
+
+      #5. Combine application.js and user_compiler.js
+      File.open "application_user.js", "w" do |f|
+        f.puts File.read("glob/application.js")
+        f.puts File.read("glob/user_compiler.js")
       end
     end
   end
 
-  option :compress, type: :boolean
-  desc "build", "Build a flok project, you must be in the root of the project"
-  def build
-    Dir.mkdir("./public") unless File.exists?("./public")
-    FileUtils.touch "./products/application.js"
-    FileUtils.touch "../FlokTest/app/assets/javascripts/flok.js"
-
-    src = Flok::MergeSource.merge_all
-
-    #Compress by writing to a temporary dir, run closure, and then put back
-    if options["compress"] == true
-      src = Closure::Compiler.new.compile(src)
-    end
-
-    File.write("./products/application.js", src)
-    File.write("../FlokTest/app/assets/javascripts/flok.js", src)
+  desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM"
+  def server platform
+    system('bundle exec guard')
   end
 end
 

@@ -5,6 +5,7 @@ The `spec` folder contains all tests with the exception of **Driver** tests (See
 
   * `spec/`
     - `etc/`  - All tests that do not fit any categories.
+      -`lib/` - Tests that pertain to the ./lib/flok ruby library
     - `iface/`
       - `kern/` - All tests that *only* need the kernel (server) pipe.
       - `driver/` - All tests that *only* need the driver (client) pipe.
