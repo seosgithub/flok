@@ -62,8 +62,13 @@ RSpec.describe "CLI" do
         Dir.chdir "CHROME" do
           #Has an application_user.js file
           expect(files).to include "application_user.js"
-          expect(files).not_to include "application.js"
-          expect(files).not_to include "user_compiler.js"
+
+          #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
+          glob_application_js = File.read('glob/application.js')
+          glob_user_compiler_js = File.read('glob/user_compiler.js')
+          application_user_js = File.read('application_user.js')
+          expect(application_user_js).to include(glob_application_js)
+          expect(application_user_js).to include(glob_user_compiler_js)
 
           #Contains the same files as the kernel in the drivers directory
           expect(dirs).to include "drivers"

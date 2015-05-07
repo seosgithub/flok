@@ -47,17 +47,21 @@ class FlokCLI < Thor
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
 
     Dir.chdir File.join(local_products_path, platform) do
-      File.write "user_compiler.js", user_compiler_js
+      #Make a glob folder
+      FileUtils.mkdir "glob"
 
-      #4. Combine application.js and user_compiler.js
-      File.open "application_user.js", "w" do |f|
-        f.puts File.read("application.js")
-        f.puts File.read("user_compiler.js")
-      end
+      #3. Put user_compiler_js in glob folder
+      File.write "glob/user_compiler.js", user_compiler_js
 
-      #5. Delete application.js and user_compiler.js
+      #4. Move application.js to the glob folder
+      FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
-      FileUtils.rm "user_compiler.js"
+
+      #5. Combine application.js and user_compiler.js
+      File.open "application_user.js", "w" do |f|
+        f.puts File.read("glob/application.js")
+        f.puts File.read("glob/user_compiler.js")
+      end
     end
   end
 end
