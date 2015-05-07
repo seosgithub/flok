@@ -2,7 +2,7 @@
 
 ###Functions
 
-`if_init_view(name, info, tp_base, *tp_targets)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  `tp_targets` will look like `["main", "contentA", ...]` where everything after `root` is a spot.
+`if_init_view(name, info, tp_base, tp_targets)` - Create a view based on an agreed upon name for a `prototype` and pass it some `info`. Do not show the view yet.  `tp_targets` will look like `["main", "contentA", ...]` where everything after `root` is a spot.
 ```js
 (main)>if_init_view('nav_container', {title: "Home"}, 333, ["root", "content"]);
 ```

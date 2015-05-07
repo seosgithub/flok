@@ -13,17 +13,7 @@ class FlokCLI < Thor
 
     #Get the directory of the given path, if path is only 'foo', then this will go into '.' (nop)
     Dir.chdir File.dirname(path) do
-      #Create the project folder
-      Dir.mkdir name
-
-      #Go into the project folder
-      Dir.chdir name do
-        #Create any needed folders
-        Dir.mkdir "app"
-
-        #Create a guard file
-        File.write ".Guardfile", ""
-      end
+      Flok::Project.create name
     end
   end
 
@@ -45,14 +35,11 @@ class FlokCLI < Thor
     end
 
     #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
-    controller_glob_path = "#{local_products_path}/glob/controllers.rb" 
+    controller_glob_path = "#{local_products_path}/#{platform}/glob/controllers.rb" 
     Flok.src_glob("rb", './app/controllers', controller_glob_path)
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
 
     Dir.chdir File.join(local_products_path, platform) do
-      #Make a glob folder
-      FileUtils.mkdir "glob"
-
       #3. Put user_compiler_js in glob folder
       File.write "glob/user_compiler.js", user_compiler_js
 
@@ -70,6 +57,7 @@ class FlokCLI < Thor
 
   desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM"
   def server platform
+    system('bundle exec guard')
   end
 end
 

@@ -81,16 +81,22 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :root_view, :name
+    attr_accessor :root_view, :name, :spots
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
+      @spots = ['main']
 
       self.instance_eval(&block)
     end
 
     def view name
       @root_view = name
+    end
+
+    #Names of spots
+    def spots *spots
+      @spots += spots
     end
 
     #Pass through action

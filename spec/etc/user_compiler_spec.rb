@@ -52,4 +52,12 @@ RSpec.describe "User compiler" do
     hello_event_function = ctx.eval "ctable.my_controller.actions.my_action.handlers.hello"
     expect(hello_event_function).not_to eq(nil)
   end
+
+  it "Can compile a controller with spot names" do
+    ctx = compile "controller0"
+    spot_names = JSON.parse(ctx.eval "JSON.stringify(ctable.my_controller.spots)")
+    expect(spot_names).to include "hello"
+    expect(spot_names).to include "world"
+    expect(spot_names).to include "main" #Should be added by default
+  end
 end

@@ -1,4 +1,5 @@
 Dir.chdir File.join File.dirname(__FILE__), '../../'
+require './spec/env/etc'
 require './lib/flok'
 
 require 'tempfile'
@@ -6,15 +7,6 @@ require 'securerandom'
 
 #Specifications for the ./bin/flok utility
 
-def new_temp_dir
-  #Get a new temporary directory
-  temp = Tempfile.new SecureRandom.hex
-  path = temp.path
-  temp.close!
-
-  FileUtils.mkdir_p path
-  return path
-end
 
 #Execute flok binary
 def flok args
@@ -36,24 +28,13 @@ def flok_new
   end
 end
 
-def dirs
-  Dir["*"].select{|e| File.directory?(e)}
-end
-
-def files
-  Dir["{*,.*}"].select{|e| File.file?(e)} #Match dotfiles and normal files
-end
-
 RSpec.describe "CLI" do
-  it "Can create a new project with correct directories" do
-    flok_new do
-      #Check directories
-      expect(dirs).to include("app")
-
-      #Check files
-      expect(files).to include(".Guardfile")
-    end
-  end
+#  it "Can create a new project with correct directories" do
+    #flok_new do
+      ##Basic test, just checking to make sure creation works
+      #expect(files).to include("Gemfile")
+    #end
+  #end
 
   it "Can build a project with every type of platform" do
     Flok.platforms.each do |platform|
@@ -85,11 +66,40 @@ RSpec.describe "CLI" do
     end
   end
 
-  it "Can auto-rebuild via flok server" do
+  it "Can build a project with a controller file for each platform" do
     Flok.platforms.each do |platform|
-      flok_new do
-        flok "server"
+      @platform = platform
+      controller_rb = File.read('./spec/etc/user_compiler/controller0.rb')
+
+      #Compile and then return the length of the application_user.js file
+      def compile_with_file path=nil
+        #Custom controller to test source with
+        controller_src = File.read(path) if path
+        flok_new do
+          File.write "./app/controllers/controller0.rb", controller_src if path
+
+          #Build a new project
+          flok "build #{@platform}"
+
+          #Check it's products directory
+          Dir.chdir "products" do
+            #Has a platform folder
+            Dir.chdir @platform do
+              glob_application_js = File.read('glob/application.js')
+              glob_user_compiler_js = File.read('glob/user_compiler.js')
+              application_user_js = File.read('application_user.js')
+
+              return application_user_js.split("\n").count
+            end
+          end
+        end
       end
+
+      #The file with content should be longer when compiled into the flat application_user.js
+      len_with_content = compile_with_file "./spec/etc/user_compiler/controller0.rb"
+      len_no_content = compile_with_file
+
+      expect(len_no_content).to be < len_with_content
     end
   end
 end
