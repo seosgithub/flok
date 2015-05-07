@@ -1,5 +1,6 @@
 #Compile a controller ruby file into a javascript string
 
+require 'erb'
 module Flok
   module UserCompiler
     #Compile a ruby file containing flok controller definitions (from the user)
@@ -10,7 +11,7 @@ module Flok
       context.instance_eval(rb_src, __FILE__, __LINE__)
 
       @src = ""
-      ctable_erb = File.read('./lib/flok/user_compiler_templates/ctable.js.erb')
+      ctable_erb = File.read File.join(File.dirname(__FILE__), "./user_compiler_templates/ctable.js.erb")
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
 

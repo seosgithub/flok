@@ -20,21 +20,45 @@ class FlokCLI < Thor
       Dir.chdir name do
         #Create any needed folders
         Dir.mkdir "app"
-        Dir.mkdir "config"
       end
     end
   end
 
-  option :compress, type: :boolean
-  desc "build <path>", "Build the products for a project path"
-  def build path="."
-    #Go into the correct folder
-    Dir.chdir path
-
+  desc "build <platform>", "Build the products for a platform"
+  def build platform
     #Create a products folder if it dosen't already exist
     Dir.mkdir("./products") unless File.exists?("./products")
 
-    #Get a list of platforms this project supports
+    ENV["PLATFORM"] = platform
+
+    #Go into the flok gem project
+    local_products_path = File.join(Dir.pwd, "products")
+    Dir.chdir(File.join(File.dirname(__FILE__), "../")) do
+      #1. Use the rake task
+      system('rake build:world')
+
+      #2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM
+      FileUtils.cp_r "./products/#{platform}", local_products_path
+    end
+
+    #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
+    controller_glob_path = "#{local_products_path}/glob/controllers.rb" 
+    Flok.src_glob("rb", './app/controllers', controller_glob_path)
+    user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
+
+    Dir.chdir File.join(local_products_path, platform) do
+      File.write "user_compiler.js", user_compiler_js
+
+      #4. Combine application.js and user_compiler.js
+      File.open "application_user.js", "w" do |f|
+        f.puts File.read("application.js")
+        f.puts File.read("user_compiler.js")
+      end
+
+      #5. Delete application.js and user_compiler.js
+      FileUtils.rm "application.js"
+      FileUtils.rm "user_compiler.js"
+    end
   end
 end
 
