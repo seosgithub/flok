@@ -11,4 +11,9 @@ module Flok
       end
     end
   end
+
+  #Alias
+  def self.platforms
+    return Platform.list
+  end
 end

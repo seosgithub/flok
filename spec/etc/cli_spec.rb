@@ -1,3 +1,6 @@
+Dir.chdir File.join File.dirname(__FILE__), '../../'
+require './lib/flok'
+
 require 'tempfile'
 require 'securerandom'
 
@@ -38,7 +41,7 @@ def dirs
 end
 
 def files
-  Dir["*"].select{|e| File.file?(e)}
+  Dir["{*,.*}"].select{|e| File.file?(e)} #Match dotfiles and normal files
 end
 
 RSpec.describe "CLI" do
@@ -46,33 +49,46 @@ RSpec.describe "CLI" do
     flok_new do
       #Check directories
       expect(dirs).to include("app")
+
+      #Check files
+      expect(files).to include(".Guardfile")
     end
   end
 
-  it "Can build a project" do
-    flok_new do
-      #Build a new project
-      flok "build CHROME"
+  it "Can build a project with every type of platform" do
+    Flok.platforms.each do |platform|
+      flok_new do
+        #Build a new project
+        flok "build #{platform}"
 
-      #Check it's products directory
-      expect(dirs).to include "products"
-      Dir.chdir "products" do
-        #Has a platform folder
-        expect(dirs).to include "CHROME"
-        Dir.chdir "CHROME" do
-          #Has an application_user.js file
-          expect(files).to include "application_user.js"
+        #Check it's products directory
+        expect(dirs).to include "products"
+        Dir.chdir "products" do
+          #Has a platform folder
+          expect(dirs).to include platform
+          Dir.chdir platform do
+            #Has an application_user.js file
+            expect(files).to include "application_user.js"
 
-          #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
-          glob_application_js = File.read('glob/application.js')
-          glob_user_compiler_js = File.read('glob/user_compiler.js')
-          application_user_js = File.read('application_user.js')
-          expect(application_user_js).to include(glob_application_js)
-          expect(application_user_js).to include(glob_user_compiler_js)
+            #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
+            glob_application_js = File.read('glob/application.js')
+            glob_user_compiler_js = File.read('glob/user_compiler.js')
+            application_user_js = File.read('application_user.js')
+            expect(application_user_js).to include(glob_application_js)
+            expect(application_user_js).to include(glob_user_compiler_js)
 
-          #Contains the same files as the kernel in the drivers directory
-          expect(dirs).to include "drivers"
+            #Contains the same files as the kernel in the drivers directory
+            expect(dirs).to include "drivers"
+          end
         end
+      end
+    end
+  end
+
+  it "Can auto-rebuild via flok server" do
+    Flok.platforms.each do |platform|
+      flok_new do
+        flok "server"
       end
     end
   end

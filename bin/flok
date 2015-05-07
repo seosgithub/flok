@@ -20,6 +20,9 @@ class FlokCLI < Thor
       Dir.chdir name do
         #Create any needed folders
         Dir.mkdir "app"
+
+        #Create a guard file
+        File.write ".Guardfile", ""
       end
     end
   end
@@ -63,6 +66,10 @@ class FlokCLI < Thor
         f.puts File.read("glob/user_compiler.js")
       end
     end
+  end
+
+  desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM"
+  def server platform
   end
 end
 
