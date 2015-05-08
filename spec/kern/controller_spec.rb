@@ -134,8 +134,9 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval('base')
 
+    #+3 because it's after the base view (has two spots)
     ctx.eval %{ 
-      info = tel_deref(#{base+3}) #+3 because it's after the base view (has two spots)
+      info = tel_deref(#{base+3})     
     }
 
     info = ctx.eval("info")
