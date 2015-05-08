@@ -13,7 +13,7 @@ ctable = {
                 },
                 handlers: {
                   <% a.ons.each do |e| %>
-                    <%= e[:name] %>: function(p) {
+                    <%= e[:name] %>: function(__base__, __params__) {
                       <%= e[:src] %>
                     },
                   <% end %>

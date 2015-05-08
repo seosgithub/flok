@@ -43,19 +43,11 @@ You may add surface prototypes like so under your #surface-prototypes divider
 You create a constructor for a controller and then pass `drivers.ui.regController("surface_name", ControllerConstructorName);` and it will automatically be bound when a new surface is created.
 ```js
 //Constructor for a controller that will automatically bind to a surface with the attribute 'data-name=tab_controller'
-var TabController = function($sel, info, pipe) {
-  //Assign members
-  this.$sel = $sel;
-  this.info = info;
-  this.pipe = pipe;
-
-  $sel.find("button").on('click', function() {
-    //Do something, like send an event
-  });
+var TabController = function($sel, info) {
 }
 
 //Register the new controller
 $(document).ready(function() {
-  drivers.ui.regController("tab_container", TabController);
+  regController("tab_container", TabController);
 });
 ```

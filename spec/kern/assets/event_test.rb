@@ -6,7 +6,7 @@ controller :my_controller do
     on_entry %{
     }
 
-    on "test_action", %{
+    on "test_event", %{
       test_action_called_base = __base__;
       test_action_called_params = __params__;
     }

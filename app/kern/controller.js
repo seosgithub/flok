@@ -36,5 +36,23 @@ function _embed(vc_name, sp, context) {
   //Call the on_entry function with the base address
   cte.actions[action].on_entry(base);
 
+  //Register the event handler callback
+  reg_evt(base, controller_event_callback);
+
   return base;
+}
+
+//Called when an event is received
+function controller_event_callback(ep, event_name, info) {
+  //Grab the controller instance
+  var inst = tel_deref(ep);
+
+  //Now, get the ctable entry
+  var cte = inst.cte;
+
+  //Now find the event handler
+  var handler = cte.actions[inst.action].handlers[event_name];
+  if (handler !== undefined) {
+    handler(ep, info);
+  }
 }
