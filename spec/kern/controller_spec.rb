@@ -10,7 +10,7 @@ RSpec.describe "kern:controller_spec" do
   include_context "kern"
 
   #Can initialize a controller via embed and have the correct if_dispatch messages
-  it "Can initiate a controller via _embed" do
+ it "Can initiate a controller via _embed" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
 
@@ -93,4 +93,70 @@ RSpec.describe "kern:controller_spec" do
 
     expect(ctx.eval('on_entry_base_pointer')).to eq(ctx.eval("base"))
   end
+
+  it "can embed a controller within a controller and put the right views in" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller1.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval('base')
+
+    #First, we expect the base vc to be setup as a view
+    @driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
+    @driver.mexpect("if_attach_view", [base, 0])
+
+    #Now we expect the embedded view to be setup as a view within the base view
+    #+3 because it's after the base view and the base has two spots
+    @driver.mexpect("if_init_view", ["test_view2", {}, base+3, ["main", "hello", "world"]])
+    @driver.mexpect("if_attach_view", [base+3, base])
+  end
+
+  it "can embed a controller within a controller and allocate the correct view controller instance" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller1.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval('base')
+
+    ctx.eval %{ 
+      info = tel_deref(#{base+3}) #+3 because it's after the base view (has two spots)
+    }
+
+    info = ctx.eval("info")
+    expect(info).not_to eq(nil)
+  end
+
+  it "calls on_entry with the base pointer when the sub_controller is embedded" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller1.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #+3 because the base has 2 spots, so it should have incremented to 3
+    expect(ctx.eval('on_entry_base_pointer')).to eq(ctx.eval("base")+3)
+  end
+
 end

@@ -72,11 +72,49 @@ module Flok
 
     def on_entry js_src
       #returns a string
-      @on_entry_src = js_src
+      @on_entry_src = macro(js_src)
     end
 
     def on name, js_src
-      @ons << {:name => name, :src => js_src}
+      @ons << {:name => name, :src => macro(js_src)}
+    end
+
+    def macro js_src
+      lines = js_src.split("\n").map do |line|
+        
+      end
+
+      return lines.join("\n")
+    end
+
+    def macro text
+      out = StringIO.new
+
+      text.split("\n").each do |l|
+        #EMBED(vc_name, spot_name, context) macro
+        if l =~ /EMBED/
+          l.strip!
+          l.gsub!(/EMBED\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
+
+          vc_name = o.shift.gsub(/"/, "")
+          spot_name = o.shift.gsub(/"/, "")
+          context = o.shift.gsub(/"/, "")
+
+          res = %{
+            _embed("#{vc_name}", __base__, {});
+          }
+          out.puts res
+        else
+          out.puts l
+        end
+      end
+
+      puts out.string
+
+      return out.string
     end
   end
 
