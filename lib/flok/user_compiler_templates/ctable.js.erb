@@ -8,7 +8,7 @@ ctable = {
         actions: {
           <% actions_for_controller(c.name).each do |a| %>
               <%= a.name %>: {
-                on_entry: function(p) {
+                on_entry: function(__base__) {
                   <%= a.on_entry_src.strip %>
                 },
                 handlers: {

@@ -9,24 +9,88 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:controller_spec" do
   include_context "kern"
 
-  #Controller initialization is done via `_embed` or the `embed` macro if you are inside a controller. Embedding
-    #1. Requests a set of sequential pointers via `tels`, `n(spots)`.  `main` is always a spot, so there is always at least one pointer. The first pointer is the base.
-    #2. Initializes the root view of the controller with the base pointer and retrieve the spots array from the controller `main` + whatever you declared in `spots`
-    #3. Attaches that view to the `view pointer` (which is a tele-pointer) given in the embed call.
-    #4. Sets up the view controller's info structure.
-    #5. Explicitly registers the view controller's info structure with the `root view base pointer` via `tel_reg_ptr(info, base)`
-    #6. Invokes the view controllers `on_entry` function with the info structure.
+  #Can initialize a controller via embed and have the correct if_dispatch messages
   it "Can initiate a controller via _embed" do
     #Compile the controller
-    ctx = compile "controller1"
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
 
     #Run the embed function
     ctx.eval %{
-      //Get a new base pointer
-      var base = tels(1);
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
 
-      //Call embed
-      _embed("test", base, {});
+      //Drain queue
+      int_dispatch([]);
     }
+
+    base = ctx.eval("base")
+
+    @driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
+    @driver.mexpect("if_attach_view", [base, 0])
+  end
+
+  it "Can initiate a controller via _embed and have a controller_info located in tel table" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval("base")
+    ctx.eval %{ 
+      info = tel_deref(#{base})
+    }
+
+    info = ctx.eval("info")
+    expect(info).not_to eq(nil)
+
+    #Should have the right set of keys in the controller info
+    ctx.eval %{
+      context = info.context
+      action = info.action
+      cte = info.cte
+    }
+
+    expect(ctx.eval('context')).not_to eq(nil)
+    expect(ctx.eval('action')).not_to eq(nil)
+    expect(ctx.eval('cte')).not_to eq(nil)
+  end
+
+  it "calls on_entry with the base pointer when a controller is embedded for the initial action" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    expect(ctx.eval('on_entry_base_pointer')).to eq(ctx.eval("base"))
+  end
+
+  it "calls on_entry with the base pointer when a controller is embedded for the initial action" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {});
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    expect(ctx.eval('on_entry_base_pointer')).to eq(ctx.eval("base"))
   end
 end

@@ -7,7 +7,6 @@ require 'securerandom'
 
 #Specifications for the ./bin/flok utility
 
-
 #Execute flok binary
 def flok args
   #Get path to the flok binary relative to this file

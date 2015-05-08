@@ -12,8 +12,29 @@ function _embed(vc_name, sp, context) {
   //Get spot names
   var spots = cte.spots;
 
+  //Actions
+  var actions = cte.actions;
+
   //Construct the view
   var base = tels(spots.length);
   SEND("main", "if_init_view", vname, context, base, spots);
   SEND("main", "if_attach_view", base, sp);
+
+  //TODO: choose action
+  var action = Object.keys(cte.actions)[0];
+
+  //Create controller information struct
+  var info = {
+    context: {},
+    action: action,
+    cte: cte,
+  };
+
+  //Register controller base with the struct, we already requested base
+  tel_reg_ptr(info, base);
+
+  //Call the on_entry function with the base address
+  cte.actions[action].on_entry(base);
+
+  return base;
 }

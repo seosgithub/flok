@@ -33,7 +33,8 @@ receive the event in the `root` view of the controller.
 
 ```javascript
 controller_info {
-  base: 333,   //The base pointer of the root-view, and the tele-pointer of this controller.
   context: {}, //A hash that contains context information (user supplied)
+  action: //The name of the current action that is active
+  cte:    //The ctable entry pertaining to this controller
 }
 ```
