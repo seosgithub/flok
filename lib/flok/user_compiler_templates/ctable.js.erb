@@ -9,11 +9,14 @@ ctable = {
           <% actions_for_controller(c.name).each do |a| %>
               <%= a.name %>: {
                 on_entry: function(__base__) {
+                  //Controller information
+                  var __info__ = tel_deref(__base__);
                   <%= a.on_entry_src.strip %>
                 },
                 handlers: {
                   <% a.ons.each do |e| %>
                     <%= e[:name] %>: function(__base__, __params__) {
+                      var __info__ = tel_deref(__base__);
                       <%= e[:src] %>
                     },
                   <% end %>

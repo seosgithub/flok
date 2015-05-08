@@ -114,7 +114,32 @@ module Flok
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
           res = %{
-            _embed("#{vc_name}", __base__+#{spot_index}, {});
+            var ptr = _embed("#{vc_name}", __base__+#{spot_index}, {});
+            __info__.embeds.push(ptr);
+          }
+          out.puts res
+        #GOTO(action_name)
+        elsif l =~ /GOTO/
+          l.strip!
+          l.gsub!(/GOTO\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
+
+          action_name = o.shift.gsub(/"/, "")
+
+          #Switch the actions, reset embeds, and call on_entry
+          res = %{
+            __info__.action = "#{action_name}";
+
+            //Remove all views
+            var embeds = __info__.embeds;
+            for (var i = 0; i < __info__.embeds.length; ++i) {
+              main_q.push([1, "if_free_view", embeds[i]]);
+            }
+
+            __info__.embeds = [];
+            __info__.cte.actions[__info__.action].on_entry(__base__)
           }
           out.puts res
         else

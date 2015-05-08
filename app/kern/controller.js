@@ -28,6 +28,7 @@ function _embed(vc_name, sp, context) {
     context: {},
     action: action,
     cte: cte,
+    embeds: [],
   };
 
   //Register controller base with the struct, we already requested base

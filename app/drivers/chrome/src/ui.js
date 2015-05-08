@@ -36,6 +36,12 @@ function if_init_view(name, info, tp_base, tp_targets) {
     tp_idx += 1;
   });
 
+  //Bind controller
+  if (reg_controllers[name] != undefined) {
+    var constructor = reg_controllers[name];
+    new constructor($sel, info);
+  }
+
   //Our surface pointers are selectors
   return $sel
 }
@@ -51,6 +57,7 @@ function if_attach_view(vp, p) {
 
   //Inject the view into p
   var $view = if_ui_tp_to_selector[vp];
+
   $view.show();
   $view.appendTo($target);
 }

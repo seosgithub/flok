@@ -40,7 +40,7 @@ You may add surface prototypes like so under your #surface-prototypes divider
 ```
 
 ### Binding a Controller to a view
-You create a constructor for a controller and then pass `drivers.ui.regController("surface_name", ControllerConstructorName);` and it will automatically be bound when a new surface is created.
+You create a constructor for a controller
 ```js
 //Constructor for a controller that will automatically bind to a surface with the attribute 'data-name=tab_controller'
 var TabController = function($sel, info) {

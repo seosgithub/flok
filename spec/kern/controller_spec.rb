@@ -161,9 +161,73 @@ RSpec.describe "kern:controller_spec" do
     #expect(ctx.eval('on_entry_base_pointer')).to eq(ctx.eval("base")+3)
   #end
 
-  it "Can receive 'test_event' destined for the controller and call an action" do
+  #it "Can receive 'test_event' destined for the controller and set a variable" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/event_test.rb')
+
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {});
+
+      #//Drain queue with test event
+      #int_dispatch([3, "int_event", base, "test_event", {}]);
+    #}
+
+    ##Now we expect some variables to be set in the action
+    #expect(ctx.eval("test_action_called_base")).not_to eq(nil)
+    #expect(ctx.eval("test_action_called_params")).not_to eq(nil)
+  #end
+
+  #it "Can initiate a controller via _embed and have a tracked list of embeds in info" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/controller1.rb')
+
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {});
+
+      #//Drain queue
+      #int_dispatch([]);
+    #}
+
+    #base = ctx.eval("base")
+    #ctx.eval %{ 
+      #info = tel_deref(#{base})
+    #}
+
+    ##Should have the right set of keys in the controller info
+    #ctx.eval %{
+      #embeds = JSON.stringify(info.embeds)
+    #}
+    #embeds = JSON.parse(ctx.eval("embeds"))
+
+    ##Expect base+3 because it's the vc itself, not the spot it's in
+    #expect(embeds).to eq([base+3])
+  #end
+
+  #it "Can receive 'test_event' and change actions" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
+
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {});
+
+      #//Drain queue with test event
+      #int_dispatch([3, "int_event", base, "test_event", {}]);
+    #}
+
+    ##Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
+    ##to be called
+    #expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
+  #end
+
+  it "Does tear down the old embedded view from the embedded view controller when switching actions" do
     #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/event_test.rb')
+    ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
 
     #Run the embed function
     ctx.eval %{
@@ -174,8 +238,15 @@ RSpec.describe "kern:controller_spec" do
       int_dispatch([3, "int_event", base, "test_event", {}]);
     }
 
-    #Now we expect some variables to be set in the action
-    expect(ctx.eval("test_action_called_base")).not_to eq(nil)
-    expect(ctx.eval("test_action_called_params")).not_to eq(nil)
+    base = ctx.eval("base")
+
+    #Expect that a view was embedded inside a view at this point
+    @driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
+    @driver.mexpect("if_attach_view", [base, 0])
+    @driver.mexpect("if_init_view", ["test_view2", {}, base+3, ["main"]])
+    @driver.mexpect("if_attach_view", [base+3, base+1])
+
+    #And then the request to switch views with the 'test_event' removed the second view
+    @driver.mexpect("if_free_view", [base+3])
   end
 end

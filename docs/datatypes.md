@@ -36,5 +36,6 @@ controller_info {
   context: {}, //A hash that contains context information (user supplied)
   action: //The name of the current action that is active
   cte:    //The ctable entry pertaining to this controller
+  embeds: //An array of currently active embeds that need to be removed when changing actions
 }
 ```
