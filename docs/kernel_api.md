@@ -12,6 +12,9 @@ instead.
 ##Networking
   * `get_req(owner_tp, url, params, callback)` - Request some RESTFUL get request.  The callback receives `(info)` with a data payload. Will retry until successful, will never fail. The request will be abandoned if the owner object no longer exists.
 
+##Controllers
+  * `_embed(vc_name, sp, context)` - Embed a view controller in a surface-pointer. Following the rules of the ui device, embedded to a sp of 0 is the master root view.
+
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
 `PLATFORM` - The platform that this kernel was compiled with

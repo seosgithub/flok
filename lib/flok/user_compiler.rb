@@ -70,13 +70,13 @@ module Flok
       self.instance_eval(&block)
     end
 
-    def on_entry &block
+    def on_entry js_src
       #returns a string
-      @on_entry_src = block.call
+      @on_entry_src = js_src
     end
 
-    def on name, &block
-      @ons << {:name => name, :src => block.call}
+    def on name, js_src
+      @ons << {:name => name, :src => js_src}
     end
   end
 

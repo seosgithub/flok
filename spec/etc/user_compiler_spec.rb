@@ -1,16 +1,7 @@
 #Load all the test files in ./user_compiler/*.js
 
-
 Dir.chdir File.join File.dirname(__FILE__), '../../'
 require './lib/flok'
-require 'therubyracer'
-
-#Get the source for a file in  ./user_compiler/*.rb
-def js_src fn
-  Dir.chdir File.join(File.dirname(__FILE__), "user_compiler") do
-    return File.read(fn+'.rb')
-  end
-end
 
 #Return a v8 instance of a compiled js file
 def compile fn
@@ -20,6 +11,13 @@ def compile fn
   ctx = V8::Context.new
   ctx.eval js_res
   ctx
+end
+
+#Get the source for a file in  ./user_compiler/*.rb
+def js_src fn
+  Dir.chdir File.join(File.dirname(__FILE__), "user_compiler") do
+    return File.read(fn+'.rb')
+  end
 end
 
 #Testing the compilation of controller/action user files into javascript counterparts
