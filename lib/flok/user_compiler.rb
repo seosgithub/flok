@@ -41,15 +41,19 @@ module Flok
       @controllers << UserCompilerController.new(name, self, &block)
     end
 
-    def action controller_name, name, &block
-      @actions << UserCompilerAction.new(controller_name, name, self, &block)
+    def action controller, name, &block
+      @actions << UserCompilerAction.new(controller, name, self, &block)
     end
 
     def on controller_name, action_name, name, &block
     end
 
     def actions_for_controller controller_name
-      return @actions.select{|e| e.controller_name == controller_name}
+      return @actions.select{|e| e.controller.name == controller_name}
+    end
+
+    def spots_for_controller controller_name
+      return @controllers.detect{|e| e.name == controller_name}.spots
     end
   end
 
@@ -59,10 +63,10 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller_name, :name, :on_entry_src, :ons
+    attr_accessor :controller, :name, :on_entry_src, :ons
 
-    def initialize controller_name, name, ctx, &block
-      @controller_name = controller_name
+    def initialize controller, name, ctx, &block
+      @controller = controller
       @name = name
       @ctx = ctx
       @ons = [] #Event handlers
@@ -103,8 +107,14 @@ module Flok
           spot_name = o.shift.gsub(/"/, "")
           context = o.shift.gsub(/"/, "")
 
+          #Get the spot 
+          spot_index = @controller.spots.index(spot_name)
+          raise "controller #{@controller.name.inspect} attempted to embed #{spot_name.inspect} inside #{@name.inspect}, but #{spot_name.inspect} was not defined in 'spots' (#{@controller.spots.inspect})" unless spot_index
+
+          #Calculate spot index as an offset from the base address using the index of the spot in the spots
+          #address offset
           res = %{
-            _embed("#{vc_name}", __base__, {});
+            _embed("#{vc_name}", __base__+#{spot_index}, {});
           }
           out.puts res
         else
@@ -139,7 +149,7 @@ module Flok
 
     #Pass through action
     def action name, &block
-      @ctx.action @name, name, &block
+      @ctx.action self, name, &block
     end
   end
 end
