@@ -9,6 +9,11 @@
   * `tel_exists(tp)` - Returns true or false depending on whether there is a telepointer that matches
 instead.
 
+##Events
+  * `reg_evt(ep, f)` - Register a function to be called when an event is processed by `int_event`. The function will receive `(ep, event_name, info)`.
+
+  * `dereg_evt(ep)` - Do not do anything if ep is received as an `int_event`
+
 ##Networking
   * `get_req(owner_tp, url, params, callback)` - Request some RESTFUL get request.  The callback receives `(info)` with a data payload. Will retry until successful, will never fail. The request will be abandoned if the owner object no longer exists.
 

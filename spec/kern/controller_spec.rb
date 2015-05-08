@@ -171,7 +171,11 @@ RSpec.describe "kern:controller_spec" do
       base = _embed("my_controller", 0, {});
 
       //Drain queue with test event
-      int_dispatch([]);
+      int_dispatch([2, "int_event", "test_event", {}]);
     }
+
+    #Now we expect some variables to be set in the action
+    expect(ctx.eval("test_action_called_base")).not_to eq(nil)
+    expect(ctx.eval("test_action_called_params")).not_to eq(nil)
   end
 end

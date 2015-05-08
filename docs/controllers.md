@@ -34,3 +34,5 @@ Controller initialization is done via `_embed` or the `embed` macro if you are i
   4. Sets up the view controller's info structure.
   5. Explicitly registers the view controller's info structure with the `root view base pointer` via `tel_reg_ptr(info, base)`
   6. Invokes the view controllers `on_entry` function with the info structure.
+
+Additionally, the `event` sub-system will be configured via `reg_evt` so that an event given to the base pointer in `int_event`, it will be sent to the `handle_cevent` function which will dispatch the event to the approriate event handler within the controller.
