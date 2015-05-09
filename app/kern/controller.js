@@ -2,7 +2,7 @@
 
 //Embed a view-controller into a named spot. If spot is null, then it is assumed
 //you are referring to the root-spot.
-function _embed(vc_name, sp, context) {
+function _embed(vc_name, sp, context, event_gw) {
   //Lookup VC ctable entry
   var cte = ctable[vc_name];
 
@@ -35,6 +35,7 @@ function _embed(vc_name, sp, context) {
     action: action,
     cte: cte,
     embeds: [],
+    event_gw: event_gw
   };
 
   //Register controller base with the struct, we already requested base
@@ -61,5 +62,9 @@ function controller_event_callback(ep, event_name, info) {
   var handler = cte.actions[inst.action].handlers[event_name];
   if (handler !== undefined) {
     handler(ep, info);
+  } else {
+    if (inst.event_gw != null) {
+      controller_event_callback(inst.event_gw, event_name, info);
+    }
   }
 }

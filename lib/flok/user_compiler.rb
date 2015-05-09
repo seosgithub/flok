@@ -114,7 +114,7 @@ module Flok
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
           res = %{
-            var ptr = _embed("#{vc_name}", __base__+#{spot_index}, {});
+            var ptr = _embed("#{vc_name}", __base__+#{spot_index}, {}, __base__);
             __info__.embeds.push(ptr);
           }
           out.puts res

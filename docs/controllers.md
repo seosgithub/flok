@@ -11,7 +11,9 @@ Events can be sent bi-directionally from the `fuc` and `dvc` via the [Event Modu
 When an event is sent from the `fuc`, the event pointer should be interpreted as the opaque device defined address of the `dvc`. The `dvc` would have been given in `if_init_controller` and the device is required to record that information and dispatch `if_event` messages to the matching `dvc`.
 
 ####`dvc` => `fuc`
-When an event is sent from `dvc`, then `fuc` calls an appropriate `on` handler to manage the event. If there are no `on` handlers that can take the event, the event is passed to the `event_gw` (event gateway) of the `controller_info` structure [See datatypes](./datatypes.md) for more information on the structure. If `event_gw` is undefined, then the event is ignored.
+When an event is sent from `dvc`, then `fuc` calls an appropriate `on` handler to manage the event. If there are no `on` handlers that can take the
+event, the event is passed to the `event_gw` (event gateway) of the `controller_info` structure [See datatypes](./datatypes.md) for more information
+on the structure. If `event_gw` is `null`, then the event is ignored.
 
 ###Writing a `flok user controller (fuc)`
 Let's write a `fuc` controller for a view that has 2 tabs and a content area.

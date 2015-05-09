@@ -18,7 +18,9 @@ instead.
   * `get_req(owner_tp, url, params, callback)` - Request some RESTFUL get request.  The callback receives `(info)` with a data payload. Will retry until successful, will never fail. The request will be abandoned if the owner object no longer exists.
 
 ##Controllers
-  * `_embed(vc_name, sp, context)` - Embed a view controller in a surface-pointer. Following the rules of the ui device, embedded to a sp of 0 is the master root view. Returns base pointer
+  * `_embed(vc_name, sp, context, event_gw)` - Embed a view controller in a surface-pointer. Following the rules of the ui device, embedded to a sp of
+      0 is the master root view. Returns base pointer. `event_gw` is a pointer to a `vc`. If it is null, then any events coming in will not be sent to
+      somewhere else if they do not match any 'on' for the current action.
 
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
