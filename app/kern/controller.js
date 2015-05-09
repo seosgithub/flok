@@ -15,9 +15,11 @@ function _embed(vc_name, sp, context) {
   //Actions
   var actions = cte.actions;
 
+
   //Construct the view
   var base = tels(spots.length);
   SEND("main", "if_init_view", vname, context, base, spots);
+  SEND("main", "if_controller_init", base, vc_name, context);
   SEND("main", "if_attach_view", base, sp);
 
   //TODO: choose action
