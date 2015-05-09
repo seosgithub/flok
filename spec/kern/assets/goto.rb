@@ -4,11 +4,11 @@ controller :my_controller do
 
   action :my_action do
     on_entry %{
-      EMBED("my_controller2", "hello", {});
+      Embed("my_controller2", "hello", {});
     }
 
     on "test_event", %{
-      GOTO("my_other_action")
+      Goto("my_other_action")
     }
   end
 

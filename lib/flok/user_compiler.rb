@@ -96,9 +96,9 @@ module Flok
 
       text.split("\n").each do |l|
         #EMBED(vc_name, spot_name, context) macro
-        if l =~ /EMBED/
+        if l =~ /Embed/
           l.strip!
-          l.gsub!(/EMBED\(/, "")
+          l.gsub!(/Embed\(/, "")
           l.gsub! /\)$/, ""
           l.gsub! /\);$/, ""
           o = l.split(",").map{|e| e.strip}
@@ -119,9 +119,9 @@ module Flok
           }
           out.puts res
         #GOTO(action_name)
-        elsif l =~ /GOTO/
+        elsif l =~ /Goto/
           l.strip!
-          l.gsub!(/GOTO\(/, "")
+          l.gsub!(/Goto\(/, "")
           l.gsub! /\)$/, ""
           l.gsub! /\);$/, ""
           o = l.split(",").map{|e| e.strip}
@@ -135,7 +135,8 @@ module Flok
             //Remove all views
             var embeds = __info__.embeds;
             for (var i = 0; i < __info__.embeds.length; ++i) {
-              main_q.push([1, "if_free_view", embeds[i]]);
+              //Free +1 because that will be the 'main' view
+              main_q.push([1, "if_free_view", embeds[i]+1]);
             }
 
             __info__.embeds = [];

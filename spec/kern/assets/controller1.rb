@@ -4,7 +4,7 @@ controller :my_controller do
 
   action :my_action do
     on_entry %{
-      EMBED("my_sub_controller", "hello", {});
+      Embed("my_sub_controller", "hello", {});
     }
 
     on "hello", %{
