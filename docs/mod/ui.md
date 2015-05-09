@@ -35,7 +35,6 @@ This driver controls two things called a **view** and a **spot**.
 Here is an example for the `chrome` driver of a live view built from two views.
 ![](../images/view_and_spot.png)
 
-
-
 ###A note on free
 If `free` is called on a view, that view is always already detached. If a *view* receives `free`, that *view* must call `free` on all of it's children before itself.
+Additionally, any controllers bound to the *view* via `if_controller_init` must be destroyed as well.

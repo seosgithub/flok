@@ -25,8 +25,9 @@ RSpec.describe "kern:controller_spec" do
 
     #base = ctx.eval("base")
 
-    #@driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
-    #@driver.mexpect("if_attach_view", [base, 0])
+    #@driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    #@driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
+    #@driver.mexpect("if_attach_view", [base+1, 0])
   #end
 
   #it "Can initiate a controller via _embed and have a controller_info located in tel table" do
@@ -225,28 +226,28 @@ RSpec.describe "kern:controller_spec" do
     #expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
   #end
 
-  it "Does tear down the old embedded view from the embedded view controller when switching actions" do
-    #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
+  #it "Does tear down the old embedded view from the embedded view controller when switching actions" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
 
-    #Run the embed function
-    ctx.eval %{
-      //Call embed on main root view
-      base = _embed("my_controller", 0, {});
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {});
 
-      //Drain queue with test event
-      int_dispatch([3, "int_event", base, "test_event", {}]);
-    }
+      #//Drain queue with test event
+      #int_dispatch([3, "int_event", base, "test_event", {}]);
+    #}
 
-    base = ctx.eval("base")
+    #base = ctx.eval("base")
 
-    #Expect that a view was embedded inside a view at this point
-    @driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
-    @driver.mexpect("if_attach_view", [base, 0])
-    @driver.mexpect("if_init_view", ["test_view2", {}, base+3, ["main"]])
-    @driver.mexpect("if_attach_view", [base+3, base+1])
+    ##Expect that a view was embedded inside a view at this point
+    #@driver.mexpect("if_init_view", ["test_view", {}, base, ["main", "hello", "world"]])
+    #@driver.mexpect("if_attach_view", [base, 0])
+    #@driver.mexpect("if_init_view", ["test_view2", {}, base+3, ["main"]])
+    #@driver.mexpect("if_attach_view", [base+3, base+1])
 
-    #And then the request to switch views with the 'test_event' removed the second view
-    @driver.mexpect("if_free_view", [base+3])
-  end
+    ##And then the request to switch views with the 'test_event' removed the second view
+    #@driver.mexpect("if_free_view", [base+3])
+  #end
 end

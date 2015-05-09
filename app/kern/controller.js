@@ -15,12 +15,16 @@ function _embed(vc_name, sp, context) {
   //Actions
   var actions = cte.actions;
 
+  //Allocate a list of tels, the base is the actual 'vc', followed by
+  //the 'main' spot, and so on
+  var base = tels(spots.length+1);
 
-  //Construct the view
-  var base = tels(spots.length);
-  SEND("main", "if_init_view", vname, context, base, spots);
-  SEND("main", "if_controller_init", base, vc_name, context);
-  SEND("main", "if_attach_view", base, sp);
+  spots.unshift("vc") //Borrow spots array to place 'vc' in the front => ['vc', 'main', ...]
+    //Initialize the view at base+1 (base+0 is vc), and the vc at base+0
+    SEND("main", "if_init_view", vname, context, base+1, spots);
+    SEND("main", "if_controller_init", base, base+1, vc_name, context); 
+    SEND("main", "if_attach_view", base+1, sp);
+  spots.shift() //Un-Borrow spots array (it's held in a constant struct, so it *cannot* change)
 
   //TODO: choose action
   var action = Object.keys(cte.actions)[0];
