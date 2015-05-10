@@ -130,6 +130,7 @@ module Flok
 
           #Switch the actions, reset embeds, and call on_entry
           res = %{
+            var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
             //Remove all views
@@ -138,6 +139,12 @@ module Flok
               //Free +1 because that will be the 'main' view
               main_q.push([1, "if_free_view", embeds[i]+1]);
             }
+
+            //Send off event for action change
+            main_q.push([3, "if_event", __base__, "action", {
+              from: old_action,
+              to: "#{action_name}"
+            }]);
 
             __info__.embeds = [];
             __info__.cte.actions[__info__.action].on_entry(__base__)

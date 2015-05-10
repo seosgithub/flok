@@ -54,10 +54,6 @@ function if_attach_view(vp, p) {
 
   $view.show();
   $view.appendTo($target);
-  console.log(vp);
-  console.log(p);
-  console.log($view);
-  console.log($target);
 }
 
 function if_free_view(vp) {
