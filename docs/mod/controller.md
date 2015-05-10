@@ -1,7 +1,11 @@
 #Controller (controller.js)
 
+### Depends
+  * ui.js - The controller module depends on the `ui` module as it passes a pointer to a view in `if_controller_init`
+
 ### Functions
 `if_controller_init(bp, rvp, name, info)` - Initialize a controller that manages the view at `rvp` and contains the address `bp`. All events are sent to `bp` should be handled appropriatlely.
+The `rvp` pointer will always be an initialized (but not attached) view. When receiving an action, the view is guaranteed to be attached at that time.
 
 ### Spec helpers
 
@@ -18,11 +22,12 @@ special meanings based on the `name` field of the event:
   2. Everything else is a `custom event` and must be handeled accordingly
 
 ### Spec messages (driver side)
-`spec_controller_list` - Sends a message back that contains an array of controller base pointers that were initialized via `if_controller_init`
+`if_spec_controller_init` - Setup anything necessary for the spec tests, this may include adding prototype controller js (for chrome), etc
+`if_spec_controller_list` - Sends a message back called `spec` that contains an array of controller base pointers that were initialized via `if_controller_init`
 but have not been destroyed.
 
 ### Spec fixtures (driver side)
 There should be a special controller called `__test__` that can be initialized and should respond in the following ways when it receives an action and
 event:
-  Sends a message back containing `{from: from, to: to, info: info}` when an action is received
-  Sends a message back containing a hash that looks like `{name: name, info: event}` when a custom event is received
+  Sends a message back called `spec` containing `{from: from, to: to, info: info}` when an action is received
+  Sends a message back called `spec` containing a hash that looks like `{name: name, info: event}` when a custom event is received

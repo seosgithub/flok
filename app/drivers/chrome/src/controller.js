@@ -21,3 +21,25 @@ function if_controller_init(bp, rvp, name, info) {
     cinstances[bp].init(info);
   }
 }
+
+//Spec helpers
+function if_spec_controller_list() {
+  int_dispatch([1, "spec", Object.keys(cinstances).map(parseInt)]);
+}
+
+function if_spec_controller_init() {
+  var TestController = function(bp, $sel) {
+    //Setup your object
+    this.init = function(info) {
+    }
+
+    //Action has changed
+    this.action = function(from, to) {
+    }
+  }
+
+  //Register the new controller
+  $(document).ready(function() {
+    regController("__test__", TestController);
+  });
+}
