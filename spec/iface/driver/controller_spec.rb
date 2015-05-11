@@ -37,7 +37,7 @@ RSpec.describe "iface:driver:controller" do
     bp = 332
     init_controller(bp)
 
-    #List controllers available
+    List controllers available
     @pipe.puts [[0, 0, "if_spec_controller_list"]].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", [bp]], 6.seconds)
   end
@@ -49,7 +49,7 @@ RSpec.describe "iface:driver:controller" do
     #Send an action event
     to_action = "test_action"
     send_event(bp, "action", {:from => nil, :to => to_action})
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", {"from" => nil, "to" => to_action}], 6.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "action_rcv", {"from" => nil, "to" => to_action}], 6.seconds)
   end
 
   it "Does send back a message for the test controller custom action" do
@@ -60,7 +60,7 @@ RSpec.describe "iface:driver:controller" do
     custom_name = SecureRandom.hex
     custom_info = {"info" => SecureRandom.hex}
     send_event(bp, custom_name, custom_info)
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", {"name" => custom_name, "info" => custom_info}], 6.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "custom_rcv", {"name" => custom_name, "info" => custom_info}], 6.seconds)
   end
 
   it "When a view is deleted that was associated with a view controller, the view controller should no longer exist" do

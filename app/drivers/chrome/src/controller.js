@@ -14,7 +14,7 @@ FlokController = function() {
 
   //Send a message
   this.send = function(name, info) {
-    int_dispatch([1, name, info]);
+    int_dispatch([3, "int_event", this.bp, name, info]);
   }
 
   //Do nothing by default
@@ -65,11 +65,11 @@ function if_spec_controller_init() {
     this.base = FlokController; this.base();
 
     this.action = function(from, to) {
-      this.send("spec", {from: from, to:to});
+      this.send("action_rcv", {from: from, to:to});
     }
 
     this.event = function(name, info) {
-      this.send("spec", {name:name, info:info})
+      this.send("custom_rcv", {name:name, info:info})
     }
   }
 
