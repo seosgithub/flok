@@ -61,15 +61,17 @@ function if_free_view(vp) {
 
   //Find any child view vps
   var cvps = $.makeArray($view.find(".view").map(function() {
-    return parseInt($(this).attr("data-tp"));
+    return parseInt($(this).attr("data-tp"), 10);
   }));
+
+  console.error($("body").html());
 
   //Destroy all
   for (var i = 0; i < cvps.length; ++i) {
     delete if_ui_tp_to_selector[cvps[i]];
 
     //controllers are always at bp, bp+1 is always  a view
-    delete cinstances(cvps[i]-1);
+    delete cinstances[cvps[i]-1];
   }
 
   $view.remove();

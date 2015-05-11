@@ -46,6 +46,10 @@ You create a constructor for a controller
 var TestController = function() {
   this.base = FlokController; this.base();
 
+  this.init = function() {
+    //You have access to info in here
+  }
+
   this.action = function(from, to) {
     this.send("spec", {from: from, to:to});
   }

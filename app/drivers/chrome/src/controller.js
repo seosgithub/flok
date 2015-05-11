@@ -48,7 +48,6 @@ function if_controller_init(bp, rvp, name, info) {
     var c = new controller();
     c.__initialize__(bp, $sel, info);
     cinstances[bp] = c;
-
     cinstances[bp].init();
   }
 }
@@ -56,7 +55,11 @@ function if_controller_init(bp, rvp, name, info) {
 //Spec helpers
 //List all active controllers
 function if_spec_controller_list() {
-  int_dispatch([1, "spec", Object.keys(cinstances).map(parseInt)]);
+  var keys = Object.keys(cinstances).map(function(item) {
+    return parseInt(item, 10);
+  });
+
+  int_dispatch([1, "spec", keys]);
 }
 
 //Spec init controller
