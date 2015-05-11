@@ -1,3 +1,32 @@
+//The prototype controller
+//////////////////////////////////////////////////////////////////////////////////////
+FlokController = function() {
+  //Called internally when the controller is initialized from a if_controller_init
+  this.__initialize__ = function(bp, $sel, info) {
+    this.bp = bp;
+    this.$ = $sel.find;
+    this.info = info;
+  }
+
+  //User defined init function
+  this.init = function() {
+  }
+
+  //Send a message
+  this.send = function(name, info) {
+    int_dispatch([1, name, info]);
+  }
+
+  //Do nothing by default
+  this.action = function(from, to) {
+  }
+
+  //Do nothing by default
+  this.event = function(name, info) {
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
 //Controller works with the ui module and segue module
 reg_controllers = {};
 
@@ -16,25 +45,31 @@ function if_controller_init(bp, rvp, name, info) {
 
     //Get selector
     var $sel = if_ui_tp_to_selector[rvp];
-    cinstances[bp] = new controller(bp, $sel);
+    var c = new controller();
+    c.__initialize__(bp, $sel, info);
+    cinstances[bp] = c;
 
-    cinstances[bp].init(info);
+    cinstances[bp].init();
   }
 }
 
 //Spec helpers
+//List all active controllers
 function if_spec_controller_list() {
   int_dispatch([1, "spec", Object.keys(cinstances).map(parseInt)]);
 }
 
+//Spec init controller
 function if_spec_controller_init() {
-  var TestController = function(bp, $sel) {
-    //Setup your object
-    this.init = function(info) {
+  var TestController = function() {
+    this.base = FlokController; this.base();
+
+    this.action = function(from, to) {
+      this.send("spec", {from: from, to:to});
     }
 
-    //Action has changed
-    this.action = function(from, to) {
+    this.event = function(name, info) {
+      this.send("spec", {name:name, info:info})
     }
   }
 
@@ -43,3 +78,7 @@ function if_spec_controller_init() {
     regController("__test__", TestController);
   });
 }
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//Controller events are handled in if_event.js
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

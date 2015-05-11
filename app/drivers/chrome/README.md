@@ -43,18 +43,21 @@ You may add surface prototypes like so under your #surface-prototypes divider
 You create a constructor for a controller
 ```js
 //Constructor for a controller that will automatically bind to a surface with the attribute 'data-name=tab_controller'
-var TabController = function(bp, $sel) {
-  //Setup your object
-  this.init = function(info) {
+var TestController = function() {
+  this.base = FlokController; this.base();
+
+  this.action = function(from, to) {
+    this.send("spec", {from: from, to:to});
   }
 
-  //Action has changed
-  this.action = function(from, to) {
+  this.event = function(name, info) {
+    this.send("spec", {name:name, info:info})
   }
 }
 
 //Register the new controller
 $(document).ready(function() {
-  regController("tab_container", TabController);
+  regController("__test__", TestController);
 });
+
 ```
