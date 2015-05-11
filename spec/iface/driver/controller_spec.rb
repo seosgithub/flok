@@ -62,4 +62,16 @@ RSpec.describe "iface:driver:controller" do
     send_event(bp, custom_name, custom_info)
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", {"name" => custom_name, "info" => custom_info}], 6.seconds)
   end
+
+  it "When a view is deleted that was associated with a view controller, the view controller should no longer exist" do
+    bp = 332
+    init_controller(bp)
+
+    #Signal destruction of view (bp+1)
+    @pipe.puts [[0, 1, "if_free_view", bp+1]].to_json
+
+    #List controllers available
+    @pipe.puts [[0, 0, "if_spec_controller_list"]].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", []], 6.seconds)
+  end
 end

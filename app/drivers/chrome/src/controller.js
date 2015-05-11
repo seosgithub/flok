@@ -82,3 +82,5 @@ function if_spec_controller_init() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //Controller events are handled in if_event.js
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//Controller destruction is in ui.js under 'delete cinstances'

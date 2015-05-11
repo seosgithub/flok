@@ -64,12 +64,19 @@ function if_free_view(vp) {
     return parseInt($(this).attr("data-tp"));
   }));
 
+  //Destroy all
   for (var i = 0; i < cvps.length; ++i) {
     delete if_ui_tp_to_selector[cvps[i]];
+
+    //controllers are always at bp, bp+1 is always  a view
+    delete cinstances(cvps[i]-1);
   }
 
   $view.remove();
   delete if_ui_tp_to_selector[vp];
+
+  //controllers are always at bp, bp+1 is always  a view
+  delete cinstances[vp-1];
 }
 
 //Spec related////////////////////////////////////////////////
