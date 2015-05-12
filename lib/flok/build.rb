@@ -20,6 +20,17 @@ module Flok
     File.write(output_path, out)
   end
 
+  def self.src_glob_r type, dir_path, output_path
+    out = ""
+    FileUtils.mkdir_p(dir_path)
+    FileUtils.mkdir_p(File.dirname(output_path))
+    Dir[File.join(dir_path, "**/*.#{type}")].each do |f|
+      out << File.read(f) << "\n"
+    end
+
+    File.write(output_path, out)
+  end
+
   #Build the whole world for a certain platform
   def self.build_world build_path, platform
     #What platform are we working with?

@@ -22,6 +22,22 @@ end
 
 #Make sure it runs
 task :spec do
+  #Build the driver
+  ENV['BUILD_PATH'] = "../../../products/chrome/drivers/"
+  system('rake build')
+
+  Dir.chdir "../../../products/chrome/drivers/" do
+    #Copy chrome.js and spec files into glob folder
+    FileUtils.mkdir_p "./glob"
+    FileUtils.cp "chrome.js", "./glob"
+    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/"), "./glob/spec.js")
+
+    #Compile into one chrome-test.js file
+    Flok.src_glob("js", "./glob/", "chrome-test.js")
+
+    #Now run (it already includes the spec runners in the spec folder)
+    system('phantomjs chrome-test.js');
+  end
 end
 
 #Establish an environment with a pipe assuming the world is built

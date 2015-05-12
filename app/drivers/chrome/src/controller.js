@@ -4,8 +4,12 @@ FlokController = function() {
   //Called internally when the controller is initialized from a if_controller_init
   this.__initialize__ = function(bp, $sel, info) {
     this.bp = bp;
-    this.$ = $sel.find;
     this.info = info;
+    this.$_sel = $sel;
+  }
+
+  this.$sel = function(str) {
+    return $(str, this.$_sel).not(".spot *")
   }
 
   //User defined init function
@@ -48,6 +52,7 @@ function if_controller_init(bp, rvp, name, info) {
     var c = new controller();
     c.__initialize__(bp, $sel, info);
     cinstances[bp] = c;
+
     cinstances[bp].init();
   }
 }
