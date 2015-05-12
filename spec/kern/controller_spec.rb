@@ -333,4 +333,30 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
     @driver.mexpect("if_event", [base, "action", {"from" => "my_action", "to" => "my_other_action"}])
   end
+
+  #It can instate a controller that uses a def in the controller inside an action to define an event handler
+  it "Can initiate a controller via _embed and def a macro that can be used inside the action to define an event" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller_def.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      //Drain queue with test event
+      int_dispatch([3, "int_event", base, "test_event", {}]);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "content"]])
+    @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
+    @driver.mexpect("if_attach_view", [base+1, 0])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+    @driver.mexpect("if_event", [base, "action", {"from" => "my_action", "to" => "my_other_action"}])
+  end
 end

@@ -23,8 +23,18 @@ controller "tab_controller" do
   view "tab_container"
   spaces "content"
 
+  #You can also define macros for shared action traits
+  macro "my_macro" do
+    on "shared_clicked" do
+      Goto("home")
+    end
+  end
+
   #The home tab
   action "home" do
+    #Macros can be called via their name
+    my_macro
+
     on_entry %{
       Embed("home_controller", "content", {});
     }

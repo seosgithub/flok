@@ -159,20 +159,38 @@ module Flok
 
       return out.string
     end
+
+    #You can def things in controller and use them as macros inside actions
+    #But these defs. live in the UserCompilerController instance and we need
+    #to delegate these calls to the controller that are not available in the action
+    def method_missing method, *args, &block
+      if macro = @controller.macros[method]
+        #Call the macro in our context
+        self.instance_eval(&macro)
+      else
+        raise "No macro found named: #{method}"
+      end
+    end
   end
 
   class UserCompilerController
-    attr_accessor :root_view, :name, :spots
+    attr_accessor :root_view, :name, :spots, :macros
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
       @spots = ['main']
+      @macros = {}
 
       self.instance_eval(&block)
     end
 
     def view name
       @root_view = name
+    end
+
+    #Create an action macro
+    def macro name, &block
+      @macros[name] = block
     end
 
     #Names of spots
