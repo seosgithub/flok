@@ -9,7 +9,14 @@ FlokController = function() {
   }
 
   this.$sel = function(str) {
-    return $(str, this.$_sel).not(".spot *")
+    //Oh boy this sucked to come up with...
+    //Do not allow selection of descendents of a spot
+    //Read it as "Select all sub elements matching query
+    //as long as they are not a descedente of a spot of this
+    //current selector (spots are in spots, and we might be 
+    //globally inside a spot, but the selector should ignore
+    //that and look for local spots inside the current selector)
+    return $(str, this.$_sel).not($(".spot *", this.$_sel));
   }
 
   //User defined init function
@@ -70,14 +77,14 @@ function if_spec_controller_list() {
 //Spec init controller
 function if_spec_controller_init() {
   var TestController = function() {
-    this.base = FlokController; this.base();
+    this.base = FlokController; this.base(); self = this;
 
-    this.action = function(from, to) {
-      this.send("action_rcv", {from: from, to:to});
+    self.action = function(from, to) {
+      self.send("action_rcv", {from: from, to:to});
     }
 
-    this.event = function(name, info) {
-      this.send("custom_rcv", {name:name, info:info})
+    self.event = function(name, info) {
+      self.send("custom_rcv", {name:name, info:info})
     }
   }
 

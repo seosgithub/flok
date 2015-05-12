@@ -44,18 +44,19 @@ You create a constructor for a controller
 ```js
 //Constructor for a controller that will automatically bind to a surface with the attribute 'data-name=tab_controller'
 var TestController = function() {
-  this.base = FlokController; this.base();
+  this.base = FlokController; this.base(); var self = this;
 
-  this.init = function() {
+  self.init = function() {
     //You have access to info in here
   }
 
-  this.action = function(from, to) {
-    this.send("spec", {from: from, to:to});
+  self.action = function(from, to) {
+    var myH1Tag = self.$sel("h1");  //Example of a jQuery selector
+    self.send("spec", {from: from, to:to});
   }
 
-  this.event = function(name, info) {
-    this.send("spec", {name:name, info:info})
+  self.event = function(name, info) {
+    self.send("spec", {name:name, info:info})
   }
 }
 

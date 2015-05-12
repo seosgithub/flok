@@ -8,10 +8,10 @@ $(document).ready(function() {
 
     //Create a test controller
     var TestController = function() {
-      this.base = FlokController; this.base();
+      this.base = FlokController; this.base(); self = this;
 
-      this.init = function() {
-        var matches = this.$sel("#root");
+      self.init = function() {
+        var matches = self.$sel("#root");
         assert.equal(matches.length, 0, "Matches are 0");
         done();
       }
@@ -36,10 +36,10 @@ $(document).ready(function() {
 
     //Create a test controller
     var TestController = function() {
-      this.base = FlokController; this.base();
+      this.base = FlokController; this.base(); self = this;
 
-      this.init = function() {
-        var matches = this.$sel("#hello");
+      self.init = function() {
+        var matches = self.$sel("#hello");
         assert.equal(matches.length, 1, "Matches are 1");
         done();
       }
@@ -66,10 +66,10 @@ $(document).ready(function() {
 
     //Create a test controller
     var TestController = function() {
-      this.base = FlokController; this.base();
+      this.base = FlokController; this.base(); self = this;
 
-      this.init = function() {
-        var matches = this.$sel("h1");
+      self.init = function() {
+        var matches = self.$sel("h1");
         assert.equal(matches.length, 0, "Matches are 0");
         done();
       }
@@ -98,10 +98,10 @@ $(document).ready(function() {
 
     //Create a test controller
     var TestController = function() {
-      this.base = FlokController; this.base();
+      this.base = FlokController; this.base(); self = this;
 
-      this.init = function() {
-        var matches = this.$sel(".spot");
+      self.init = function() {
+        var matches = self.$sel(".spot");
         assert.equal(matches.length, 1, "Matches are 1");
         done();
       }
@@ -120,6 +120,41 @@ $(document).ready(function() {
 
     //Call the controllers init with a forged selector
     $sel = $("#test");
+    var c = new TestController();
+    c.__initialize__(0, $sel, {});
+    c.init();
+  });
+
+  QUnit.test("Controller selector can select children that aren't in a spot but a sub-controller of a spot", function(assert) {
+    var done = assert.async();
+
+    //Create a test controller
+    var TestController = function() {
+      this.base = FlokController; this.base(); self = this;
+
+      self.init = function() {
+        var matches = self.$sel("h1");
+        assert.equal(matches.length, 1, "Matches are 1");
+        done();
+      }
+    }
+
+    //Insert some HTML
+    $("body").html("                      \
+      <div id='root'>                     \
+        <div id='test'>                   \
+          <div class='spot' id='hello'>   \
+            <div id='test2'>              \
+              <h1>Title</h1>              \
+            </div>                        \
+          </div>                          \
+        </div>                            \
+      </div>                              \
+    ");
+
+
+    //Call the controllers init with a forged selector
+    $sel = $("#test2");
     var c = new TestController();
     c.__initialize__(0, $sel, {});
     c.init();
