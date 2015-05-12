@@ -15,7 +15,8 @@ Controllers are bound to the lifetime of the view contained at `rvp`.  When `if_
 ### Events
 All controller information is passed through events via `if_event`. When a controller receives an event, some events have
 special meanings based on the `name` field of the event:
-  1. `action` - The action has changed (on entered)
+  1. `action` - The action has changed (on entered). This is also called after if_controller_init with `null`. Action is **always** called with an
+  attached view. 
     * `from` - A string that represents the 'from' action we came from, it may be null
     * `to`   - A string that represents the 'to' action we are going to, it is never null
     * `info` - A hash with information for the new action

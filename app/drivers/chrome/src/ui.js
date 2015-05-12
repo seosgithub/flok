@@ -64,8 +64,6 @@ function if_free_view(vp) {
     return parseInt($(this).attr("data-tp"), 10);
   }));
 
-  console.error($("body").html());
-
   //Destroy all
   for (var i = 0; i < cvps.length; ++i) {
     delete if_ui_tp_to_selector[cvps[i]];

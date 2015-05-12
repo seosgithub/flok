@@ -9,7 +9,7 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:controller_spec" do
   include_context "kern"
 
- #Can initialize a controller via embed and have the correct if_dispatch messages
+  #Can initialize a controller via embed and have the correct if_dispatch messages
   it "Can initiate a controller via _embed" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
@@ -28,6 +28,7 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
   end
 
   it "Can initiate a controller via _embed and have a controller_info located in tel table" do
@@ -122,7 +123,11 @@ RSpec.describe "kern:controller_spec" do
     #the next view controlelr and finally main view entry (5th)
     @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_sub_controller", {}])
-    @driver.mexpect("if_attach_view", [base+5, base+1])
+    @driver.mexpect("if_attach_view", [base+5, base+2])
+
+    #Now expect actions in reverse order up hierarchy
+    @driver.mexpect("if_event", [base+4, "action", {"from" => nil, "to" => "my_action"}])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
   end
 
   it "can embed a controller within a controller and allocate the correct view controller instance" do
@@ -258,7 +263,11 @@ RSpec.describe "kern:controller_spec" do
     #Embed my_controller2 in action 'my_action'
     @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_controller2", {}])
-    @driver.mexpect("if_attach_view", [base+5, base+1])
+    @driver.mexpect("if_attach_view", [base+5, base+2])
+
+    #Expect action start
+    @driver.mexpect("if_event", [base+4, "action", {"from" => nil, "to" => "my_action"}])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
 
     #And then the request to switch views with the 'test_event' removed the second view
     @driver.mexpect("if_free_view", [base+5])
@@ -321,6 +330,7 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
-    @driver.mexpect("if_event", [0, "action", {"from" => "my_action", "to" => "my_other_action"}])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+    @driver.mexpect("if_event", [base, "action", {"from" => "my_action", "to" => "my_other_action"}])
   end
 end

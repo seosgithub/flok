@@ -27,4 +27,9 @@ instead.
 `PLATFORM` - The platform that this kernel was compiled with
 
 #Messaging
-`SEND(queue_index, message_name, *params)` - Queue a message to be sent out. This is a macro, careful how you type it, and it should be on one line!
+`SEND(queue_index, message_name, *params)` - Queue a message to be sent out. This is a macro, you must not put any characters beyond quotes and
+variables in here.  If you need to pass a hash literal, array literal, etc, please assign the variable *before* you put it in here like
+```js
+var payload = {from: null, to: action};
+SEND("main", "if_event", base, "action", payload);
+```

@@ -19,15 +19,15 @@ function _embed(vc_name, sp, context, event_gw) {
   //the 'main' spot, and so on
   var base = tels(spots.length+1);
 
+  //TODO: choose action
+  var action = Object.keys(cte.actions)[0];
+
   spots.unshift("vc") //Borrow spots array to place 'vc' in the front => ['vc', 'main', ...]
     //Initialize the view at base+1 (base+0 is vc), and the vc at base+0
     SEND("main", "if_init_view", vname, context, base+1, spots);
     SEND("main", "if_controller_init", base, base+1, vc_name, context); 
     SEND("main", "if_attach_view", base+1, sp);
   spots.shift() //Un-Borrow spots array (it's held in a constant struct, so it *cannot* change)
-
-  //TODO: choose action
-  var action = Object.keys(cte.actions)[0];
 
   //Create controller information struct
   var info = {
@@ -46,6 +46,10 @@ function _embed(vc_name, sp, context, event_gw) {
 
   //Register the event handler callback
   reg_evt(base, controller_event_callback);
+
+  //Notify action
+  var payload = {from: null, to: action};
+  SEND("main", "if_event", base, "action", payload);
 
   return base;
 }
