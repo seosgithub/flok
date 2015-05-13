@@ -433,4 +433,46 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
     @driver.mexpect("if_event", [base, "test_event", {"secret" => secret}])
   end
+
+  it "makes the child's event_gw the parent controller" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/event_gw.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {secret: "#{secret}"}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval("base")
+    sub_event_gw = ctx.eval("sub_event_gw")
+
+    expect(sub_event_gw).to eq(base)
+  end
+
+
+  #Can have a sub-controller Raise an event and for the parent controller to receive this
+  it "Can have a sub-controller Raise an event and for the parent controller to receive this" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/raise_event.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {secret: "#{secret}"}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #This is set when the parent controller receives an event
+    raise_res_context = JSON.parse(ctx.eval("JSON.stringify(raise_res_context)"))
+
+    expect(raise_res_context).to eq({"secret" => "#{secret}", "hello" => "world"})
+  end
 end

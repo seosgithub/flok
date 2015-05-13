@@ -6,6 +6,7 @@ Client API covers controller action event handlers.
   * Goto(action_name) - Change actions
   * Request(service_name, info, event_cb_name) - Initiate a service.  See [Services](./services.md) for more info.
   * Send(event_name, info) - Send a custom event on the main queue.
+  * Raise(event_name, info) - Will send an event to the parent view controller (and it will bubble up, following `event_gw` which is set in `Embed` as the parent controller
 
 ### Controller Event Handlers
   * Variables

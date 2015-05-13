@@ -41,11 +41,12 @@ function _embed(vc_name, sp, context, event_gw) {
   //Register controller base with the struct, we already requested base
   tel_reg_ptr(info, base);
 
-  //Call the on_entry function with the base address
-  cte.actions[action].on_entry(base);
 
   //Register the event handler callback
   reg_evt(base, controller_event_callback);
+
+  //Call the on_entry function with the base address
+  cte.actions[action].on_entry(base);
 
   //Notify action
   var payload = {from: null, to: action};

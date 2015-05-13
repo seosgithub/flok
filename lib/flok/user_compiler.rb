@@ -132,7 +132,20 @@ module Flok
           out << %{
            main_q.push([3, "if_event", __base__, "#{event_name}", #{info}])
           }
+        #Raise(event_name, info)
+        elsif l =~ /Raise/
+          l.strip!
+          l.gsub!(/Raise\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
 
+          event_name = o.shift
+          info = o.shift
+
+          out << %{
+            int_event(__info__.event_gw, #{event_name}, #{info});
+          }
         #GOTO(action_name)
         elsif l =~ /Goto/
           l.strip!
@@ -184,8 +197,6 @@ module Flok
           out.puts l
         end
       end
-
-      #puts out.string
 
       return out.string
     end
