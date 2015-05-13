@@ -47,7 +47,7 @@ var TestController = function() {
   this.base = FlokController; this.base(); var self = this;
 
   self.init = function() {
-    //You have access to info in here
+    //You have access to 'context' in here
   }
 
   self.action = function(from, to) {

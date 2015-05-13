@@ -2,9 +2,9 @@
 //////////////////////////////////////////////////////////////////////////////////////
 FlokController = function() {
   //Called internally when the controller is initialized from a if_controller_init
-  this.__initialize__ = function(bp, $sel, info) {
+  this.__initialize__ = function(bp, $sel, context) {
     this.bp = bp;
-    this.info = info;
+    this.context = context;
     this.$_sel = $sel;
   }
 
