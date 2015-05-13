@@ -1,6 +1,6 @@
 #Kernel API
 
-##Telepointer
+##Telepointer (Mapped I/O)
   * `tels(n)` - Returns one number that represents the base index of the telepointer.  See [Messaging](Messaging.md) for details on telepointers.
   * `tel_reg(f)` - Returns a number that represents the base pointer of a function callback.
   * `tel_del(n)` - Delete a telepointer at some index. Does nothing if not registered with something.
