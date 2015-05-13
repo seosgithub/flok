@@ -61,6 +61,7 @@ end
   * **Macros**
     * `Embed(vc_name, spot_name, context)` - Embed a `fuc` named **vc_name** into spot named **spot_name**. The initialized view controller should be passed **context**.
     * `Goto(action_name)` - Goto an action with a name within *this* `fuc`. Will free any views that were embedded.
+    * `Request(na)`
 
 ###`fuc` registrations
 When a `fuc` is initialized, there are various things that are configured that must be cleaned up when the `fuc` is torn down.

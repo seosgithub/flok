@@ -3,14 +3,13 @@ Services are entirely built into the Flok kernel. If you need custom actions for
 you must adhere to the services API.
 
 ###Request
-You initiate a service request via `ServiceRequest`. This may be called in either the general kernel API or a controller. This macro takes several
+You initiate a service request via `ServiceRequest`. This may be called only in the controller at this time. This macro takes several parameters
 parameters, all of which must either be strict variable names or double quoted strings:
 
-  * `ServiceRequest(name, info, ecp, event_name)`
+  * `Request(name, info, event_name)`
     * `name` - The name of the service you are making a request from
-    * `ecp` - The pointer for event callbacks
-    * `event_name` - The name of the event when a callback occurs
     * `info` - The information to give the service
+    * `event_name` - The name of the event when a callback occurs
 
 Callbacks are handled by redirecting them through the [event](./mod/event.md) interface `int_event`.  You should register with `reg_evt` to receive
 events back from a service. The request itself is not made via the event system, only the response is.  This may seem a little odd because normally

@@ -15,7 +15,7 @@ module Flok
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
 
-      puts @src
+      #puts @src
 
       return @src
     end
@@ -155,7 +155,7 @@ module Flok
         end
       end
 
-      puts out.string
+      #puts out.string
 
       return out.string
     end
