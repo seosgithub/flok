@@ -3,7 +3,7 @@ Services are entirely built into the Flok kernel. If you need custom actions for
 you must adhere to the services API.
 
 ###Request
-You initiate a service request via `ServiceRequest`. This may be called only in the controller at this time. This macro takes several parameters
+You initiate a service request via `Request`. This may be called only in the controller at this time. This macro takes several parameters
 parameters, all of which must either be strict variable names or double quoted strings:
 
   * `Request(name, info, event_name)`
@@ -46,7 +46,7 @@ service("rest") do
 
   on_request %{
     #Code that handles a payload goes here.
-    #You have access to `info`, `ep`, and `ename` which was given in the ServiceRequest macro
+    #You have access to `info`, `ep`, and `ename` which was given in the Request macro
 
     //Create a GET request that will respond to the telepointer
     var tp = tel_reg(service_rest_callback);

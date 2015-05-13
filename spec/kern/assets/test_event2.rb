@@ -9,7 +9,7 @@ controller :my_controller do
 
     on "test_event", %{
       test_action_called_base = __base__;
-      test_action_called_params = __params__;
+      test_action_called_params = params;
     }
   end
 end

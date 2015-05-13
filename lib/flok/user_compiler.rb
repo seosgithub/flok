@@ -105,7 +105,7 @@ module Flok
 
           vc_name = o.shift.gsub(/"/, "")
           spot_name = o.shift.gsub(/"/, "")
-          context = o.shift.gsub(/"/, "")
+          context = o.shift
 
           #Get the spot 
           spot_index = @controller.spots.index(spot_name)
@@ -114,10 +114,25 @@ module Flok
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
           res = %{
-            var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, {}, __base__);
+            var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
             __info__.embeds.push(ptr);
           }
           out.puts res
+        #Send(event_name, info)
+        elsif l =~ /Send/
+          l.strip!
+          l.gsub!(/Send\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
+
+          event_name = o.shift.gsub(/"/, "")
+          info = o.shift
+
+          out << %{
+           main_q.push([3, "if_event", __base__, "#{event_name}", #{info}])
+          }
+
         #GOTO(action_name)
         elsif l =~ /Goto/
           l.strip!
@@ -150,6 +165,21 @@ module Flok
             __info__.cte.actions[__info__.action].on_entry(__base__)
           }
           out.puts res
+        #Request(service_name, payload, event_name_cb)
+        elsif l =~ /Request/
+          l.strip!
+          l.gsub!(/Request\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
+
+          name = o.shift.gsub(/"/, "")
+          info = o.shift.gsub(/"/, "")
+          event_name = o.shift
+
+          out << %{
+            service_#{name}_req(#{info}, __base__, #{event_name});
+          }
         else
           out.puts l
         end

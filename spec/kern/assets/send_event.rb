@@ -4,11 +4,11 @@ controller :my_controller do
 
   action :my_action do
     on_entry %{
+      on_entry_base_pointer = __base__;
     }
 
-    on "test_event", %{
-      test_action_called_base = __base__;
-      test_action_called_params = params;
+    on "hello", %{
+      Send("test_event", params);
     }
   end
 end

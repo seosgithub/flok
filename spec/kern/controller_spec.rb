@@ -31,6 +31,55 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
   end
 
+  #Can initialize a controller via embed and that controller has the correct info
+  it "Can initiate a controller via _embed" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {secret: "#{secret}"}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"secret" => secret}])
+    @driver.mexpect("if_attach_view", [base+1, 0])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+  end
+
+  #Can initialize a controller via embed and the sub-controller has the correct info
+  it "Can initiate a controller via _embed" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/embed_info.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {secret: "#{secret}"}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"secret" => secret}])
+    @driver.mexpect("if_attach_view", [base+1, 0])
+    @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main", "hello", "world"]])
+
+    #We expect the sub controller to receive the same info
+    @driver.mexpect("if_controller_init", [base+4, base+5, "my_sub_controller", {"secret" => secret}])
+  end
+
   it "Can initiate a controller via _embed and have a controller_info located in tel table" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
@@ -358,5 +407,30 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
     @driver.mexpect("if_event", [base, "action", {"from" => "my_action", "to" => "my_other_action"}])
+  end
+
+  #Can send a custom event from the flok controller
+  it "Can send a custom event from the flok controller via Send" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/send_event.rb')
+
+    secret = SecureRandom.hex
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue with an event
+      int_dispatch([3, "int_event", base, "hello", {secret: "#{secret}"}]);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
+    @driver.mexpect("if_attach_view", [base+1, 0])
+    @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+    @driver.mexpect("if_event", [base, "test_event", {"secret" => secret}])
   end
 end

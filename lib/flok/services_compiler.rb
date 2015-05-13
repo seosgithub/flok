@@ -58,11 +58,37 @@ module Flok
     end
 
     def on_init str
-      @on_init = str
+      @on_init = macro(str)
     end
 
     def on_request str
-      @on_request = str
+      @on_request = macro(str)
+    end
+
+    def macro text
+      out = StringIO.new
+
+      text.split("\n").each do |l|
+        ##Request(vc_name, spot_name, context) macro
+        #if l =~ /Request/
+          #l.strip!
+          #l.gsub!(/Request\(/, "")
+          #l.gsub! /\)$/, ""
+          #l.gsub! /\);$/, ""
+          #o = l.split(",").map{|e| e.strip}
+
+          #service_name = o.shift.gsub(/"/, "")
+          #info = o.shift.gsub(/"/, "")
+          #event_name = o.shift.gsub(/"/, "")
+
+          #out << %{
+          #}
+        #else
+          out.puts l
+        #end
+      end
+
+      return out.string
     end
   end
 end

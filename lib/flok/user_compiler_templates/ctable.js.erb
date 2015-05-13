@@ -7,14 +7,19 @@ ctable = {
           <% actions_for_controller(c.name).each do |a| %>
               <%= a.name %>: {
                 on_entry: function(__base__) {
-                  //Controller information
+                  //Controller information, includes action, etc. (controller_info)
                   var __info__ = tel_deref(__base__);
+
+                  //The 'context' which is user-defined
+                  var context = __info__.context;
                   <%= a.on_entry_src.strip %>
                 },
                 handlers: {
                   <% a.ons.each do |e| %>
-                    <%= e[:name] %>: function(__base__, __params__) {
+                    <%= e[:name] %>: function(__base__, params) {
                       var __info__ = tel_deref(__base__);
+                      var context = __info__.context;
+
                       <%= e[:src] %>
                     },
                   <% end %>

@@ -39,6 +39,7 @@ shared_context "kern" do
         #Execute
         @driver = FakeDriverContext.new
         v8 = V8::Context.new(:with => @driver)
+        @driver.ctx = v8
         v8.eval %{
           //We must convert this to JSON because the fake driver will receive
           //a raw v8 object otherwise
@@ -57,7 +58,7 @@ shared_context "kern" do
   class FakeDriverContext
     include RSpec::Matchers 
 
-    attr_accessor :msgs
+    attr_accessor :ctx
     def initialize
       @q = []  #Full queue, 2 dimensional all priority 
       @cq = nil #Contains only the current working priority
@@ -88,6 +89,36 @@ shared_context "kern" do
       expect(name).to eq(msg_name)
       expect(args).to eq(msg_args)
       expect(priority).to eq(@cp)
+    end
+
+    #Retrieve a message, we at least expect a name and priority
+    def get msg_name, priority=0
+      #Dequeue from multi-priority queue if possible
+      if @cq.nil? or @cq.count == 0
+        @cq = @q.shift
+        @cp = @cq.shift #save priority
+      end
+
+      #Make sure we got something from the priority queue
+      raise "Expected #{msg_name.inspect} but there was no messages available" unless @cq
+
+      #Now read the queue with the correct num of args
+      arg_len = @cq.shift
+      name = @cq.shift
+      args = @cq.shift(arg_len)
+
+      expect(name).to eq(msg_name)
+      expect(priority).to eq(@cp)
+
+      return args
+    end
+
+    #Send a message back to flok, will drain queue as well (run flok code)
+    def int msg_name, args
+      msg = [args.length, msg_name, *args].to_json
+      @ctx.eval %{
+        int_dispatch(#{msg});
+      }
     end
   end
 end

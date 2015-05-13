@@ -7,10 +7,15 @@ controller :my_controller do
     }
 
     on "start_request", %{
-      ServiceRequest("rest", info, "request_response");
+      var payload = {
+        url: "http://test.services.fittr.com/ping",
+        params: {},
+      };
+      Request("rest", payload, "request_response");
     }
 
     on "request_response", %{
+      response = params;
     }
   end
 end

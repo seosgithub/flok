@@ -1,6 +1,8 @@
 #Controllers
 Controllers are a lot like the controllers from `MVC` triads. They are the heart of your user-defined behavior in the same way rails controllers define your web-application.
 
+See [Client API](./client_api.md) for details on the functions available to controllers.
+
 ##Kernel & Client Controllers
 There are two types of controllers.  One type is a universal `flok user controller` (**fuc**) that manages state information, the view hierarchy, and is written in javascript; the other type is present on your device, the `device view controller` (**dvc**). The `device view controller` expresses the appereance of the state and view names from `flok user controller`.  The `device view controller` also sends events to the `flok user controller` when an action is commited, like a `button_clicked` event.
 
@@ -58,10 +60,7 @@ end
 ```
 
 ###`fuc` API
-  * **Macros**
-    * `Embed(vc_name, spot_name, context)` - Embed a `fuc` named **vc_name** into spot named **spot_name**. The initialized view controller should be passed **context**.
-    * `Goto(action_name)` - Goto an action with a name within *this* `fuc`. Will free any views that were embedded.
-    * `Request(na)`
+  See [Client API](./client_api.md)
 
 ###`fuc` registrations
 When a `fuc` is initialized, there are various things that are configured that must be cleaned up when the `fuc` is torn down.

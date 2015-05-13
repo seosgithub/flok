@@ -2,5 +2,18 @@
 Client API covers controller action event handlers.
 
 ### Controller MACROS
-  * EMBED(view_controller_name, spot_name, context) - Embed a view controller with the name `view_controller_name` inside the current view controller at the spot with a context
-  * GOTO(action_name) - Change actions
+  * Embed(view_controller_name, spot_name, context) - Embed a view controller with the name `view_controller_name` inside the current view controller at the spot with a context
+  * Goto(action_name) - Change actions
+  * Request(service_name, info, event_cb_name) - Initiate a service.  See [Services](./services.md) for more info.
+  * Send(event_name, info) - Send a custom event on the main queue.
+
+### Controller Event Handlers
+  * Variables
+    * `context` - The information for the controllers context
+    * `params` - What was passed in the event
+    * `__base__` - The address of the controller
+    * `__info__` - Holds the `context`, current action, etc. See [Datatypes](./datatypes.md)
+### Controller on_entry
+    * `context` - The information for the controllers context
+    * `__base__` - The address of the controller
+    * `__info__` - Holds the `context`, current action, etc. See [Datatypes](./datatypes.md)
