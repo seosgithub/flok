@@ -1,6 +1,15 @@
-mods:
-  - ui
-  - event
-  - net
-  - segue
-  - controller
+DEBUG:
+  mods:
+    - ui
+    - event
+    - net
+    - segue
+    - controller
+    - debug
+RELEASE:
+  mods:
+    - ui
+    - event
+    - net
+    - segue
+    - controller

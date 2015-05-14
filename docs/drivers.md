@@ -4,7 +4,18 @@ This folder is required to have a `config.yml` and a `Rakefile`.  Everything els
 
 ## config.yml
 Driver configuration file.  Contains the following keys:
-  * `mods` - A list of module names this driver supports. See [Modules](./modules.md) for details.
+  * `$ENVIRONMENT` - Can either be `RELEASE` or `DEBUG`
+    * `mods` - A list of module names this driver supports. See [Modules](./modules.md) for details.
+
+```yml
+DEBUG:
+  mods:
+    ui
+    debug
+RELEASE:
+  mods:
+    ui
+```
 
 ## Rakefile
 Contains the following tasks:

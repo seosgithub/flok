@@ -10,6 +10,19 @@ module Flok
         return dirs
       end
     end
+
+    #Get a list of modules for a particular environment for a platform
+    def self.mods platform, environment
+      #Create array that looks like a javascript array with single quotes
+      mods = self.config_yml(platform, environment)['mods']
+    end
+
+    #Get all config.yml information for a platform
+    def self.config_yml platform, environment
+      driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
+      raise "No config.yml found in your 'platform: #{platform}' driver" unless driver_config
+      return driver_config[environment]
+    end
   end
 
   #Alias

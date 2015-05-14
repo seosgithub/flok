@@ -4,8 +4,8 @@
   * ui.js - The controller module depends on the `ui` module as it passes a pointer to a view in `if_controller_init`
 
 ### Functions
-`if_controller_init(bp, rvp, name, info)` - Initialize a controller that manages the view at `rvp` and contains the address `bp`. All events are sent to `bp` should be handled appropriatlely.
-The `rvp` pointer will always be an initialized (but not attached) view. When receiving an action, the view is guaranteed to be attached at that time.
+`if_controller_init(bp, rvp, name, context)` - Initialize a controller that manages the view at `rvp` and contains the address `bp`. All events are sent to `bp` should be handled appropriatlely.
+The `rvp` pointer will always be an initialized (but not attached) view. When receiving an action, the view is guaranteed to be attached at that time. Context is what the controller was initialized with.
 
 ### Spec helpers
 

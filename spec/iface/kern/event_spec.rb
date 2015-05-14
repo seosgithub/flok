@@ -5,6 +5,7 @@ require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
 RSpec.describe "iface:kern:event" do
+  module_dep "event"
   include_context "iface:kern"
 
   #A callback was registered in the kernel for testing purposes

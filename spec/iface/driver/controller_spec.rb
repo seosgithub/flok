@@ -6,6 +6,7 @@ require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
 RSpec.describe "iface:driver:controller" do
+  module_dep "controller"
   include_context "iface:driver"
 
   before(:each) do

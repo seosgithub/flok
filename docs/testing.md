@@ -1,4 +1,5 @@
 #Testing
+All tests that relate to the kernel are automatically built with `FLOK_ENV=DEBUG`
 
 ##./spec layout
 The `spec` folder contains all tests with the exception of **Driver** tests (See below for information).
@@ -44,11 +45,15 @@ Interface tests are used for things that can be tested through either only the k
     * `./spec/iface/kern` - Tests only need the server pipe
     * `./spec/iface/driver` - Tests only need the client pipe
     * `./spec/iface/all` - Tests need both pipes
+  * Variables
+    * `@mods` - The list of modules this driver suppotrs in `DEBUG` mode
   * Environment
    * `include_context "iface:kern"` - Access `@pipe` matching the description for kernel pipe [Interactive](./interactive.md)
    * `include_context "iface:driver"` - Access `@pipe` matching the description for driver pipe [Interactive](./interactive.md)
    * `$PLATFORM` - The name of the platform of the driver and the parameters for the kernel.
    * `$PWD` - `./`
+
+For each test, including both `kern` and `driver`, please use the `module_dep(module_name)` to prevent tests from running on unspported modules
 
 ##Etc
 Tests that do not fit into any of the categories (e.g. build output tests), should be placed in `./spec/etc`
@@ -72,4 +77,4 @@ The `rake spec:world PLATFORM=$PLATFORM` executes the following tests:
   5. The drivers tests
 
 ####All (All platforms)
-The `rake spec` executes the same thing as `rake spec:world PLATFORM=$PLATFORM` but uses every platform automatically.
+The `rake spec` executes the same thing as `rake spec:world PLATFORM=$PLATFORM` but uses every platform automatically. This will test the kernel multiple times, but that is ok, as different platforms have different modules enabled for the kernel.

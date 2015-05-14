@@ -55,6 +55,7 @@ namespace :pipe do
     #Get the platform we are on
     platform = ENV["PLATFORM"]
     raise "No $PLATFORM given" unless platform
+    ENV["FLOK_ENV"] = "DEBUG"
 
     exec "ruby", "-e", %{
       require 'flok'
@@ -79,16 +80,19 @@ end
 namespace :spec do
   RSpec::Core::RakeTask.new(:_kern) do |t|
     t.pattern = "./spec/kern/*_spec.rb"
+    ENV["FLOK_ENV"] = "DEBUG"
   end
   task :kern => ['build:world', :_kern]
 
   RSpec::Core::RakeTask.new(:_iface) do |t|
     t.pattern = "./spec/iface/**/*_spec.rb"
+    ENV["FLOK_ENV"] = "DEBUG"
   end
   task :iface => ['build:world', :_iface]
 
   RSpec::Core::RakeTask.new(:_etc) do |t|
     t.pattern = "./spec/etc/*_spec.rb"
+    ENV["FLOK_ENV"] = "DEBUG"
   end
   task :etc => ['build:world', :_etc] 
 

@@ -31,7 +31,7 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
   end
 
-  #Can initialize a controller via embed and that controller has the correct info
+ #Can initialize a controller via embed and that controller has the correct info
   it "Can initiate a controller via _embed" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')

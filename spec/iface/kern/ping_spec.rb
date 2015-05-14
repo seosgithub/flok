@@ -3,6 +3,7 @@ require './spec/env/iface.rb'
 require 'securerandom'
 
 RSpec.describe "iface:kern:ping_spec" do
+  module_dep "ping"
   include_context "iface:kern"
 
  it "supports ping" do

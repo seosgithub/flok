@@ -79,7 +79,7 @@ module Flok
     raise "No config.yml found in your 'platform: #{platform}' driver" unless  driver_config
 
     #Create array that looks like a javascript array with single quotes
-    mods = driver_config['mods']
+    mods = Flok::Platform.mods(platform, environment)
     mods_js_arr = "[" + mods.map{|e| "'#{e}'"}.join(", ") + "]"
 
     #Append this to our output file

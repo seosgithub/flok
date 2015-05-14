@@ -95,3 +95,8 @@ Controller initialization is done via `_embed` or the `embed` macro if you are i
   5. Explicitly registers the view controller's info via `tel_reg_ptr(info, base)`
   6. Configures the `evt` to receive events at the base pointer
   6. Invokes the view controllers `on_entry` function with the info structure.
+
+###Debug
+  * When compiled with `DEBUG` mode enabled, upon `_embed`, the client will receive a `if_debug_set_kv` hash with the key `controller.$BP` with:
+    * `actions: [ActionName:[EventNames]]` - A hash that contains key names which are actions and values that are arrays of the available events.
+     * e.g. `actions => {"index" => ["pause_clicked", "exit_clicked"]}`
