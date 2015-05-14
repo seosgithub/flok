@@ -113,6 +113,7 @@ module Flok
       #Debug / Release
       @debug = (ENV['FLOK_ENV'] == "DEBUG")
       @release = (ENV['FLOK_ENV'] == "RELEASE")
+      @mods = Flok::Platform.mods(ENV['PLATFORM'], ENV['FLOK_ENV'])
     end
   end
 end

@@ -43,8 +43,14 @@ shared_context "iface:driver" do
   end
 end
 
+#Get a list of modules based on the platform and environment
+def mods
+  Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
+end
+
+#Ensure this platform supports a module, or skip the test (used inside before(:each) describe block, or `it` block)
 def module_dep name
   before(:each) do
-    skip "#{ENV["PLATFORM"].inspect} does not support #{name.inspect} module in config.yml" unless @mods.include? name
+    skip "#{ENV["PLATFORM"].inspect} does not support #{name.inspect} module in config.yml" unless mods.include? name
   end
 end

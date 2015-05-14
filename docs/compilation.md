@@ -31,6 +31,7 @@ All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end
 ####Supported variables
   * `@debug` - Set to `true` when `rake build:world` is called with FLOK_ENV=DEBUG
   * `@release` - Set to `true` when `rake build:world` is called with FLOK_ENV=RELEASE
+  * `@mods` - The set of modules supported by this platform and build configuration
 
 ```js
   //Example JS code for debug / release mode
