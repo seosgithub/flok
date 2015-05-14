@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json'
+require 'erb'
 
 ##################################################################
 #This file contains everything relating to compiling source files
@@ -32,8 +33,11 @@ module Flok
   end
 
   #Build the whole world for a certain platform
-  def self.build_world build_path, platform
-    #What platform are we working with?
+  def self.build_world build_path, platform, environment
+    #Environment must be either DEBUG or RELEASE
+    raise "$FLOK_ENV must either be DEBUG or RELEASE, got #{environment.inspect}" unless %w{DEBUG RELEASE}.include? environment
+
+    #Clean up previous build
     `rm -rf #{build_path}`
 
     #1. `rake build` is run inside `./app/drivers/$platform`
@@ -63,10 +67,10 @@ module Flok
     #7. All js files in `./products/$PLATFORM/glob/kern_services.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/kern_services.pre_macro.js
     File.write("#{build_path}/glob/kern_services.pre_macro.js", macro_process(File.read("#{build_path}/glob/kern_services.pre_macro.js")))
 
-    #7. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/application.js`
-    Flok.src_glob("js", "#{build_path}/glob", "#{build_path}/application.js")
+    #8. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/glob/application.js.erb`
+    Flok.src_glob("js", "#{build_path}/glob", "#{build_path}/glob/application.js.erb")
 
-    #8. Add custom commands
+    #9. Add custom commands
     ################################################################################################################
     #MODS - List mods listed in config.yml
     #---------------------------------------------------------------------------------------
@@ -79,20 +83,36 @@ module Flok
     mods_js_arr = "[" + mods.map{|e| "'#{e}'"}.join(", ") + "]"
 
     #Append this to our output file
-    `echo "MODS = #{mods_js_arr};" >> #{build_path}/application.js`
-    `echo "PLATFORM = \'#{platform}\';" >> #{build_path}/application.js`
+    `echo "MODS = #{mods_js_arr};" >> #{build_path}/glob/application.js.erb`
+    `echo "PLATFORM = \'#{platform}\';" >> #{build_path}/glob/application.js.erb`
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
-    #9. Append relavent mods code in kernel with macros
+    #10. Append relavent mods code in kernel with macros
     mods.each do |mod|
       s = File.read("./app/kern/mod/#{mod}.js")
-      open("#{build_path}/application.js", "a") do |f|
+      open("#{build_path}/glob/application.js.erb", "a") do |f|
         f.puts macro_process(s)
       end
-
     end
 
-    `rm -rf #{build_path}/glob`
+    #11. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
+    erb_src = File.read "#{build_path}/glob/application.js.erb"
+    renderr = ERB.new(erb_src)
+    context = ApplicationJSERBContext.new()
+    new_src = renderr.result(context.get_binding)
+    File.write "#{build_path}/application.js", new_src
+  end
+
+  class ApplicationJSERBContext
+    def get_binding
+      return binding
+    end
+
+    def initialize
+      #Debug / Release
+      @debug = (ENV['FLOK_ENV'] == "DEBUG")
+      @release = (ENV['FLOK_ENV'] == "RELEASE")
+    end
   end
 end

@@ -41,9 +41,10 @@ namespace :build do
   task :world do
     #What platform are we working with?
     raise "No $PLATFORM given" unless platform = ENV["PLATFORM"]
+    raise "No $FLOK_ENV given" unless environment = ENV["FLOK_ENV"]
     build_path = "./products/#{platform}"
 
-    Flok.build_world(build_path, platform)
+    Flok.build_world(build_path, platform, environment)
   end
 end
 

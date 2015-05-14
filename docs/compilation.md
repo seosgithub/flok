@@ -1,8 +1,8 @@
 # Compliation
 
-Compilation is handled by the `rake build:world PLATFORM=YOUR_PLATFORM` and then end result of that compliation is put in ./products/
+Compilation is handled by the `rake build:world PLATFORM=YOUR_PLATFORM FLOK_ENV=ENVIRONMENT` and then end result of that compliation is put in ./products/
 Compilation *always* results in a `./products/$PLATFORM/application.js` file along with other files in `./products/$PLATFORM/drivers/` that
-were deemed necessary by the platform driver `build` scripts.
+were deemed necessary by the platform driver `build` scripts. The environment can either be `DEBUG` or `RELEASE`.
 
 ### Build Order
 *Unless otherwise stated, all files execute in alpha-numerical order. (`0foo.js` would execute before `1foo.js`).  Please use this convention only
@@ -17,6 +17,26 @@ as necessary.*
  5. `./products/$PLATFORM/glob/kern_serivces.rb` is processed via `Flok::Services` and then exported as `./products/$PLATFORM/glob/kern_services.pre_macro.js`
  6. All js files in `./products/$PLATFORM/glob/2kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/2kern.js
  7. All js files in `./products/$PLATFORM/glob/kern_services.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/kern_services.js
- 8. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/application.js`
+ 8. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/glob/application.js.erb`
  9. Auto-generated code is placed at the end (like PLATFORM global)
- 10. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section.
+ 10. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section and appended to `glob/application.js.erb`
+ 11. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
+
+##Erb variables
+All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end %>`. These files include:
+  * `./app/kern/*.js`
+  * `./app/kern/mod/*.js`
+  * `./app/kern/services/*.js` - Services only support ERB in the javascript code sections
+
+####Supported variables
+  * `@debug` - Set to `true` when `rake build:world` is called with FLOK_ENV=DEBUG
+  * `@release` - Set to `true` when `rake build:world` is called with FLOK_ENV=RELEASE
+
+```js
+  //Example JS code for debug / release mode
+  <% if @debug %>
+    //JS Code for debug
+  <% else %>
+    //JS code for not debug mode
+  <% end %>
+```
