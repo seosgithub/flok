@@ -6,9 +6,11 @@ This folder is required to have a `config.yml` and a `Rakefile`.  Everything els
 Driver configuration file.  Contains the following keys:
   * `$ENVIRONMENT` - Can either be `RELEASE` or `DEBUG`
     * `mods` - A list of module names this driver supports. See [Modules](./modules.md) for details.
+    * `debug_attach` - See [Debug server](./debug_server.md) for information
 
 ```yml
 DEBUG:
+  debug_attach: socket_io
   mods:
     ui
     debug
