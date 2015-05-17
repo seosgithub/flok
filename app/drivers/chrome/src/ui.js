@@ -5,7 +5,37 @@ if_ui_tp_to_selector = {};
 function if_init_view(name, info, tp_base, tp_targets) {
   //Get the prototype that matches
   var $proto = $("#prototypes").find(".view[data-name=\'"+name+"\']");
-  if ($proto.length === 0) { throw "Couldn't find a surface prototype named: "+name; }
+  if ($proto.length === 0) { 
+    <% if @debug %>
+      //Create a prototype from nothing
+      $("#prototypes").append("<div class='view' data-name='"+name+"' data-debug='1'></div>");
+      var $proto = $("#prototypes").find(".view[data-name=\'"+name+"\']");
+
+      //Add title
+      $proto.append("<h1><span id='controller_name'></span>#<span id='action_name'></span></h1>");
+
+      //Add context
+      $proto.append("<div id='context'></div>");
+
+      //Add last event
+      $proto.append("<div id='last_event'><h2 class='name'></h2><div class='info'></div></div>");
+
+      //Add action div
+      $proto.append("<div id='action_events'></div>");
+
+      //Add needed spots
+      $proto.append("<div class='spots'></div>")
+      for (var i = 0; i < tp_targets.length; ++i) {
+        var spot_name = tp_targets[i];
+        //The main spot is the actual view
+        if (spot_name != "main") {
+          $proto.find(".spots").append("<div class='spot' data-name='" + spot_name + "'></div>")
+        }
+      }
+    <% else %>
+      throw "Couldn't find a surface prototype named: "+name; 
+    <% end %>
+  }
 
   //Get a UUID, move the surface to the 'body' element and hidden
   var uuid = UUID();

@@ -22,7 +22,7 @@ controller :my_sub_controller do
       embedded_context = context;
     }
 
-    on "hello", %{
+    on "holah", %{
       var x = 3;
     }
   end

@@ -13,5 +13,7 @@ controller :my_controller do
   action :my_other_action do
     on_entry %{
     }
+    on "hello", %{
+    }
   end
 end

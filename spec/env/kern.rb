@@ -114,11 +114,15 @@ shared_context "kern" do
     end
 
     #Send a message back to flok, will drain queue as well (run flok code)
-    def int msg_name, args
-      msg = [args.length, msg_name, *args].to_json
-      @ctx.eval %{
-        int_dispatch(#{msg});
-      }
+    def int msg_name, args=nil
+      if args
+        msg = [args.length, msg_name, *args].to_json
+      else
+        msg = [0, msg_name].to_json
+      end
+        @ctx.eval %{
+          int_dispatch(#{msg});
+        }
     end
   end
 end

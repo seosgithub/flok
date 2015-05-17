@@ -38,6 +38,31 @@ FlokController = function() {
 }
 //////////////////////////////////////////////////////////////////////////////////////
 
+<% if @debug %>
+//Debug controller
+//////////////////////////////////////////////////////////////////////////////////////
+//Accepts name because we need to keep track of the controller's name
+var DebugController = function(name) {
+  this.base = FlokController; this.base(); var self = this;
+  this.name = name;
+
+  this.init = function() {
+    self.$sel("#controller_name").html(name);
+    self.$sel("#context").html(JSON.stringify(self.context));
+  }
+
+  this.action = function(from, to) {
+    self.$sel("#action_name").html(to);
+  }
+
+  this.event = function(name, info) {
+    self.$sel("#last_event .name").html(name);
+    self.$sel("#last_event .info").html(JSON.stringify(info));
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////
+<% end %>
+
 //Controller works with the ui module and segue module
 reg_controllers = {};
 
@@ -50,16 +75,34 @@ function regController(name, constructor) {
 var cinstances = {};
 
 function if_controller_init(bp, rvp, name, info) {
+  <% if @debug %>
+    if (if_ui_tp_to_selector[rvp].attr("data-debug") === '1') {
+      reg_controllers[name] = DebugController;
+    }
+  <% end %>
+
   if (reg_controllers[name] != undefined) {
     //Grab controller
     var controller = reg_controllers[name];
 
     //Get selector
     var $sel = if_ui_tp_to_selector[rvp];
-    var c = new controller();
+
+    //If it is a debug view, pass some info along to it
+    <% if @debug %>
+      if (controller == DebugController) {
+        var c = new controller(name)
+      } else {
+        var c = new controller();
+      }
+    <% else %>
+      var c = new controller();
+    <% end %>
+
     c.__initialize__(bp, $sel, info);
     cinstances[bp] = c;
 
+    //Initialize
     cinstances[bp].init();
   }
 }

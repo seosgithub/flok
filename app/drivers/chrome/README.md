@@ -66,3 +66,12 @@ $(document).ready(function() {
 });
 
 ```
+
+### ERB Compliation
+The final `chrome.js` file is run through an `ERB` compiler that contains the variables:
+  * `@debug` - True if `FLOK_ENV=DEBUG`
+  * `@release` - True if `FLOK_ENV=RELEASE`
+  * `@mods` - A list of active kernel modules listed from `config.yml`
+
+### Debug information
+You may access the debug associated information via `debug_assoc` hash.

@@ -1,14 +1,14 @@
 //Global debug hash
-debug_kv = {}
+debug_assoc = {}
 
 function if_debug_assoc(base, key, value) {
-  if (debug_kv[base] === undefined) {
-    debug_kv[base] = {};
+  if (debug_assoc[base] === undefined) {
+    debug_assoc[base] = {};
   }
 
-  debug_kv[base][key] = value;
+  debug_assoc[base][key] = value;
 }
 
 function if_debug_spec_assoc(base, key) {
-  int_dispatch([1, "spec", debug_kv[base][key]])
+  int_dispatch([1, "spec", debug_assoc[base][key]])
 } 

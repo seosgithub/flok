@@ -35,3 +35,15 @@ Driver tests are chosen by the platform implementor.  The only requriements for 
   * Environment
     - `$BUILD_PATH` - The same folder the driver was given during `build`
     - `$PWD` - `./app/drivers/$PLATFORM/`
+
+## Debug View & Controller
+When a driver receives a `if_init_view` it cannot handle because the view is not something it has been programmed to understand, (typically through a template system), that driver is suggested to show a `debug` view if 
+the driver is built with the environmental variable `$FLOK_ENV` set to `DEBUG` and the `debug` module is present. The *debug* view should have one associated *debug* controller for all debug views that does the same thing.
+
+The *debug* view and controller should show something along the lines of:
+  * The controller name - This is given in `if_init_controller`
+  * The current action name - This is given in the `action` event `to` field.
+  * The last event received - You can capture this information in your custom event handler.
+  * The context information - This is passed in `if_init_controller` and should be accesssible in your view controller via `context`
+  * N Spaces for each attempted attachment of a view controller - When `if_init_view` is called, it has a list of spaces. Use these to dynamically create them.
+  * A list of buttons where each button triggers an event associated with the current action - This is set with `if_debug_assoc(controller_name, "action_events", [..])`
