@@ -7,6 +7,14 @@
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
 function if_dispatch(qq) {
+  //If debug socket is attached, forward events to it
+  //and do not process the events
+  <% if @mods.include? "debug" %>
+    if (debug_socket && debug_socket_if_forward) {
+      debug_socket.emit("if_dispatch", qq);
+    } else {
+  <% end %>
+
   //Get a priority queue
   while (qq.length > 0) {
     var q = qq.shift();
@@ -23,6 +31,11 @@ function if_dispatch(qq) {
       this[q.shift()].apply(null, q.splice(0, argc));
     }
   }
+
+  //Continuation of the debug_socket at linke 10
+  <% if @mods.include? "debug" %>
+    }
+  <% end %>
 }
 
 function ping() {

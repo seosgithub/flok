@@ -5,12 +5,13 @@ require 'timeout'
 require 'securerandom'
 require './lib/flok'
 require './spec/lib/io_extensions'
+require './spec/lib/helpers'
 
 shared_context "iface:kern" do
   before(:each) do
     @pipe = IO.popen("rake pipe:kern", "r+")
     @pid = @pipe.pid
-    @mods = Floik::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
+    @mods = Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
   end
 
   after(:each) do
@@ -22,6 +23,7 @@ shared_context "iface:kern" do
 end
 
 shared_context "iface:driver" do
+  include SpecHelpers
   before(:each) do 
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
@@ -62,6 +64,6 @@ end
 
 #Require a key value to be a apart of the config yml
 def settings_dep key, value
-  skip "#{ENV["PLATFORM"].inspect} does not support #{key.inspect} configuration in config.yml" unless config_yml.include? key
+  raise "#{ENV["PLATFORM"].inspect} does not support #{key.inspect} configuration in config.yml" unless config_yml.include? key
   skip "#{ENV["PLATFORM"].inspect} #{key.inspect} is not #{value.inspect} in config.yml; it is #{config_yml[key].inspect}"  unless value == config_yml[key]
 end

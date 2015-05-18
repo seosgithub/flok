@@ -79,7 +79,11 @@ RSpec::Matchers.define :readline_and_equal_x_within_y_seconds do |str, seconds|
   end
 
   failure_message do |actual|
-    "expected that #{@res.inspect} to equal #{str.inspect}"
+    if @res
+      "expected that #{@res.inspect} to equal #{str.inspect}"
+    else
+      "expected to get back #{str.inspect}, but I didn't get anything!"
+    end
   end
 
   description do
@@ -107,7 +111,7 @@ RSpec::Matchers.define :readline_and_equal_json_x_within_y_seconds do |json, sec
   end
 
   description do
-    "readline and equal #{str.inspect} within #{seconds.inspect}"
+    "readline and equal #{json.inspect} within #{seconds.inspect}"
   end
 end
 

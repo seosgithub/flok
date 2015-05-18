@@ -13,5 +13,7 @@ function if_debug_spec_assoc(base, key) {
   int_dispatch([1, "spec", debug_assoc[base][key]])
 } 
 
-function if_debug_attach() {
-}
+
+function if_debug_spec_send_int_event() {
+  int_dispatch([0, "spec"]);
+} 

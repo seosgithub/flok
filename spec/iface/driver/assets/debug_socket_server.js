@@ -1,48 +1,36 @@
-//Import express
-var express = require('express');
-var ws = require("nodejs-websocket")
+//Setup a server on port 9999 to accept incomming connections
 var io = require('socket.io')();
 
-var app = express();
+var stdin = process.stdin;
 
-clients = []
+_socket = null;
 
-app.get('/search', function (req, res) {
-  res.json(clients)
+stdin.resume();
+stdin.on("data", function(chunk) {
+  var res = JSON.parse(chunk.toString());
+  type = res.type;
+  msg = res.msg;
+  _socket.emit(type, msg);
 });
-
-//Start GUI Rest services
-var server = app.listen(3334, function () {
-  var host = server.address().address;
-  var port = server.address().port;
-});
-
-var socketToId = {};
 
 io.on('connection', function(socket) {
-  var id = "hello";
-  clients.push({
-    name: "Chrome (localhost)",
-    platform: "chrome",
-    id: id,
+  _socket = socket;
+  console.log("CLIENT CONNECTED");
+
+  socket.on("if_dispatch", function(data) {
+    console.log("if_dispatch");
+    console.log(JSON.stringify(data));
   });
 
-  socketToId[socket] = id;
-
-  socket.on("disconnect", function() {
-    var idx = -1;
-    for (var i = 0; i < clients.length; ++i) {
-      if (clients[i].id === socketToId[socket]) {
-        idx = i;
-        break;
-      }
-    }
-    clients.splice(idx, 1);
+  socket.on("int_dispatch", function(data) {
+    console.log("int_dispatch");
+    console.log(JSON.stringify(data));
   });
+
 });
 io.listen(9999);
 
-function go() {
-  console.log("SERVICES_STARTED");
+function call() {
+  console.log("STARTED");
 }
-setTimeout(go, 1000)
+setTimeout(call, 1000);
