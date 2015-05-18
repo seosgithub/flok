@@ -30,15 +30,11 @@ shared_context "iface:driver" do
     @mods = Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
     
     $stderr.puts "starting, PID = #{@pid}"
-    if ENV['RUBY_PLATFORM'] =~ /darwin/
-      `killall phantomjs`
-      `killall rspec`
-    end
   end
 
   after(:each) do
-    $stderr.puts "killing, PID = #{@pid}"
     begin
+      @pipe.close
       Process.kill(:INT, @pid)
     rescue Errno::ESRCH
       $stderr.puts "err, no process"

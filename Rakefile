@@ -99,7 +99,7 @@ namespace :spec do
   #Nice helper link
   task :driver do
     platform = ENV['PLATFORM']
-    Flok.system! "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
+    exec "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
   end
 
   task :world => ['etc', 'kern', 'iface', 'driver'] do

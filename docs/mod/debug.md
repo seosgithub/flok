@@ -15,3 +15,9 @@ the port -333 with the message name `eval_res` and the info as `{info: res}` whe
 ### Kernel spec related
   * The function `debug_eval_spec` is in the kernel and should return 'hello'. This is called by the specs that test eval to make sure
     that eval is working. It is never used in a message
+
+### config.yml variables
+  * `debug_attach` - See [Debug Server](../debug_server.md) for details
+
+### Debug Server
+The debug module should also provide a debug server. Details of the server are layed out in [Debug Server](../debug_server.md)
