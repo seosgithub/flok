@@ -75,3 +75,9 @@ The final `chrome.js` file is run through an `ERB` compiler that contains the va
 
 ### Debug information
 You may access the debug associated information via `debug_assoc` hash.
+
+### Socket.io Driver
+You may register a socket.io socket via
+```js
+  regSockio(name, socket);
+```
