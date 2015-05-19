@@ -17,6 +17,7 @@ r.on("line", function(chunk) {
   var res = JSON.parse(chunk.toString());
   type = res.type;
   msg = res.msg;
+  console.error("Sending" + type);
   console.error("Sending" + JSON.stringify(msg));
   _socket.emit(type, msg);
 });

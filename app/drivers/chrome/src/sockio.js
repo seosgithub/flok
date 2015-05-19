@@ -1,17 +1,12 @@
-//Register a socket.io (Usually in your view controller)
-function regSockio(id, socket) {
-  id_to_sockio[id] = socket;
+sp_to_sockio = {}
+
+function if_sockio_init(url, sp) {
+  sp_to_sockio[sp] = io(url);
 }
 
-id_to_sockio = {}
-
-function if_sockio_fwd(id, event_name, bp) {
-  <% if @debug %>
-    sockio_ensure_test(id);
-  <% end %>
-
+function if_sockio_fwd(sp, event_name, bp) {
   //Grab socket
-  var socket = id_to_sockio[id];
+  var socket = sp_to_sockio[sp];
 
   if (socket) {
     //Forward events
@@ -20,32 +15,20 @@ function if_sockio_fwd(id, event_name, bp) {
     });
   } else {
     <% if @debug %>
-      console.error("Couldnt fwd sockio with id: " + id + " (It didn't exist)");
+      console.error("Couldnt fwd sockio with sp: " + sp + " (It dspn't exist)");
     <% end %>
   }
 }
 
-function if_sockio_send(id, event_name, info) {
-  <% if @debug %>
-    sockio_ensure_test(id);
-  <% end %>
-
+function if_sockio_send(sp, event_name, info) {
   //Grab socket
-  var socket = id_to_sockio[id];
+  var socket = sp_to_sockio[sp];
 
   if (socket) {
     socket.emit(event_name, info);
   } else {
     <% if @debug %>
-      console.error("Couldnt fwd sockio with id: " + id + " (It didn't exist)");
+      console.error("Couldnt fwd sockio with sp: " + sp + " (It dspn't exist)");
     <% end %>
-  }
-}
-
-//Spec helpers
-function sockio_ensure_test(id) {
-  //Create test socket if necessary
-  if (id === "__test__" && !id_to_sockio[id]) {
-    id_to_sockio[id] = io("http://localhost:9998");
   }
 }
