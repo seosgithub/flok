@@ -115,7 +115,7 @@ module Flok
           #address offset
           res = %{
             var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
-            __info__.embeds.push(ptr);
+            __info__.embeds[#{spot_index-1}].push(ptr);
           }
           out.puts res
         #Send(event_name, info)
@@ -164,7 +164,11 @@ module Flok
 
           #Forward an event to the appropriate spot
           out << %{
-            int_event(__base__+#{spot_index}, #{event_name}, #{info});
+
+            var vcs = __info__.embeds[#{spot_index-1}];
+            for (var i = 0; i < vcs.length; ++i) {
+              int_event(vcs[i], #{event_name}, #{info});
+            }
           }
 
         #GOTO(action_name)
@@ -185,23 +189,25 @@ module Flok
             //Remove all views
             var embeds = __info__.embeds;
             for (var i = 0; i < __info__.embeds.length; ++i) {
-              //Free +1 because that will be the 'main' view
-              main_q.push([1, "if_free_view", embeds[i]+1]);
+              for (var j = 0; j < __info__.embeds[i].length; ++j) {
+                //Free +1 because that will be the 'main' view
+                main_q.push([1, "if_free_view", embeds[i][j]+1]);
 
-              <% if @debug %>
-                var vp = embeds[i]+1;
-                //First locate spot this view belongs to in reverse hash
-                var spot = debug_ui_view_to_spot[vp];
+                <% if @debug %>
+                  var vp = embeds[i][j]+1;
+                  //First locate spot this view belongs to in reverse hash
+                  var spot = debug_ui_view_to_spot[vp];
 
-                //Find it's index in the spot
-                var idx = debug_ui_spot_to_views[spot].indexOf(vp);
+                  //Find it's index in the spot
+                  var idx = debug_ui_spot_to_views[spot].indexOf(vp);
 
-                //Remove it from the spot => [view]
-                debug_ui_spot_to_views[spot].splice(idx, 1);
+                  //Remove it from the spot => [view]
+                  debug_ui_spot_to_views[spot].splice(idx, 1);
 
-                //Remove it from the reverse hash
-                delete debug_ui_view_to_spot[vp];
-              <% end %>
+                  //Remove it from the reverse hash
+                  delete debug_ui_view_to_spot[vp];
+                <% end %>
+              }
             }
 
             //Send off event for action change
@@ -210,7 +216,13 @@ module Flok
               to: "#{action_name}"
             }]);
 
+
+            //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds = [];
+            for (var i = 1; i < #{@controller.spots.count}; ++i) {
+              __info__.embeds.push([]);
+            }
+
             __info__.cte.actions[__info__.action].on_entry(__base__)
           }
           out.puts res

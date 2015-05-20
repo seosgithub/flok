@@ -37,6 +37,6 @@ controller_info {
   context: {}, //A hash that contains context information (user supplied)
   action: //The name of the current action that is active
   cte:    //The ctable entry pertaining to this controller
-  embeds: //An array of currently active embeds that need to be removed when changing actions
+  embeds: //An array of arrays, where position 0 is the spot after `main`, each element in the array is a view controller base pointer.
 }
 ```

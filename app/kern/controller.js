@@ -64,12 +64,18 @@ function _embed(vc_name, sp, context, event_gw) {
     SEND("main", "if_attach_view", base+1, sp);
   spots.shift() //Un-Borrow spots array (it's held in a constant struct, so it *cannot* change)
 
+  //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
+  var embeds = [];
+  for (var i = 1; i < spots.length; ++i) {
+    embeds.push([]);
+  }
+
   //Create controller information struct
   var info = {
     context: context,
     action: action,
     cte: cte,
-    embeds: [],
+    embeds: embeds,
     event_gw: event_gw
   };
 

@@ -10,7 +10,7 @@ controller :my_controller do
 
     on "test_event", %{
       //Forward params
-      Lower("hello", "test", params);
+      Lower("hello", "lower_request", params);
     }
   end
 end
