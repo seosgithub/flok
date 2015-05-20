@@ -25,12 +25,12 @@ FlokController = function() {
 
   //Called after init automatically to apply special helper bindings
   this.apply_helpers = function() {
-    self.$sel("[data-emit]").on("click", function() {
+    this.$sel("[data-emit]").on("click", function() {
       var name = $(this).attr("data-emit");
       self.send(name, {});
     });
 
-    self.$sel("[data-puts]").each(function() {
+    this.$sel("[data-puts]").each(function() {
       var name = $(this).attr("data-puts");
       $(this).html = self.context[name];
     });
@@ -117,7 +117,7 @@ function if_controller_init(bp, rvp, name, info) {
 
     //Initialize
     cinstances[bp].init();
-    //cinstances[bp].apply_helpers(); //emit, puts
+    cinstances[bp].apply_helpers(); //emit, puts
   }
 }
 
