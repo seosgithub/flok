@@ -1,5 +1,5 @@
 //Support for the telepathy protocol
-tel_idx = 0
+tel_idx = 3;
 
 //Global table linking telepointers to objects (like functions)
 tel_table = {};

@@ -47,11 +47,18 @@ class FlokCLI < Thor
       FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
 
-      #5. Combine application.js and user_compiler.js
-      File.open "application_user.js", "w" do |f|
+      #5. Combine application.js and user_compiler.js.erb
+      File.open "glob/application_user.js.erb", "w" do |f|
         f.puts File.read("glob/application.js")
         f.puts File.read("glob/user_compiler.js")
       end
+
+      #6. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
+      erb_src = File.read "glob/application_user.js.erb"
+      renderr = ERB.new(erb_src)
+      context = ERBUserApplicationContext.new()
+      new_src = renderr.result(context.get_binding)
+      File.write "application_user.js", new_src
     end
   end
 
@@ -59,6 +66,20 @@ class FlokCLI < Thor
   def server platform
     system('bundle exec guard')
   end
+
+  class ERBUserApplicationContext
+    def get_binding
+      return binding
+    end
+
+    def initialize
+      #Debug / Release
+      @debug = (ENV['FLOK_ENV'] == "DEBUG")
+      @release = (ENV['FLOK_ENV'] == "RELEASE")
+    end
+  end
 end
 
 FlokCLI.start(ARGV)
+
+

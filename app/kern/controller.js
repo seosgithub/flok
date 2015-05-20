@@ -1,5 +1,18 @@
 //The view-controller hierarchy is managed by this set of functions.
 
+<% if @debug %>
+  //Maintain type information for pointers
+  //Is it a spot ('spot'), view (main spot) ('view'), or view controller ('vc')?
+  debug_ui_ptr_type = {};
+
+  //Keep track of what view are embedded into spots
+  debug_ui_spot_to_views = {};
+  debug_ui_view_to_spot = {};
+
+  //The first view controller that contains a view attached to the root spot (0)
+  debug_root_vc = null;
+<% end %>
+
 //Embed a view-controller into a named spot. If spot is null, then it is assumed
 //you are referring to the root-spot.
 function _embed(vc_name, sp, context, event_gw) {
@@ -27,6 +40,27 @@ function _embed(vc_name, sp, context, event_gw) {
     SEND("main", "if_init_view", vname, {}, base+1, spots);
     
     SEND("main", "if_controller_init", base, base+1, vc_name, context);
+
+    <% if @debug and @mods.include? "debug" %>
+      //Keep track of the view-controller attached to root spot (0)
+      if (sp == 0) {
+        debug_root_vc = base;
+      }
+
+      //Track vc
+      debug_ui_ptr_type[base] = 'vc';
+      debug_ui_ptr_type[base+1] = 'view';
+      //Start at 2 because spot[0] is (currently) acting as vc, spot[1] is main view
+      for (var i = 2; i < spots.length; ++i) {
+        debug_ui_ptr_type[base+i] = 'spot';
+      }
+
+      //Track what view is going into the spot
+      debug_ui_spot_to_views[sp] = debug_ui_spot_to_views[sp] || [];
+      debug_ui_spot_to_views[sp].push(base+1);
+      debug_ui_view_to_spot[base+1] = sp;
+    <% end %>
+
     SEND("main", "if_attach_view", base+1, sp);
   spots.shift() //Un-Borrow spots array (it's held in a constant struct, so it *cannot* change)
 
@@ -41,7 +75,6 @@ function _embed(vc_name, sp, context, event_gw) {
 
   //Register controller base with the struct, we already requested base
   tel_reg_ptr(info, base);
-
 
   //Register the event handler callback
   reg_evt(base, controller_event_callback);

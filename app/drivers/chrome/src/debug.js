@@ -9,6 +9,21 @@ function if_debug_assoc(base, key, value) {
   debug_assoc[base][key] = value;
 }
 
+function if_debug_highlight_view(vp, on) {
+  //Get the view or spot
+  var $e = if_ui_tp_to_selector[vp];
+
+  if ($e) {
+    if (on) {
+      $e.css("background-color", "blue");
+      $e.css("-webkit-filter", "invert(75%)");
+    } else {
+      $e.css("background-color", "");
+      $e.css("-webkit-filter", "");
+    }
+  }
+}
+
 function if_debug_spec_assoc(base, key) {
   int_dispatch([1, "spec", debug_assoc[base][key]])
 } 
@@ -51,9 +66,6 @@ $(document).ready(function() {
     });
   });
 });
-
-//Start up the socket.io client
-debug_socket = null;
 
 //When forwading events to if_dispatch, if_dispatch will
 //normally send those events back to to the server, but

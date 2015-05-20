@@ -4,9 +4,18 @@ The debug module provides information to the client (driver) module such as even
 ### Driver Messages
 `if_debug_assoc(base, key, value)` - Associate a key and value for an object called base (usually a pointer or string)
 
+`if_debug_highlight_view(vp, on)` - Highlight the view **or spot** that is given in `vp`. Used in some debuggers (like seagull) to let users select
+the hierarchy and see it's equivalent in the client. `on` is a bool that indicates whether something should be highlihted or not. (toggle).
+If given a view pointer that's 0 or dosen't exist, it should just ignore it.
+
 #### Kernel
 `int_debug_eval(str)` - Send an eval request; the str must not contain any newlines. Will respond by sending back a `if_event` message to
 the port -333 with the message name `eval_res` and the info as `{info: res}` where `res` is what ever was retrieved by the eval.
+
+`int_debug_dump_ui` - See [Debug Dump UI](./debug/dump_ui.md) for specifics.
+
+`int_debug_controller_context(bp)` - Retreive a controller's context. Sends a `if_event` to port `-333` named `debug_controller_context_res` with the payload of the controller's
+context at `bp`
 
 ### Driver Spec related
   * `if_debug_spec_assoc(base, key)` - When this message is received, the client shall return a message called `spec` containing the value

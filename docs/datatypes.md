@@ -1,16 +1,17 @@
 #Data types
 Instances labeled `static` mean that they are not dynamically created and are meant to be used by many things. Somewhat like a singleton or a const in a functional language.
 
-###controller_info (static)
+###ctable_entry (static)
 The controller info contains all things that are necessary to initialize and use a controller. It is never duplicated and stands
 as a static structure. Each controller type has one static matching object that is part of the controller table (`ctable`) and can
 be looked up as `ctable[controller_name]`.
 
 ```javascript
-controller_info {
+ctable_entry {
   root_view,     //A constant string of the name of the view this controller sets as it's root view.
   actions,       //A dictionary [String:action_info] that corresponds to a dictionary of action_info object's based on the action's name.
   spots,         //An array fo spot names for this controller
+  name           //The name of the controller, useful for certain lookup operations, this is also the ctable key
 }
 ```
 

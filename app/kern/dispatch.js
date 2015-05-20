@@ -14,8 +14,17 @@ function int_dispatch(q) {
     //Grab the first thing off the queue, this is the arg count
     var argc = q.shift();
 
-    //Grab the next thing and look that up in the function table. Pass args left
-    this[q.shift()].apply(null, q.splice(0, argc));
+    <% if @debug %>
+      var method_name = q.shift();
+      if (this[method_name] === undefined) {
+        throw "Couldn't find method named: " + method_name;
+      } else {
+        this[method_name].apply(null, q.splice(0, argc));
+      }
+    <% else %>
+      //Grab the next thing and look that up in the function table. Pass args left
+      this[q.shift()].apply(null, q.splice(0, argc));
+    <% end %>
   }
 
   //Now push all of what we can back
