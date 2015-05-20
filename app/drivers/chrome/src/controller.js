@@ -25,14 +25,18 @@ FlokController = function() {
 
   //Called after init automatically to apply special helper bindings
   this.apply_helpers = function() {
+    var self = this;
+
+    //Emit an event
     this.$sel("[data-emit]").on("click", function() {
       var name = $(this).attr("data-emit");
       self.send(name, {});
     });
 
+    //Set the HTML
     this.$sel("[data-puts]").each(function() {
       var name = $(this).attr("data-puts");
-      $(this).html = self.context[name];
+      $(this).html(self.context[name]);
     });
   }
 
@@ -91,6 +95,8 @@ function if_controller_init(bp, rvp, name, info) {
   <% if @debug %>
     if (if_ui_tp_to_selector[rvp].attr("data-debug") === '1') {
       reg_controllers[name] = DebugController;
+    } else if (reg_controllers[name] === undefined) {
+      reg_controllers[name] = FlokController;
     }
   <% end %>
 
