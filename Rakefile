@@ -98,12 +98,15 @@ namespace :spec do
 
   #Nice helper link
   task :driver do
+    #Get platform
     platform = ENV['PLATFORM']
-    exec "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
+    raise "No platform given" unless platform
+
+    #Start the driver rake suite
+    system "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
   end
 
   task :world => ['etc', 'kern', 'iface', 'driver'] do
-    puts "done"
   end
 end
 

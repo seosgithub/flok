@@ -1,7 +1,6 @@
 Dir.chdir File.join File.dirname(__FILE__), '../../../'
 require './spec/env/iface.rb'
 RSpec.describe "iface:kern:pipe" do
-  module_dep "pipe"
   include_context "iface:kern"
 
   it "does close the read back pipe when when a syntax error occurs" do
