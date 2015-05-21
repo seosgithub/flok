@@ -39,6 +39,7 @@ RSpec.describe "CLI" do
         template_nodes = Dir["**/*"].map{|e| e.gsub(/\.erb$/i, "")}
       end
       new_proj_nodes = Dir["**/*"]
+      $stderr.puts "Flok version = #{Flok::VERSION}"
       expect(new_proj_nodes).to eq(template_nodes)
 
       expect(files).to include("Gemfile")
