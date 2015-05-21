@@ -25,7 +25,12 @@ module Flok
     out = ""
     FileUtils.mkdir_p(dir_path)
     FileUtils.mkdir_p(File.dirname(output_path))
-    Dir[File.join(dir_path, "**/*.#{type}")].each do |f|
+    nodes = []
+    nodes += Dir["./config/**/*.#{type}"].select{|e| File.file?(e)} 
+    nodes += Dir["./init/**/*.#{type}"].select{|e| File.file?(e)} 
+    nodes += Dir["./*.#{type}"].select{|e| File.file?(e)}
+    nodes += (Dir["./**/*"] - nodes).select{|e| File.file?(e)}
+    nodes.each do |f|
       out << File.read(f) << "\n"
     end
 

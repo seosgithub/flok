@@ -44,6 +44,7 @@ task :spec do
     #Copy chrome.js and spec files into glob folder
     FileUtils.mkdir_p "./glob"
     FileUtils.cp "chrome.js", "./glob"
+    require 'pry'; binding.pry
     Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/"), "./glob/spec.js")
 
     #Compile into one chrome-test.js file

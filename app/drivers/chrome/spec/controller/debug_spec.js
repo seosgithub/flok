@@ -1,6 +1,5 @@
 //Testing the controller to make sure it gets properly attached to debug views
 
-$(document).ready(function() {
   QUnit.test("when if_controller_init is called with a view that has the debug flag on, it uses the DebugController", function(assert) {
     //Setup prototypes html
     $("body").append("<div id='prototypes'></div>")
@@ -15,4 +14,3 @@ $(document).ready(function() {
     //Has the correct name
     assert.equal(cinstances[0].name, "my_test_controller", "")
   });
-});

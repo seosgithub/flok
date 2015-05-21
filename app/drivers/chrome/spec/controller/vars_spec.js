@@ -1,6 +1,5 @@
 //Tests various control variables, like context
 
-$(document).ready(function() {
   QUnit.test("Controller does receive context on explicit init", function(assert) {
     var done = assert.async();
 
@@ -27,4 +26,3 @@ $(document).ready(function() {
     c.__initialize__(0, $sel, {hello: 'world'});
     c.init();
   });
-});

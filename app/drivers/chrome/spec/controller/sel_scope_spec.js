@@ -2,7 +2,6 @@
 //is limited to the view the controller is bound to and not sub controllers
 //or global controllers
 
-$(document).ready(function() {
   QUnit.test("Controller selector cannot reach out of self", function(assert) {
     var done = assert.async();
 
@@ -159,5 +158,4 @@ $(document).ready(function() {
     c.__initialize__(0, $sel, {});
     c.init();
   });
-});
 
