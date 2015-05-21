@@ -42,4 +42,4 @@ RSpec.describe "kern:rest_service_spec" do
     response = JSON.parse(ctx.eval("JSON.stringify(response)"))
     expect(response).to eq({"success"=> true, "info" => {"secret" => secret}})
   end
-en"
+end

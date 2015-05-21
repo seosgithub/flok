@@ -2,24 +2,24 @@ Dir.chdir File.join File.dirname(__FILE__), '../../'
 require './lib/flok'
 require './spec/env/etc'
 
-#Return a v8 instance of a compiled js file
-def compile fn
-  compiler = Flok::ServicesCompiler
-  js_src(fn)
-  js_res = compiler.compile(js_src(fn))
-  ctx = V8::Context.new
-  ctx.eval js_res
-  ctx
-end
-
-#Get the source for a file in  ./service_compiler/*.rb
-def js_src fn
-  Dir.chdir File.join(File.dirname(__FILE__), "service_compiler") do
-    return File.read(fn+'.rb')
-  end
-end
-
 RSpec.describe "lib/services_compiler" do
+  #Return a v8 instance of a compiled js file
+  def compile fn
+    compiler = Flok::ServicesCompiler
+    js_src(fn)
+    js_res = compiler.compile(js_src(fn))
+    ctx = V8::Context.new
+    ctx.eval js_res
+    ctx
+  end
+
+  #Get the source for a file in  ./service_compiler/*.rb
+  def js_src fn
+    Dir.chdir File.join(File.dirname(__FILE__), "service_compiler") do
+      return File.read(fn+'.rb')
+    end
+  end
+
   it "Can call compile method and get on_init" do
     ctx = compile "service0"
 

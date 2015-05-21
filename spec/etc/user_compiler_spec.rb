@@ -3,25 +3,26 @@
 Dir.chdir File.join File.dirname(__FILE__), '../../'
 require './lib/flok'
 
-#Return a v8 instance of a compiled js file
-def compile fn
-  compiler = Flok::UserCompiler
-  js_src(fn)
-  js_res = compiler.compile(js_src(fn))
-  ctx = V8::Context.new
-  ctx.eval js_res
-  ctx
-end
-
-#Get the source for a file in  ./user_compiler/*.rb
-def js_src fn
-  Dir.chdir File.join(File.dirname(__FILE__), "user_compiler") do
-    return File.read(fn+'.rb')
-  end
-end
 
 #Testing the compilation of controller/action user files into javascript counterparts
 RSpec.describe "User compiler" do
+  #Return a v8 instance of a compiled js file
+  def compile fn
+    compiler = Flok::UserCompiler
+    js_src(fn)
+    js_res = compiler.compile(js_src(fn))
+    ctx = V8::Context.new
+    ctx.eval js_res
+    ctx
+  end
+
+  #Get the source for a file in  ./user_compiler/*.rb
+  def js_src fn
+    Dir.chdir File.join(File.dirname(__FILE__), "user_compiler") do
+      return File.read(fn+'.rb')
+    end
+  end
+
   it "Can load the ruby module" do
     compiler = Flok::UserCompiler
     puts compiler
