@@ -82,8 +82,6 @@ RSpec.describe "CLI" do
       #Custom controller to test source with
       controller_src = File.read(path) if path
       flok_new do
-        puts "Present dir: #{`pwd`}"
-        $stderr.puts Dir["**/*"].inspect
         File.write "./app/controllers/controller0.rb", controller_src if path
 
         #Build a new project
