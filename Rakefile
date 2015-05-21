@@ -110,6 +110,6 @@ end
 task :spec do
   platforms = Dir["./app/drivers/*"].map{|e| File.basename(e)}
   platforms.each do |p|
-    Flok.system! "rake spec:world PLATFORM=#{p}"
+    Flok.system! "rake spec:world PLATFORM=#{p} FLOK_ENV=DEBUG"
   end
 end
