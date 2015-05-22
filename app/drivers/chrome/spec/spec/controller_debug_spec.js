@@ -2,7 +2,7 @@
 
 QUnit.test("when if_controller_init is called with a view that has the debug flag on, it uses the DebugController", function(assert) {
   //Setup prototypes html
-  $("body").append("<div id='prototypes'></div>")
+  $("body").html("<div id='prototypes'></div>")
   if_init_view("my_test_view", {}, 1, ["main", "content"]);
 
   //Create a controller that belongs to a debug view (it has data-debug='1')

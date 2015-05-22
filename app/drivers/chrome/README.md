@@ -64,7 +64,15 @@ var TestController = function() {
 $(document).ready(function() {
   regController("__test__", TestController);
 });
+```
 
+### Data bindings
+```html
+<!-- This will place the contents of context.foo into the divider -->
+<div data-puts="foo"></div>
+
+<!-- You can also use an attribute, just place it before the variable -->
+<img data-puts="src foo" />
 ```
 
 ### ERB Compliation

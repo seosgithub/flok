@@ -35,8 +35,16 @@ FlokController = function() {
 
     //Set the HTML
     this.$sel("[data-puts]").each(function() {
-      var name = $(this).attr("data-puts");
-      $(this).html(self.context[name]);
+      //Retreive the args, seperated by spaces
+      var args = $(this).attr("data-puts");
+      args = args.split(" ");
+
+      //  2 args => set the attribute named args[0] to the value of context[args[1]]
+      if (args.length == 1) {
+        $(this).html(self.context[args[0]]);
+      } else if (args.length == 2) {
+        $(this).attr(args[0], self.context[args[1]]);
+      }
     });
   }
 
