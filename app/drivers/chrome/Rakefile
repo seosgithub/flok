@@ -56,8 +56,6 @@ task :spec do
   f.puts recipe.src
   f.close
 
-  File.write "/Users/Seo/Desktop/fuck2.js", recipe.src
-
   include SpecHelpers
   $stderr.puts "Starting CHROME spec test"
   $stderr.puts "-----------------------------------------------------"
