@@ -6,6 +6,7 @@ require 'phantomjs'
 require 'tempfile'
 require 'erb'
 require File.join(File.dirname(__FILE__), "./build_context")
+require 'cakery'
 
 #Compile all the *.js files into one file
 task :build do
@@ -40,31 +41,21 @@ task :spec do
   ENV['FLOK_ENV'] = 'DEBUG'
   system('rake build')
 
-  Dir.chdir "../../../products/chrome/drivers/" do
-    #Copy chrome.js and spec files into glob folder
-    FileUtils.mkdir_p "./glob"
-    FileUtils.cp "chrome.js", "./glob"
-    key = SecureRandom.hex
-    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/init"), "./glob/0init.js-#{key}")
-    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/config"), "./glob/1config.js-#{key}")
-    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/spec"), "./glob/1spec.js-#{key}")
-
-    #Place the spec file inside document.ready
-    spec_js = File.read("./glob/1spec.js-#{key}")
-    spec_js = %{
-      $(document).ready(function() {
-        #{spec_js}
-      });
-    }
-    File.write("./glob/1spec.js-#{key}", spec_js)
-
-    #Compile into one chrome-test.js file
-    require 'pry'; binding.pry
-    Flok.src_glob_r("js-#{key}", "./glob/", "chrome-test.js")
-
-    #Now run (it already includes the spec runners in the spec folder)
-    system('boojs chrome-test.js -t 5');
+  recipe = Cakery.new("./cakery/spec.js.erb") do |f|
+    #f.spec_js_init << "./spec/init/**/*.js"
+    #f.spec_js_init << "./spec/config/**/*.js"
+    #f.spec_js << "./spec/spec/**/*.js"
+    #f.app_js << File.join(ENV['BUILD_PATH'], './chrome.js')
+    #f.app_js << File.join(ENV['BUILD_PATH'], '../application.js')
+    f.spec_js_init < "console.log('hi')"
   end
+
+  recipe.bake
+
+  f = Tempfile.new(SecureRandom.hex)
+  f.puts recipe.src
+
+  exec("boojs", "-t", "5", f.path)
 end
 
 #Establish an environment with a pipe assuming the world is built
