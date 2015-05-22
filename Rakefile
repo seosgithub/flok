@@ -104,6 +104,7 @@ namespace :spec do
 
     #Start the driver rake suite
     system "cd ./app/drivers/#{platform}/; rake spec BUILD_PATH=../../products/#{platform}/driver"
+    raise "Driver spec for platform #{platform} has failed" if $? != 0
   end
 
   task :world => ['etc', 'kern', 'iface', 'driver'] do

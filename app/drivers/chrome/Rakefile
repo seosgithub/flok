@@ -7,6 +7,7 @@ require 'tempfile'
 require 'erb'
 require File.join(File.dirname(__FILE__), "./build_context")
 require 'cakery'
+require '../../../spec/lib/helpers.rb'
 
 #Compile all the *.js files into one file
 task :build do
@@ -42,20 +43,42 @@ task :spec do
   system('rake build')
 
   recipe = Cakery.new("./cakery/spec.js.erb") do |f|
-    #f.spec_js_init << "./spec/init/**/*.js"
-    #f.spec_js_init << "./spec/config/**/*.js"
-    #f.spec_js << "./spec/spec/**/*.js"
-    #f.app_js << File.join(ENV['BUILD_PATH'], './chrome.js')
-    #f.app_js << File.join(ENV['BUILD_PATH'], '../application.js')
-    f.spec_js_init < "console.log('hi')"
+    f.spec_js_init << "./spec/init/**/*.js"
+    f.spec_js_init << "./spec/config/**/*.js"
+    f.spec_js << "./spec/spec/**/*_spec.js"
+    f.app_js << File.join(ENV['BUILD_PATH'], './chrome.js')
+    f.app_js << File.join(ENV['BUILD_PATH'], '../application.js')
   end
 
   recipe.bake
 
   f = Tempfile.new(SecureRandom.hex)
   f.puts recipe.src
+  f.close
 
-  exec("boojs", "-t", "5", f.path)
+  File.write "/Users/Seo/Desktop/fuck2.js", recipe.src
+
+  include SpecHelpers
+  $stderr.puts "Starting CHROME spec test"
+  $stderr.puts "-----------------------------------------------------"
+  sh2("boojs #{f.path}") do |stdin, stdout|
+    loop do
+      begin
+        Timeout::timeout(5) do
+          res = stdout.readline
+          $stderr.puts "\t"+res
+          if res =~ /__SUCCESS/
+            exit 0
+          elsif res =~ /__FAILED/
+            exit 1
+          end
+        end
+      rescue Exception => e
+        $stderr.puts e.inspect
+        exit 1
+      end
+    end
+  end
 end
 
 #Establish an environment with a pipe assuming the world is built

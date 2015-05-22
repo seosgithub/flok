@@ -22,5 +22,18 @@ QUnit.log(function( details ) {
 
 QUnit.testDone(function( details ) {
   console.log("[passed/total]: ", details.passed, "/", details.total);
-  console.log("----------------------------------------------------")
+  console.log("-----------------------------------------------------------------");
+});
+
+QUnit.moduleDone(function(details) {
+  var passed = details.passed;
+  var total = details.total;
+
+  console.log("Finished Tests: " + passed + "/" + total + " passed")
+
+  if (passed == total) {
+    console.log("__SUCCESS")
+  } else {
+    console.log("__FAILED")
+  }
 });

@@ -1,8 +1,11 @@
-<%= @spec_js_init %>
-
 //All the other code from chrome.js gets thrown in here
 <%= @app_js %>
 
+//This is QUnit and configuration
+<%= @spec_js_init %>
+
+//Execute these specs
 $(document).ready(function() {
+  QUnit.module("spec")
   <%= @spec_js %>
-})
+});

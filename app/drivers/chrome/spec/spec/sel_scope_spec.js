@@ -12,7 +12,7 @@
       self.init = function() {
         var matches = self.$sel("#root");
         assert.equal(matches.length, 0, "Matches are 0");
-        done();
+        //done();
       }
     }
 
