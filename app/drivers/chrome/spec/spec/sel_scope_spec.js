@@ -157,5 +157,4 @@
     var c = new TestController();
     c.__initialize__(0, $sel, {});
     c.init();
-  });
-
+});

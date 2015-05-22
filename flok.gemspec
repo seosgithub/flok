@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "os", "0.9.6"
   spec.add_development_dependency "boojs", "~> 0.0"
   spec.add_development_dependency "activesupport", "~> 4.2"
+  spec.add_development_dependency "cakery", "~> 0.0"
   spec.add_runtime_dependency "thor", "~> 0.19"
   spec.executables << 'flok'
 end

@@ -23,15 +23,19 @@ module Flok
 
   def self.src_glob_r type, dir_path, output_path
     out = ""
-    FileUtils.mkdir_p(dir_path)
-    FileUtils.mkdir_p(File.dirname(output_path))
-    nodes = []
-    nodes += Dir["./config/**/*.#{type}"].select{|e| File.file?(e)} 
-    nodes += Dir["./init/**/*.#{type}"].select{|e| File.file?(e)} 
-    nodes += Dir["./*.#{type}"].select{|e| File.file?(e)}
-    nodes += (Dir["./**/*"] - nodes).select{|e| File.file?(e)}
-    nodes.each do |f|
-      out << File.read(f) << "\n"
+    Dir.chdir dir_path do
+      FileUtils.mkdir_p(dir_path)
+      FileUtils.mkdir_p(File.dirname(output_path))
+      nodes = []
+      nodes += Dir["./init/**/*.#{type}"].select{|e| File.file?(e)} 
+      nodes += Dir["./config/**/*.#{type}"].select{|e| File.file?(e)} 
+      final_nodes = Dir["./final/**/*.#{type}"].select{|e| File.file?(e)} 
+      nodes += Dir["./*.#{type}"].select{|e| File.file?(e)}
+      nodes += (Dir["./**/*"] - nodes - final_nodes).select{|e| File.file?(e)}
+      nodes += final_nodes
+      nodes.each do |f|
+        out << File.read(f) << "\n"
+      end
     end
 
     File.write(output_path, out)

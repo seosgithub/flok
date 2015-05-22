@@ -75,3 +75,6 @@ The final `chrome.js` file is run through an `ERB` compiler that contains the va
 
 ### Debug information
 You may access the debug associated information via `debug_assoc` hash.
+
+### Testing
+All *js* files inside `./spec/spec` will be placed in one file under one document ready so QUnit will pick it up as one testing unit

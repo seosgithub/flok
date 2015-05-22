@@ -1,5 +1,5 @@
 require 'fileutils'
-require 'flok/build'
+require_relative '../../../lib/flok'
 require 'securerandom'
 require 'tmpdir'
 require 'phantomjs'
@@ -44,10 +44,23 @@ task :spec do
     #Copy chrome.js and spec files into glob folder
     FileUtils.mkdir_p "./glob"
     FileUtils.cp "chrome.js", "./glob"
-    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/"), "./glob/spec.js")
+    key = SecureRandom.hex
+    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/init"), "./glob/0init.js-#{key}")
+    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/config"), "./glob/1config.js-#{key}")
+    Flok.src_glob_r("js", File.join(File.dirname(__FILE__), "./spec/spec"), "./glob/1spec.js-#{key}")
+
+    #Place the spec file inside document.ready
+    spec_js = File.read("./glob/1spec.js-#{key}")
+    spec_js = %{
+      $(document).ready(function() {
+        #{spec_js}
+      });
+    }
+    File.write("./glob/1spec.js-#{key}", spec_js)
 
     #Compile into one chrome-test.js file
-    Flok.src_glob("js", "./glob/", "chrome-test.js")
+    require 'pry'; binding.pry
+    Flok.src_glob_r("js-#{key}", "./glob/", "chrome-test.js")
 
     #Now run (it already includes the spec runners in the spec folder)
     system('boojs chrome-test.js -t 5');
