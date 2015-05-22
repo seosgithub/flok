@@ -37,7 +37,8 @@ shared_context "iface:driver" do
       @pipe.close
       Process.kill(:INT, @pid)
     rescue Errno::ESRCH
-      $stderr.puts "err, no process"
+    rescue IOError => e
+      $stderr.puts "WARNING: while closing pipe got: #{e.inspect}"
     end
   end
 end
