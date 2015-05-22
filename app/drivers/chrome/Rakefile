@@ -71,7 +71,7 @@ task :spec do
             exit 1
           end
         end
-      rescue Exception => e
+      rescue => e
         $stderr.puts e.inspect
         exit 1
       end
