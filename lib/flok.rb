@@ -4,11 +4,9 @@ require "flok/build"
 require "flok/platform"
 require "flok/project"
 
-if ENV["FLOK_ENV"] == "DEBUG"
-  require "flok/interactive"
-  require "flok/user_compiler"
-  require "flok/services_compiler"
-end
+require "flok/interactive"
+require "flok/user_compiler"
+require "flok/services_compiler"
 
 module Flok
 end
