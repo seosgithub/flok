@@ -28,8 +28,6 @@ shared_context "iface:driver" do
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
     @mods = Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
-    
-    $stderr.puts "starting, PID = #{@pid}"
   end
 
   after(:each) do

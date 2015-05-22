@@ -25,7 +25,6 @@ RSpec.describe "User compiler" do
 
   it "Can load the ruby module" do
     compiler = Flok::UserCompiler
-    puts compiler
   end
 
   it "Can compile a controller and give up the root view" do
