@@ -68,6 +68,7 @@ it "Can create a new project with correct directories" do
 
   it "Can build a project with every type of platform" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
         #Build a new project
         flok "build #{platform}"
@@ -122,10 +123,9 @@ it "Can create a new project with correct directories" do
     end
 
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       @platform = platform
       controller_rb = File.read('./spec/etc/user_compiler/controller0.rb')
-
-      
 
       #The file with content should be longer when compiled into the flat application_user.js
       len_with_content = compile_with_file "./spec/etc/user_compiler/controller0.rb"
@@ -138,6 +138,7 @@ it "Can create a new project with correct directories" do
   include SpecHelpers
  it "server does build project when first run" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
         #Start the server
         #Get path to the flok binary relative to this file
@@ -145,7 +146,7 @@ it "Can create a new project with correct directories" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #The server should always trigger a build on it's first run
           expect(dirs).to include "products"
           Dir.chdir "products" do
