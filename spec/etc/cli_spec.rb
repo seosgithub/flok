@@ -56,8 +56,7 @@ it "Can create a new project with correct directories" do
         template_nodes = Dir["**/*"].map{|e| e.gsub(/\.erb$/i, "")}
       end
       new_proj_nodes = Dir["**/*"]
-      $stderr.puts "Flok version = #{Flok::VERSION}"
-      expect(new_proj_nodes).to eq(template_nodes)
+      expect(new_proj_nodes.sort).to eq(template_nodes.sort)
 
       expect(files).to include("Gemfile")
     end
