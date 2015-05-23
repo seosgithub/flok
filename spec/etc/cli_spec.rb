@@ -42,7 +42,9 @@ RSpec.describe "CLI" do
 
   it "Can be executed via bundle exec" do
     flok_new do
-      flok "build CHROME"
+      Flok.platforms.each do |platform|
+        flok "build #{platform}"
+      end
     end
   end
 
