@@ -31,7 +31,7 @@ def flok_new
 end
 
 RSpec.describe "CLI" do
-it "Can create a new project with correct directories" do
+  it "Can create a new project with correct directories" do
     flok_new do
       #Should include all entities in the project template with the exception
       #of erb extenseded entities (which will still be included, but they each
@@ -186,38 +186,6 @@ it "Can create a new project with correct directories" do
           #Make sure the compiled file is different and it's somewhat valid (length > 30)
           expect(application_user_js2).not_to eq(application_user_js)
           expect(application_user_js2.length).to be > 30 #Magic 30 to avoid any problems
-        end
-      end
-    end
-  end
-
-  it "server does delete existing products when a file is added (before it does a rebuild, i.e. clean)" do
-    Flok.platforms.each do |platform|
-      flok_new do
-        #Start the server
-        #Get path to the flok binary relative to this file
-        bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-        lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
-        #Now execute the command with a set of arguments
-        sh2("ruby -I#{lib_path} #{bin_path} server #{platform}", /BUILD RAN/) do |inp, out|
-          #Get the original build
-          application_user_js = File.read("products/#{platform}/application_user.js")
-
-          #Now add a file
-          File.write "./app/controllers/test2.rb", %{
-            controller "my_controller" do
-              view "my_controller"
-              action "my_action" do
-                on_entry %{
-                }
-              end
-            end
-          }
-
-          #DONT Wait for a rebuild
-          is_dir = File.directory?("products/#{platform}")
-          expect(is_dir).to eq(false)
         end
       end
     end

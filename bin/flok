@@ -66,15 +66,6 @@ class FlokCLI < Thor
   desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM when something in ./app changes"
   include SpecHelpers #Contains sh2
   def server platform
-    File.write "Guardfile", %{
-      guard :shell, :all_on_start => true do
-        watch %r{app/.*} do |m|
-          res = system("flok build #{platform}");
-          $stdout.puts "BUILD RAN"
-        end
-      end
-    }
-
     #Ensure puts does something because it's on another thread
     $stdout.sync = true
 

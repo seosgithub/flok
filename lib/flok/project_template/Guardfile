@@ -1,0 +1,7 @@
+#This file is used for `flok server`
+guard :shell, :all_on_start => true do
+  watch %r{app/.*} do |m|
+    res = system("flok build #{ENV['PLATFORM']}");
+    $stdout.puts "BUILD RAN"
+  end
+end
