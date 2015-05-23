@@ -41,11 +41,8 @@ RSpec.describe "CLI" do
   end
 
  it "Can be executed via bundle exec" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        flok "build"
-      end
+    flok_new do
+      flok "build"
     end
   end
 
@@ -67,31 +64,29 @@ it "Can create a new project with correct directories" do
   end
 
   it "Can build a project with every type of platform" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        #Build a new project
-        flok "build"
+    platform = ENV['PLATFORM']
+    flok_new do
+      #Build a new project
+      flok "build"
 
-        #Check it's products directory
-        expect(dirs).to include "products"
-        Dir.chdir "products" do
-          #Has a platform folder
-          expect(dirs).to include platform
-          Dir.chdir platform do
-            #Has an application_user.js file
-            expect(files).to include "application_user.js"
+      #Check it's products directory
+      expect(dirs).to include "products"
+      Dir.chdir "products" do
+        #Has a platform folder
+        expect(dirs).to include platform
+        Dir.chdir platform do
+          #Has an application_user.js file
+          expect(files).to include "application_user.js"
 
-            #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
-            glob_application_js = File.read('glob/application.js')
-            glob_user_compiler_js = File.read('glob/user_compiler.js')
-            application_user_js = File.read('application_user.js')
-            expect(application_user_js).to include(glob_application_js)
-            expect(application_user_js).to include(glob_user_compiler_js)
+          #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
+          glob_application_js = File.read('glob/application.js')
+          glob_user_compiler_js = File.read('glob/user_compiler.js')
+          application_user_js = File.read('application_user.js')
+          expect(application_user_js).to include(glob_application_js)
+          expect(application_user_js).to include(glob_user_compiler_js)
 
-            #Contains the same files as the kernel in the drivers directory
-            expect(dirs).to include "drivers"
-          end
+          #Contains the same files as the kernel in the drivers directory
+          expect(dirs).to include "drivers"
         end
       end
     end
@@ -122,45 +117,41 @@ it "Can create a new project with correct directories" do
       end
     end
 
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      @platform = platform
-      controller_rb = File.read('./spec/etc/user_compiler/controller0.rb')
+    platform = ENV['PLATFORM']
+    @platform = platform
+    controller_rb = File.read('./spec/etc/user_compiler/controller0.rb')
 
-      #The file with content should be longer when compiled into the flat application_user.js
-      len_with_content = compile_with_file "./spec/etc/user_compiler/controller0.rb"
-      len_no_content = compile_with_file
+    #The file with content should be longer when compiled into the flat application_user.js
+    len_with_content = compile_with_file "./spec/etc/user_compiler/controller0.rb"
+    len_no_content = compile_with_file
 
-      expect(len_no_content).to be < len_with_content
-    end
+    expect(len_no_content).to be < len_with_content
   end
 
- include SpecHelpers
- it "server does build project when first run" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        #Now execute the command with a set of arguments
-        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
-          #The server should always trigger a build on it's first run
-          expect(dirs).to include "products"
-          Dir.chdir "products" do
-            #Has a platform folder
-            expect(dirs).to include platform
-            Dir.chdir platform do
-              #Has an application_user.js file
-              expect(files).to include "application_user.js"
+  include SpecHelpers
+  it "server does build project when first run" do
+    platform = ENV['PLATFORM']
+    flok_new do
+      #Now execute the command with a set of arguments
+      sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
+        #The server should always trigger a build on it's first run
+        expect(dirs).to include "products"
+        Dir.chdir "products" do
+          #Has a platform folder
+          expect(dirs).to include platform
+          Dir.chdir platform do
+            #Has an application_user.js file
+            expect(files).to include "application_user.js"
 
-              #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
-              glob_application_js = File.read('glob/application.js')
-              glob_user_compiler_js = File.read('glob/user_compiler.js')
-              application_user_js = File.read('application_user.js')
-              expect(application_user_js).to include(glob_application_js)
-              expect(application_user_js).to include(glob_user_compiler_js)
+            #The application_user.js contains both the glob/application.js and the glob/user_compiler.js
+            glob_application_js = File.read('glob/application.js')
+            glob_user_compiler_js = File.read('glob/user_compiler.js')
+            application_user_js = File.read('application_user.js')
+            expect(application_user_js).to include(glob_application_js)
+            expect(application_user_js).to include(glob_user_compiler_js)
 
-              #Contains the same files as the kernel in the drivers directory
-              expect(dirs).to include "drivers"
-            end
+            #Contains the same files as the kernel in the drivers directory
+            expect(dirs).to include "drivers"
           end
         end
       end
@@ -168,86 +159,80 @@ it "Can create a new project with correct directories" do
   end
 
   it "server does rebuild project when a file is added" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        #Now execute the command with a set of arguments
-        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
-          #Get the original build
-          application_user_js = File.read("products/#{platform}/application_user.js")
+    platform = ENV['PLATFORM']
+    flok_new do
+      #Now execute the command with a set of arguments
+      sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
+        #Get the original build
+        application_user_js = File.read("products/#{platform}/application_user.js")
 
-          #Now add a file
-          File.write "./app/controllers/test2.rb", %{
-            controller "my_controller" do
-              view "my_controller"
-              action "my_action" do
-                on_entry %{
-                }
-              end
+        #Now add a file
+        File.write "./app/controllers/test2.rb", %{
+          controller "my_controller" do
+            view "my_controller"
+            action "my_action" do
+              on_entry %{
+              }
             end
-          }
+          end
+        }
 
-          #Wait for a rebuild
-          expect(out).to readline_and_equal_x_within_y_seconds("BUILD RAN", 5.seconds)
+        #Wait for a rebuild
+        expect(out).to readline_and_equal_x_within_y_seconds("BUILD RAN", 5.seconds)
 
-          #Get updated version
-          application_user_js2 = File.read("products/#{platform}/application_user.js")
+        #Get updated version
+        application_user_js2 = File.read("products/#{platform}/application_user.js")
 
-          #Make sure the compiled file is different and it's somewhat valid (length > 30)
-          expect(application_user_js2).not_to eq(application_user_js)
-          expect(application_user_js2.length).to be > 30 #Magic 30 to avoid any problems
-        end
+        #Make sure the compiled file is different and it's somewhat valid (length > 30)
+        expect(application_user_js2).not_to eq(application_user_js)
+        expect(application_user_js2.length).to be > 30 #Magic 30 to avoid any problems
       end
     end
   end
 
   it "server does host products on localhost:9992" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        #Now execute the command with a set of arguments
-        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
-          real_application_user_js = File.read("products/#{platform}/application_user.js")
+    platform = ENV['PLATFORM']
+    flok_new do
+      #Now execute the command with a set of arguments
+      sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
+        real_application_user_js = File.read("products/#{platform}/application_user.js")
 
-          #Grab the application_user.js file
-          res = wget "http://localhost:9992/application_user.js"
-          expect(res).not_to eq(nil)
-          expect(res.length).not_to eq(0)
-          expect(res).to eq(real_application_user_js)
-        end
+        #Grab the application_user.js file
+        res = wget "http://localhost:9992/application_user.js"
+        expect(res).not_to eq(nil)
+        expect(res.length).not_to eq(0)
+        expect(res).to eq(real_application_user_js)
       end
     end
   end
 
   it "server does host products on localhost:9992 and changes the products when the files change" do
-    Flok.platforms.each do |platform|
-      ENV['PLATFORM'] = platform
-      flok_new do
-        #Now execute the command with a set of arguments
-        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
-          #Get the original
-          application_user_js = wget "http://localhost:9992/application_user.js"
+    platform = ENV['PLATFORM']
+    flok_new do
+      #Now execute the command with a set of arguments
+      sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
+        #Get the original
+        application_user_js = wget "http://localhost:9992/application_user.js"
 
-          #Now add a file
-          File.write "./app/controllers/test2.rb", %{
-            controller "my_controller" do
-              view "my_controller"
-              action "my_action" do
-                on_entry %{
-                }
-              end
+        #Now add a file
+        File.write "./app/controllers/test2.rb", %{
+          controller "my_controller" do
+            view "my_controller"
+            action "my_action" do
+              on_entry %{
+              }
             end
-          }
-          #Wait for a rebuild
-          expect(out).to readline_and_equal_x_within_y_seconds("BUILD RAN", 5.seconds)
+          end
+        }
+        #Wait for a rebuild
+        expect(out).to readline_and_equal_x_within_y_seconds("BUILD RAN", 5.seconds)
 
-          #Grab new version
-          application_user_js2 = wget "http://localhost:9992/application_user.js"
+        #Grab new version
+        application_user_js2 = wget "http://localhost:9992/application_user.js"
 
-          #Make sure the compiled file is different and it's longer
-          expect(application_user_js2.length).to be > application_user_js.length
-          expect(application_user_js2.length).to be > 30 #Make sure it's at least something
-        end
+        #Make sure the compiled file is different and it's longer
+        expect(application_user_js2.length).to be > application_user_js.length
+        expect(application_user_js2.length).to be > 30 #Make sure it's at least something
       end
     end
   end

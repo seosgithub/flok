@@ -34,7 +34,7 @@ shared_context "kern" do
         File.write './app/controllers/user_controller.rb', user_controllers_src
 
         #Build
-        flok "build chrome" #Will generate drivers/ but we will ignore that
+        flok "build" #Will generate drivers/ but we will ignore that
 
         #Execute
         @driver = FakeDriverContext.new
