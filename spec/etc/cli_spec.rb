@@ -35,12 +35,12 @@ def flok_new
 end
 
 RSpec.describe "CLI" do
-  before(:all) do
+ before(:all) do
     #Uninstall old gems and install the current development gem
     system("rake gem:install")
   end
 
-  it "Can be executed via bundle exec" do
+ it "Can be executed via bundle exec" do
     Flok.platforms.each do |platform|
       ENV['PLATFORM'] = platform
       flok_new do
@@ -71,7 +71,7 @@ it "Can create a new project with correct directories" do
       ENV['PLATFORM'] = platform
       flok_new do
         #Build a new project
-        flok "build #{platform}"
+        flok "build"
 
         #Check it's products directory
         expect(dirs).to include "products"
@@ -106,7 +106,7 @@ it "Can create a new project with correct directories" do
         File.write "./app/controllers/controller0.rb", controller_src if path
 
         #Build a new project
-        flok "build #{@platform}"
+        flok "build"
 
         #Check it's products directory
         Dir.chdir "products" do
@@ -135,16 +135,11 @@ it "Can create a new project with correct directories" do
     end
   end
 
-  include SpecHelpers
+ include SpecHelpers
  it "server does build project when first run" do
     Flok.platforms.each do |platform|
       ENV['PLATFORM'] = platform
       flok_new do
-        #Start the server
-        #Get path to the flok binary relative to this file
-        bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-        lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
         #Now execute the command with a set of arguments
         sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #The server should always trigger a build on it's first run
@@ -176,11 +171,6 @@ it "Can create a new project with correct directories" do
     Flok.platforms.each do |platform|
       ENV['PLATFORM'] = platform
       flok_new do
-        #Start the server
-        #Get path to the flok binary relative to this file
-        bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-        lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
         #Now execute the command with a set of arguments
         sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #Get the original build
@@ -215,17 +205,14 @@ it "Can create a new project with correct directories" do
     Flok.platforms.each do |platform|
       ENV['PLATFORM'] = platform
       flok_new do
-        #Start the server
-        #Get path to the flok binary relative to this file
-        bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-        lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
         #Now execute the command with a set of arguments
         sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           real_application_user_js = File.read("products/#{platform}/application_user.js")
 
           #Grab the application_user.js file
           res = wget "http://localhost:9992/application_user.js"
+          expect(res).not_to eq(nil)
+          expect(res.length).not_to eq(0)
           expect(res).to eq(real_application_user_js)
         end
       end
@@ -236,11 +223,6 @@ it "Can create a new project with correct directories" do
     Flok.platforms.each do |platform|
       ENV['PLATFORM'] = platform
       flok_new do
-        #Start the server
-        #Get path to the flok binary relative to this file
-        bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-        lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
         #Now execute the command with a set of arguments
         sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #Get the original
@@ -262,9 +244,9 @@ it "Can create a new project with correct directories" do
           #Grab new version
           application_user_js2 = wget "http://localhost:9992/application_user.js"
 
-          #Make sure the compiled file is different and it's somewhat valid (length > 30)
-          expect(application_user_js2).not_to eq(application_user_js)
-          expect(application_user_js2.length).to be > 30 #Magic 30 to avoid any problems
+          #Make sure the compiled file is different and it's longer
+          expect(application_user_js2.length).to be > application_user_js.length
+          expect(application_user_js2.length).to be > 30 #Make sure it's at least something
         end
       end
     end
