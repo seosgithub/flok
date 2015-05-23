@@ -41,14 +41,14 @@ RSpec.describe "CLI" do
   end
 
   it "Can be executed via bundle exec" do
-    flok_new do
-      Flok.platforms.each do |platform|
+    Flok.platforms.each do |platform|
+      flok_new do
         flok "build #{platform}"
       end
     end
   end
 
- it "Can create a new project with correct directories" do
+it "Can create a new project with correct directories" do
     flok_new do
       #Should include all entities in the project template with the exception
       #of erb extenseded entities (which will still be included, but they each
