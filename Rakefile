@@ -23,7 +23,7 @@ def upgrade_version
   return new_version
 end
 
-task :push do
+task 'gem:push' do
   version = upgrade_version
   `git add .`
   `git commit -a -m 'gem #{version}'`
@@ -33,6 +33,31 @@ task :push do
   `gem build flok.gemspec`
   `gem push flok-#{version}.gem`
   `rm flok-#{version}.gem`
+end
+
+#Will build and install the development GEM
+#but will not push it out or upgrade the version
+#WARNING: It will also remove any copies of flok you currently
+task 'gem:install' do
+  #Remove current version
+  $stderr.puts "Removing gem if necessary... This may give a warning but it's ok"
+  $stderr.puts "------------------------------------------------------"
+  system('gem uninstall -xa flok')
+  $stderr.puts "------------------------------------------------------\n\n"
+
+  #Build gem
+  $stderr.puts "Attempting to build gem..."
+  $stderr.puts "------------------------------------------------------"
+  res = system('gem build flok.gemspec')
+  raise "Could not build gem" unless res
+  $stderr.puts "------------------------------------------------------\n\n"
+
+  #Install gem
+  $stderr.puts "Attempting to install gem..."
+  $stderr.puts "------------------------------------------------------"
+  res = system("gem install flok-#{Flok::VERSION}.gem")
+  raise "Could not install gem" unless res
+  $stderr.puts "------------------------------------------------------"
 end
 
 #Compile

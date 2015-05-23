@@ -11,19 +11,23 @@ require 'securerandom'
 
 #Execute flok binary
 def flok args
-  #Get path to the flok binary relative to this file
-  bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
-  lib_path = File.join(File.dirname(__FILE__), "../../lib")
-
-  #Now execute the command with a set of arguments
-  system("ruby -I#{lib_path} #{bin_path} #{args}")
+  #Execute
+  ENV['BUNDLE_GEMFILE'] = File.join(Dir.pwd, "Gemfile")
+  ENV['RUBYOPT'] = ""
+  system('bundle install')
+  res = system("bundle exec flok #{args}")
+  raise "Could not execute bundle exec flok #{args.inspect}" unless res
 end
 
 #Create a new flok project named test and go into that directory
 def flok_new 
   temp_dir = new_temp_dir
   Dir.chdir temp_dir do
-    flok "new test"
+    #This isn't done with flok() because we don't have a project yet, ergo, no Gemfile
+    #But it's ok because it's *this* development version because we installed a copy of
+    #it before this spec ran in before(:each)
+    system("flok new test")
+
     Dir.chdir "test" do
       yield
     end
@@ -31,7 +35,18 @@ def flok_new
 end
 
 RSpec.describe "CLI" do
-  it "Can create a new project with correct directories" do
+  before(:all) do
+    #Uninstall old gems and install the current development gem
+    system("rake gem:install")
+  end
+
+  it "Can be executed via bundle exec" do
+    flok_new do
+      flok "build CHROME"
+    end
+  end
+
+ it "Can create a new project with correct directories" do
     flok_new do
       #Should include all entities in the project template with the exception
       #of erb extenseded entities (which will still be included, but they each
