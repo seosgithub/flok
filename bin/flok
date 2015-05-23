@@ -18,12 +18,13 @@ class FlokCLI < Thor
     end
   end
 
-  desc "build <platform>", "Build the products for a platform"
-  def build platform
+  desc "build", "Build the products for a platform"
+  def build
+    raise "$PLATFORM was not set" unless ENV['PLATFORM']
+    platform = ENV['PLATFORM']
+
     #Create a products folder if it dosen't already exist
     Dir.mkdir("./products") unless File.exists?("./products")
-
-    ENV["PLATFORM"] = platform
 
     #Go into the flok gem project
     local_products_path = File.join(Dir.pwd, "products")
@@ -65,8 +66,10 @@ class FlokCLI < Thor
 
   desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM when something in ./app changes"
   include SpecHelpers #Contains sh2
-  def server platform
-    ENV['PLATFORM'] = platform
+  def server
+    raise "$PLATFORM was not set" unless ENV['PLATFORM']
+    platform = ENV['PLATFORM']
+
     #Ensure puts does something because it's on another thread
     $stdout.sync = true
 
@@ -111,5 +114,3 @@ class FlokCLI < Thor
 end
 
 FlokCLI.start(ARGV)
-
-

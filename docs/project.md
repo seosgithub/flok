@@ -2,11 +2,11 @@
 Flok is divided up like rails.  There is the flok kernel and driver stack and then there is user-facing applications.
 
 ###The flok command
-You create and build projects via the `flok` command.
+You create and build projects via the `flok` command. You must set the `$FLOK_ENV` to either `DEBUG` or `RELEASE` and `$PLATFORM` to a platform.
 
  * `flok new <path>` - Create a new flok project
- * `flok build <platform>` - Build a flok project. Generates files in `./products`
- * `flok server <platform>` - Trigger auto-rebuild when a file is modified in the `./app` folder and hosts the `products/$PLATFORM` folder on `http://localhost:9992/`. e.g. `http://localhost:9992/application_user.js`
+ * `flok build` - Build a flok project. Generates files in `./products`
+ * `flok server` - Trigger auto-rebuild when a file is modified in the `./app` folder and hosts the `products/$PLATFORM` folder on `http://localhost:9992/`. e.g. `http://localhost:9992/application_user.js`
 
 ###Folder structure
   * `app/`

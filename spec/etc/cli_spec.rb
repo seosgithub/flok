@@ -42,8 +42,9 @@ RSpec.describe "CLI" do
 
   it "Can be executed via bundle exec" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
-        flok "build #{platform}"
+        flok "build"
       end
     end
   end
@@ -172,6 +173,7 @@ it "Can create a new project with correct directories" do
 
   it "server does rebuild project when a file is added" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
         #Start the server
         #Get path to the flok binary relative to this file
@@ -179,7 +181,7 @@ it "Can create a new project with correct directories" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #Get the original build
           application_user_js = File.read("products/#{platform}/application_user.js")
 
@@ -210,6 +212,7 @@ it "Can create a new project with correct directories" do
 
   it "server does host products on localhost:9992" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
         #Start the server
         #Get path to the flok binary relative to this file
@@ -217,7 +220,7 @@ it "Can create a new project with correct directories" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           real_application_user_js = File.read("products/#{platform}/application_user.js")
 
           #Grab the application_user.js file
@@ -230,6 +233,7 @@ it "Can create a new project with correct directories" do
 
   it "server does host products on localhost:9992 and changes the products when the files change" do
     Flok.platforms.each do |platform|
+      ENV['PLATFORM'] = platform
       flok_new do
         #Start the server
         #Get path to the flok binary relative to this file
@@ -237,7 +241,7 @@ it "Can create a new project with correct directories" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server", /BUILD RAN/) do |inp, out|
           #Get the original
           application_user_js = wget "http://localhost:9992/application_user.js"
 
