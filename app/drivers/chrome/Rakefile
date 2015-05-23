@@ -47,7 +47,7 @@ task :spec do
     f.spec_js_init << "./spec/config/**/*.js"
     f.spec_js << "./spec/spec/**/*_spec.js"
     f.app_js << File.join(ENV['BUILD_PATH'], './chrome.js')
-    f.app_js << File.join(ENV['BUILD_PATH'], '../application.js')
+    #f.app_js << File.join(ENV['BUILD_PATH'], '../application.js')
   end
 
   recipe.bake
