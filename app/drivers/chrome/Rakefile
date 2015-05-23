@@ -89,7 +89,3 @@ task :pipe => :build do
     server.begin_pipe
   }
 end
-
-task :server do
-  
-end

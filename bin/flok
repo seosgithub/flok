@@ -3,6 +3,8 @@
 require 'flok'
 require 'thor'
 require 'fileutils'
+require 'webrick'
+require_relative '../spec/lib/helpers.rb'
 
 class FlokCLI < Thor
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
@@ -61,11 +63,49 @@ class FlokCLI < Thor
     end
   end
 
-  desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM"
+  desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM when something in ./app changes"
+  include SpecHelpers #Contains sh2
   def server platform
-    system('bundle exec guard')
+    File.write "Guardfile", %{
+      guard :shell, :all_on_start => true do
+        watch %r{^app/.*} do |m|
+          system("#{$0} build #{platform}")
+          res = system("#{$0} build #{platform}");
+          $stdout.puts "BUILD RAN"
+        end
+      end
+    }
+
+    #Ensure puts does something because it's on another thread
+    $stdout.sync = true
+
+    ###########################################################################
+    #We execute two tasks that run at the same time, (1) the webrick hoster
+    #and (2) the guard reloader that triggers build
+    ###########################################################################
+    #1) Launch webrick server
+    server = WEBrick::HTTPServer.new :Port => 9992, :DocumentRoot => "./products/#{platform}", :StartCallback => Proc.new {
+    }
+    server_started = false
+
+    #2) Wait for initial build to launch (all_on_start)
+    sh2("guard") do |inp, out|
+      loop do
+        res = out.readline
+        if res =~ /BUILD RAN/
+          #Start server
+          Thread.new { server.start } unless server_started
+          server_started = true
+
+          puts "BUILD RAN"
+        else
+          $stderr.puts res
+        end
+      end
+    end
   end
 
+  #Part of the build command
   class ERBUserApplicationContext
     def get_binding
       return binding

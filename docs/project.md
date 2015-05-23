@@ -6,7 +6,7 @@ You create and build projects via the `flok` command.
 
  * `flok new <path>` - Create a new flok project
  * `flok build <platform>` - Build a flok project. Generates files in `./products`
- * `flok server <platform>` - Trigger auto-rebuild when a file is modified in the `./app` folder and hosts the `products` folder on `http://localhost:9992/`
+ * `flok server <platform>` - Trigger auto-rebuild when a file is modified in the `./app` folder and hosts the `products/$PLATFORM` folder on `http://localhost:9992/`. e.g. `http://localhost:9992/application_user.js`
 
 ###Folder structure
   * `app/`

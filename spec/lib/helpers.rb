@@ -1,6 +1,7 @@
 require 'securerandom'
 require 'json'
 require 'webrick'
+require 'open-uri'
 
 #Duplex pipe
 ###################################################################################################################
@@ -290,29 +291,39 @@ def sh2 *args
   end
 end
 
-#Execute some chrome code
-def chrome code, wait_for
-  #Load js assets
-  js_assets = Dir["./spec/assets/*.js"]
-  f = Tempfile.new(SecureRandom.hex)
-  js_assets.each do |fn|
-    f.puts File.read(fn)
+  #Execute some chrome code
+  def chrome code, wait_for
+    #Load js assets
+    js_assets = Dir["./spec/assets/*.js"]
+    f = Tempfile.new(SecureRandom.hex)
+    js_assets.each do |fn|
+      f.puts File.read(fn)
+    end
+
+    f.puts code
+    f.close
+    sh "boojs", f.path, wait_for do
+      yield
+    end
   end
 
-  f.puts code
-  f.close
-  sh "boojs", f.path, wait_for do
-    yield
+  #Get the result at an endpoint
+  def get endpoint
+    uri = URI.parse(endpoint)
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
+    response = http.request(request)
+
+    return JSON.parse(response.body)
   end
-end
 
-#Get the result at an endpoint
-def get endpoint
-  uri = URI.parse(endpoint)
-  http = Net::HTTP.new(uri.host, uri.port)
-  request = Net::HTTP::Get.new(uri.request_uri)
-  response = http.request(request)
-
-  return JSON.parse(response.body)
-end
+  def wget endpoint
+    begin
+      Timeout::timeout(5) do
+        return open(endpoint).read
+      end
+    rescue Timeout::Error
+      raise "Timed out while waiting for: #{endpoint.inspect}"
+    end
+  end
 end
