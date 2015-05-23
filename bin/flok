@@ -68,9 +68,8 @@ class FlokCLI < Thor
   def server platform
     File.write "Guardfile", %{
       guard :shell, :all_on_start => true do
-        watch %r{^app/.*} do |m|
-          system("#{$0} build #{platform}")
-          res = system("#{$0} build #{platform}");
+        watch %r{app/.*} do |m|
+          res = system("flok build #{platform}");
           $stdout.puts "BUILD RAN"
         end
       end
