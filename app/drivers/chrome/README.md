@@ -66,14 +66,16 @@ $(document).ready(function() {
 });
 ```
 
-### Data bindings
+### DOM helpers
 ```html
 <!-- This will place the contents of context.foo into the divider -->
 <div data-puts="foo"></div>
 
 <!-- You can also use an attribute, just place it before the variable -->
 <img data-puts="src foo" />
-```
+
+<!-- You can send events via the emit tag -->
+<button data-emit='button_clicked'>Click me</button>
 
 ### ERB Compliation
 The final `chrome.js` file is run through an `ERB` compiler that contains the variables:

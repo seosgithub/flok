@@ -62,7 +62,7 @@ task :spec do
   sh2("boojs #{f.path}") do |stdin, stdout|
     loop do
       begin
-        Timeout::timeout(5) do
+        Timeout::timeout(10) do
           res = stdout.readline
           $stderr.puts "\t"+res
           if res =~ /__SUCCESS/
