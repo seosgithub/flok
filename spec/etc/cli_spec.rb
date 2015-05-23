@@ -14,7 +14,6 @@ def flok args
   #Execute
   ENV['BUNDLE_GEMFILE'] = File.join(Dir.pwd, "Gemfile")
   ENV['RUBYOPT'] = ""
-  system('bundle install')
   res = system("bundle exec flok #{args}")
   raise "Could not execute bundle exec flok #{args.inspect}" unless res
 end
@@ -29,6 +28,7 @@ def flok_new
     system("flok new test")
 
     Dir.chdir "test" do
+      system('bundle install')
       yield
     end
   end
@@ -142,7 +142,7 @@ RSpec.describe "CLI" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("ruby -I#{lib_path} #{bin_path} server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
           #The server should always trigger a build on it's first run
           expect(dirs).to include "products"
           Dir.chdir "products" do
@@ -177,7 +177,7 @@ RSpec.describe "CLI" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("ruby -I#{lib_path} #{bin_path} server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
           #Get the original build
           application_user_js = File.read("products/#{platform}/application_user.js")
 
@@ -215,7 +215,7 @@ RSpec.describe "CLI" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("ruby -I#{lib_path} #{bin_path} server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
           real_application_user_js = File.read("products/#{platform}/application_user.js")
 
           #Grab the application_user.js file
@@ -235,7 +235,7 @@ RSpec.describe "CLI" do
         lib_path = File.join(File.dirname(__FILE__), "../../lib")
 
         #Now execute the command with a set of arguments
-        sh2("ruby -I#{lib_path} #{bin_path} server #{platform}", /BUILD RAN/) do |inp, out|
+        sh2("bundle exec flok server #{platform}", /BUILD RAN/) do |inp, out|
           #Get the original
           application_user_js = wget "http://localhost:9992/application_user.js"
 
