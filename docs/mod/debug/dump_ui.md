@@ -18,7 +18,7 @@ Ontop of the base node, the type defines a child class of the node:
     * `name` - The name of the view controller (human friendly)
     * `action` - Current action name (human friendly)
     * `ptr` - The base pointer of this view controller
-    * `event_handlers` - A list of events that the current action is capabable of handling
+    * `events` - A list of events that the current action is capabable of handling
   * `view` - View
     * `name` - The name of the view
     * `ptr` - The pointer to the view
