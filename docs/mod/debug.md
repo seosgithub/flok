@@ -14,8 +14,11 @@ the port -333 with the message name `eval_res` and the info as `{info: res}` whe
 
 `int_debug_dump_ui` - See [Debug Dump UI](./debug/dump_ui.md) for specifics.
 
-`int_debug_controller_context(bp)` - Retreive a controller's context. Sends a `if_event` to port `-333` named `debug_controller_context_res` with the payload of the controller's
-context at `bp`
+`int_debug_controller_describe(bp)` - Retreive information about a controller. Sends a `if_event` to port `-333` named `debug_controller_describe_res` with the payload of the controller's
+describe at `bp`.
+  * describe returns
+    * `context` - The context of the controller which is `cinfo.context`
+    * `events` - The list of events the current controller action will respond to, **current action not the same as displayed if it's changed**
 
 ### Driver Spec related
   * `if_debug_spec_assoc(base, key)` - When this message is received, the client shall return a message called `spec` containing the value
