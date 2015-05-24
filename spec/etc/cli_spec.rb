@@ -168,7 +168,6 @@ it "Can create a new project with correct directories" do
         #Now add a file
         File.write "./app/controllers/test2.rb", %{
           controller "my_controller" do
-            view "my_controller"
             action "my_action" do
               on_entry %{
               }
@@ -216,7 +215,6 @@ it "Can create a new project with correct directories" do
         #Now add a file
         File.write "./app/controllers/test2.rb", %{
           controller "my_controller" do
-            view "my_controller"
             action "my_action" do
               on_entry %{
               }

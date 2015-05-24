@@ -263,7 +263,7 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :root_view, :name, :spots, :macros
+    attr_accessor :name, :spots, :macros
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
@@ -271,10 +271,6 @@ module Flok
       @macros = {}
 
       self.instance_eval(&block)
-    end
-
-    def view name
-      @root_view = name
     end
 
     #Create an action macro

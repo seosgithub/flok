@@ -24,7 +24,7 @@ RSpec.describe "kern:debug_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["my_view", {}, base+1, ["main"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"hello" => "world"}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "index"}])

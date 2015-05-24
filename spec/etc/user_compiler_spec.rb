@@ -27,10 +27,11 @@ RSpec.describe "User compiler" do
     compiler = Flok::UserCompiler
   end
 
-  it "Can compile a controller and give up the root view" do
+  it "Can compile a controller and give up the root 
+  iew" do
     ctx = compile "controller0"
     root_view = ctx.eval "ctable.my_controller.root_view"
-    expect(root_view).to eq("test_view")
+    expect(root_view).to eq("my_controller")
   end
 
   it "Can compile a controller and contain a list of actions" do
