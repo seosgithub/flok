@@ -18,11 +18,11 @@ event, the event is passed to the `event_gw` (event gateway) of the `controller_
 on the structure. If `event_gw` is `null`, then the event is ignored.
 
 ###Writing a `flok user controller (fuc)`
-Let's write a `fuc` controller for a view that has 2 tabs and a content area.
+Let's write a `fuc` controller that has 2 tabs and a content area. The view is implicitly the same name of the controller, in this case it would be
+`tab_controller`
 
 ```ruby
 controller "tab_controller" do
-  view "tab_container"
   spaces "content"
 
   #You can also define macros for shared action traits
