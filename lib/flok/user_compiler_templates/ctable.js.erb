@@ -2,7 +2,7 @@ ctable = {
   <% @controllers.each do |c| %>
       <%= c.name %>: {
         name: '<%= c.name %>',
-        root_view: '<%= c.root_view %>',
+        root_view: '<%= c.name %>',
         spots: <%= c.spots.to_json %>,
         actions: {
           <% actions_for_controller(c.name).each do |a| %>
