@@ -9,9 +9,10 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:debug_spec" do
   include_context "kern"
 
- it "Can retreive the controller's context" do
+  #includes context, events, etc.
+  it "Can retreive the controller's describe" do
     #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/controller_context.rb')
+    ctx = flok_new_user File.read('./spec/kern/assets/controller_describe.rb')
 
     #Do not run anything
     ctx.eval %{
@@ -30,9 +31,14 @@ RSpec.describe "kern:debug_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "index"}])
 
     #Request context for view controller
-    @driver.int "int_debug_controller_context", [base]
-    @driver.mexpect("if_event", [-333, "debug_controller_context_res", {
-      "hello" => "world"
+    @driver.int "int_debug_controller_describe", [base]
+    @driver.mexpect("if_event", [-333, "debug_controller_describe_res", {
+      "context" => {
+        "hello" => "world"
+      },
+      "events" => [
+        "test"
+      ]
     }])
   end
 end
