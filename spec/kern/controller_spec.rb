@@ -25,7 +25,7 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
@@ -48,7 +48,7 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"secret" => secret}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
@@ -71,12 +71,12 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"secret" => secret}])
     @driver.mexpect("if_attach_view", [base+1, 0])
-    @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main", "hello", "world"]])
 
     #We expect the sub controller to receive the same info
+    @driver.mexpect("if_init_view", ["my_sub_controller", {}, base+5, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_sub_controller", {"secret" => secret}])
   end
 
@@ -163,14 +163,14 @@ RSpec.describe "kern:controller_spec" do
     base = ctx.eval('base')
 
     #First, we expect the base vc to be setup as a view
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
 
     #Now we expect the embedded view to be setup as a view within the base view
     #It's +5, because the base takes us 4 (+3) entries, and then the next embedded takes up
     #the next view controlelr and finally main view entry (5th)
-    @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_sub_controller", {}, base+5, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_sub_controller", {}])
     @driver.mexpect("if_attach_view", [base+5, base+2])
 
@@ -305,12 +305,12 @@ RSpec.describe "kern:controller_spec" do
     #['vc', 'main', 'hello', 'world'], ['vc', 'main']
     #|--0-----1--------2--------3---|=======================The my_controller
     #                                  |-4------5---|====== The my_controller2
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0]) #Attach to main root spot
 
     #Embed my_controller2 in action 'my_action'
-    @driver.mexpect("if_init_view", ["test_view2", {}, base+5, ["main"]])
+    @driver.mexpect("if_init_view", ["my_controller2", {}, base+5, ["main"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_controller2", {}])
     @driver.mexpect("if_attach_view", [base+5, base+2])
 
@@ -377,7 +377,7 @@ RSpec.describe "kern:controller_spec" do
     base = ctx.eval("base")
 
     #The usual
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
@@ -403,7 +403,7 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "content"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "content"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
@@ -428,7 +428,7 @@ RSpec.describe "kern:controller_spec" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["test_view", {}, base+1, ["main", "hello", "world"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "hello", "world"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])

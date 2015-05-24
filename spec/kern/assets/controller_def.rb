@@ -1,5 +1,4 @@
 controller :my_controller do
-  view :test_view
   spots "content"
 
   macro :my_macro do
