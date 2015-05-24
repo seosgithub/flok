@@ -43,7 +43,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["my_view", {}, base+1, ["main"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "index"}])
@@ -62,7 +62,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "children" => [
             {
               "type" => "view",
-              "name" => "my_view",
+              "name" => "my_controller",
               "ptr" => base+1,
               "children" => []
             }
@@ -87,7 +87,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["my_view", {}, base+1, ["main", "one", "two"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "one", "two"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "index"}])
@@ -106,7 +106,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "children" => [
             {
               "type" => "view",
-              "name" => "my_view",
+              "name" => "my_controller",
               "ptr" => base+1,
               "children" => [
                 {"name" => "one", "type" => "spot", "children" => [], "ptr" => base+2},
@@ -134,10 +134,10 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["my_view", {}, base+1, ["main", "one", "two"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "one", "two"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
-    @driver.mexpect("if_init_view", ["my_other_view", {}, base+5, ["main"]])
+    @driver.mexpect("if_init_view", ["my_other_controller", {}, base+5, ["main"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_other_controller", {}])
     @driver.mexpect("if_attach_view", [base+5, base+2])
     @driver.mexpect("if_event", [base+4, "action", {"from" => nil, "to" => "index"}])
@@ -157,7 +157,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "children" => [
             {
               "type" => "view",
-              "name" => "my_view",
+              "name" => "my_controller",
               "ptr" => base+1,
               "children" => [
                 {"name" => "one", "type" => "spot", "children" => [
@@ -170,7 +170,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
                       {
                         "type" => "view",
                         "ptr" => base+5,
-                        "name" => "my_other_view",
+                        "name" => "my_other_controller",
                         "children" => [],
                       }
                     ]
@@ -200,10 +200,10 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
 
     base = ctx.eval("base")
 
-    @driver.mexpect("if_init_view", ["my_view", {}, base+1, ["main", "one", "two"]])
+    @driver.mexpect("if_init_view", ["my_controller", {}, base+1, ["main", "one", "two"]])
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
-    @driver.mexpect("if_init_view", ["my_other_view", {}, base+5, ["main"]])
+    @driver.mexpect("if_init_view", ["my_other_controller", {}, base+5, ["main"]])
     @driver.mexpect("if_controller_init", [base+4, base+5, "my_other_controller", {}])
     @driver.mexpect("if_attach_view", [base+5, base+2])
     @driver.mexpect("if_event", [base+4, "action", {"from" => nil, "to" => "index"}])
@@ -227,7 +227,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "children" => [
             {
               "type" => "view",
-              "name" => "my_view",
+              "name" => "my_controller",
               "ptr" => base+1,
               "children" => [
                 {"name" => "one", "type" => "spot", "children" => [], "ptr" => base+2},
