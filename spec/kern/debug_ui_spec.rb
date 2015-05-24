@@ -59,6 +59,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "ptr" => base,
           "type" => "vc",
           "action" => "index",
+          "events" => ["test"],
           "children" => [
             {
               "type" => "view",
@@ -103,6 +104,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "ptr" => base,
           "type" => "vc",
           "action" => "index",
+          "events" => ["test", "test2"],
           "children" => [
             {
               "type" => "view",
@@ -154,6 +156,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
           "ptr" => base,
           "type" => "vc",
           "action" => "index",
+          "events" => ["test1"],
           "children" => [
             {
               "type" => "view",
@@ -166,6 +169,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
                     "ptr" => base+4,
                     "type" => "vc",
                     "action" => "index",
+                    "events" => ["test2"],
                     "children" => [
                       {
                         "type" => "view",
@@ -221,6 +225,7 @@ it "Can call int_debug_dump_ui and get back root view hierarchy" do
       "children" => [
         {
           "name" => "my_controller",
+          "events" => ["test2"],
           "ptr" => base,
           "type" => "vc",
           "action" => "other",

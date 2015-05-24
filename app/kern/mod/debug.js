@@ -54,12 +54,17 @@ function dump_ui_recurse(ptr, node) {
 
     //Live controller instance
     var cinfo = tel_deref(ptr);
+    var cte = cinfo.cte;
 
     //Get action
-    node['action'] = cinfo.action;
+    var action = cinfo.action;
+    node['action'] = action;
 
     //Get name from the ctable reference
-    node['name'] = cinfo.cte.name;
+    node['name'] = cte.name;
+
+    //Get a list of events that this action responds to
+    node['events'] = Object.keys(cte.actions[action].handlers);
 
     //Recurse with the 'main' view (ptr+1) in this view controller's
     //first child slot. (there is only one view per view controller)

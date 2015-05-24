@@ -9,10 +9,16 @@ controller :my_controller do
     on "next", %{
       Goto("other");
     }
+
+    on "test1", %{
+    }
   end
 
   action :other do
     on_entry %{
+    }
+
+    on "test2", %{
     }
   end
 end
@@ -20,6 +26,9 @@ end
 controller :my_other_controller do
   action :index do
     on_entry %{
+    }
+
+    on "test3", %{
     }
   end
 end
