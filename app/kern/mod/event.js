@@ -2,14 +2,6 @@
 evt = {};
 
 function int_event(ep, event_name, info) {
-  <% if @debug %>
-    if (typeof ep == 'string' || ep instanceof String) {
-      console.log("WARN: received ep of '" + ep + "' that was a string!!!");
-      console.log("name: " + name);
-      console.log("info: " + JSON.stringify(info));
-    }
-  <% end %>
-
   var f = evt[ep];
   if (f != undefined) {
     f(ep, event_name, info);
