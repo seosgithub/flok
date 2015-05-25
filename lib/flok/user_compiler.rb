@@ -210,12 +210,7 @@ module Flok
               }
             }
 
-            //Send off event for action change
-            main_q.push([3, "if_event", __base__, "action", {
-              from: old_action,
-              to: "#{action_name}"
-            }]);
-
+            
 
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds = [];
@@ -224,6 +219,13 @@ module Flok
             }
 
             __info__.cte.actions[__info__.action].on_entry(__base__)
+
+            //Send off event for action change
+            main_q.push([3, "if_event", __base__, "action", {
+              from: old_action,
+              to: "#{action_name}"
+            }]);
+
           }
           out.puts res
         #Request(service_name, payload, event_name_cb)
