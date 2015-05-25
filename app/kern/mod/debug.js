@@ -117,9 +117,16 @@ function dump_ui_recurse(ptr, node) {
 }
 
 ////////////////////////////////////////////////////////////
-//Controller context
+//Controller describe
 ////////////////////////////////////////////////////////////
-function int_debug_controller_context(bp) {
-  var payload = tel_deref(bp).context;
-  SEND("main", "if_event", -333, "debug_controller_context_res", payload);
+function int_debug_controller_describe(bp) {
+  //Grab the controller's instance and table entry
+  var cinfo = tel_deref(bp);
+  var cte = cinfo.cte;
+
+  var payload = {
+    context: cinfo.context,
+    events: Object.keys(cte.actions[cinfo.action].handlers) 
+  };
+  SEND("main", "if_event", -333, "debug_controller_describe_res", payload);
 }
