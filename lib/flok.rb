@@ -7,6 +7,7 @@ require "flok/project"
 require "flok/interactive"
 require "flok/user_compiler"
 require "flok/services_compiler"
+require "flok/transition_compiler"
 
 module Flok
 end
