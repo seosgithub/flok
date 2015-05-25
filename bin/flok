@@ -41,9 +41,15 @@ class FlokCLI < Thor
     Flok.src_glob("rb", './app/controllers', controller_glob_path)
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
 
+    #3b. Build the client's ./app/transitions/*.rb into './products/$PLATFORM/transitions.js'
+    transition_glob_path = "#{local_products_path}/#{platform}/glob/transitions.rb" 
+    Flok.src_glob("rb", './app/transitions', transition_glob_path)
+    transition_compiler_js = Flok::TransitionCompiler.compile File.read(transition_glob_path)
+
     Dir.chdir File.join(local_products_path, platform) do
       #3. Put user_compiler_js in glob folder
       File.write "glob/user_compiler.js", user_compiler_js
+      File.write "glob/transitions.js", user_compiler_js
 
       #4. Move application.js to the glob folder
       FileUtils.cp "application.js", "glob/application.js"
@@ -53,6 +59,7 @@ class FlokCLI < Thor
       File.open "glob/application_user.js.erb", "w" do |f|
         f.puts File.read("glob/application.js")
         f.puts File.read("glob/user_compiler.js")
+        f.puts File.read("glob/transitions.js")
       end
 
       #6. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
