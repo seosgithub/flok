@@ -38,7 +38,6 @@ function int_debug_dump_ui() {
     payload.children.push(rvc);
   }
 
-  //Notify with the 'debug' pointer of -333
   SEND("main", "if_event", -333, "debug_dump_ui_res", payload);
 }
 

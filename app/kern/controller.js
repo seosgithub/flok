@@ -16,6 +16,7 @@
 //Embed a view-controller into a named spot. If spot is null, then it is assumed
 //you are referring to the root-spot.
 function _embed(vc_name, sp, context, event_gw) {
+  console.log("Eembed request for vc named: " + vc_name + " into spot: " + sp);
   //Lookup VC ctable entry
   var cte = ctable[vc_name];
 
