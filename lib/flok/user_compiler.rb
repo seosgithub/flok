@@ -114,6 +114,7 @@ module Flok
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
           res = %{
+            
             var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
             __info__.embeds[#{spot_index-1}].push(ptr);
           }
@@ -210,14 +211,14 @@ module Flok
               }
             }
 
-            
-
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds = [];
             for (var i = 1; i < #{@controller.spots.count}; ++i) {
               __info__.embeds.push([]);
             }
 
+            //Call on_entry for the new action via the singleton on_entry
+            //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
 
             //Send off event for action change
@@ -225,7 +226,6 @@ module Flok
               from: old_action,
               to: "#{action_name}"
             }]);
-
           }
           out.puts res
         #Request(service_name, payload, event_name_cb)
