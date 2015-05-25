@@ -24,7 +24,6 @@ function reg(name, from_view_name, to_view_name) {
 
 //Will send the 'if' commands
 function intercept_if_necessary(bottom_view_name, top_view_name, from_vp, to_vp) {
-  console.log("Intercept if necessars")
   if (int_segue_interceptors[bottom_view_name] && int_segue_interceptors[bottom_view_name][top_view_name]) {
     var rez = int_segue_interceptors[bottom_view_name][top_view_name];
 
