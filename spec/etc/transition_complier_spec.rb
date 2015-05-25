@@ -26,7 +26,31 @@ RSpec.describe "Transition compiler" do
     compiler = Flok::TransitionCompiler
   end
 
-  it "Can compile a controller" do
+  it "Can compile a controller without failing" do
     ctx = compile "trans0"
+  end
+
+  it "Does have the ttable root structure with an entry for my_controller" do
+    ctx = compile "trans0"
+    entry = ctx.eval "ttable.my_controller"
+    expect(entry).not_to eq(nil)
+  end
+
+  it "Does have the ttable root structure that can do a lookup for to" do
+    ctx = compile "trans0"
+    entry = ctx.eval "ttable.my_controller.index.about"
+    expect(entry).not_to eq(nil)
+  end
+
+  it "Does have the ttable root structure that can do a lookup for to" do
+    ctx = compile "trans0"
+    entry = ctx.eval "ttable.my_controller.index.about"
+    expect(entry).not_to eq(nil)
+  end
+
+  it "Does have the ttable root structure that can do a lookup for to and has a name" do
+    ctx = compile "trans0"
+    entry = ctx.eval "ttable.my_controller.index.about.name"
+    expect(entry).not_to eq(nil)
   end
 end
