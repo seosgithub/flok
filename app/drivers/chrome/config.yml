@@ -8,6 +8,7 @@ DEBUG:
     - controller
     - debug
     - sockio
+    - persist
 RELEASE:
   mods:
     - ui
@@ -16,3 +17,4 @@ RELEASE:
     - segue
     - controller
     - sockio
+    - persist
