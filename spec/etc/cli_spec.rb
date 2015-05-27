@@ -40,11 +40,11 @@ RSpec.describe "CLI" do
     system("rake gem:install")
   end
 
- it "Can be executed via bundle exec" do
-    flok_new do
-      flok "build"
-    end
-  end
+# it "Can be executed via bundle exec" do
+    #flok_new do
+      #flok "build"
+    #end
+  #end
 
 #it "Can create a new project with correct directories" do
     #flok_new do
