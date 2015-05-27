@@ -12,3 +12,6 @@ function if_per_get(s, ns, key) {
 
 function if_per_get_sync(s, ns, key) {
 }
+
+function if_per_flush_sync() {
+}
