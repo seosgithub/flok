@@ -2,6 +2,7 @@ require 'json'
 require 'tempfile'
 require 'securerandom'
 require 'open3'
+$stdout.sync = true
 
 #Interactive pipe for testing.
 #Creates a server that routes $stdin into if_dispatch and $stdout to int_dispatch.
@@ -33,7 +34,29 @@ class InteractiveServer
           if results[0].include? STDIN
             begin
               q = gets.strip
-              inp.puts "if_dispatch(JSON.parse('#{q}'))"
+              if q == "RESTART"
+                inp.puts "$__RESTART__"
+
+                begin
+                  #Wait for restart to respond 'ok'
+                  Timeout::timeout(10) do
+                    restart_res = out.readline
+                    raise "Restart of phantomjs did not return '__RESTART_OK__' like expected, returned: #{restart_res.inspect}" unless restart_res == "$__RESTART_OK__\n"
+                  end
+                rescue Timeout::Error
+                  raise "Restart of boojs did not happen within 5 seconds"
+                rescue EOFError
+                  #Sleep for a second to let the error pipe fill up from boojs, this error
+                  #will then be displayed and then we will crash
+                  sleep 3
+                  $stderr.puts err.read
+                  raise "boojs encountered an error"
+                end
+
+                puts "RESTART OK"
+              else
+                inp.puts "if_dispatch(JSON.parse('#{q}'))"
+              end
             rescue Errno::EIO
               #Can't say anything here, we don't have a pipe
               exit 1

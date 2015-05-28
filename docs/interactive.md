@@ -8,7 +8,6 @@
     * `cd ./; rake pipe:server PLATFORM=$PLATFORM`
 
 ###What $stdout and $stdin does for pipes
-
   * Server
   	- `$stdin` => `int_dispatch`
   	- `if_dispatch` => `$stdout`
@@ -17,6 +16,12 @@
   	- `int_dispatch` => `$stdout`
   
 All communication *coming* from `$stdin` and *going* to `$stdout` is in un-escaped JSON formatting that follows the conventions mentioned in [Messaging](./messaging.md).
+If the driver `$stdin` receives the string `RESTART\n` by itself on a single line, then it should restart itself and then next reply should be
+`RESTART OK\n`
+it is fully restarted. All data should be destroyed except for things explicitly synchronously flushed like the `persist` module. When this pipe is
+opened, it is expected that no local data is retained; the only way to retain data is through explicit restarts. All data writes should be flushed
+(fsynced) when the pipe is restarted so that no data writes are lost. Some specs expect that setting data will be fsynced when it calls restart (which
+ is immediately after the set)
 
 The test suites assume particular behavior of the pipes. Please review [./spec/env/iface.rb](../spec/env/iface.rb) for the method named `pipe_suite` for the proper behavior.
 
