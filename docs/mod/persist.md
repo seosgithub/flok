@@ -2,16 +2,18 @@
 Persistance management. Loosely based on redis.
 
 ###Driver messages
-`if_per_set(ns, key, value)` - Set a key and value asynchronously.
-`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back (asynchronously).
-`if_per_get_sync(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back (synchronously).
-`if_per_del(ns, key)` - Delete a particular key asynchronously.
-`if_per_del_ns(ns)` - Delete an entire namespace asynchronously.
+`if_per_set(ns, key, value)` - Set a key and value
+`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back
+`if_per_del(ns, key)` - Delete a particular key
+`if_per_del_ns(ns)` - Delete an entire namespace
+
+###TODO driver messages
 `if_per_set_f(ns, key, tp)` - Tell the driver to dereference the telepointer and to save it to disk.
 
-###Kernel interrupts
-`int_per_get_res(s, res)` - A response retrieved from either `if_get` or `if_get_sync` that contains the session key and result dictionary. If the key
-does not exist, null is returned.
+For race conditions, e.g, an asynchronous set is followed by a synchronous get, it is undefined as to what that behavior that will be.
+It is expected that the kernel should manage the write-back cache and that the driver should not attempt a write back cache unless
+it is convenient to do so.
 
-###Driver specs
-`if_per_spec_sync()` - Forces fsync of all operations, many platforms may just set a delay to ensure writes are completed.
+###Kernel interrupts
+`int_per_get_res(s, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. If the key
+does not exist, null is returned.
