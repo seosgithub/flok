@@ -12,3 +12,6 @@ Persistance management. Loosely based on redis.
 ###Kernel interrupts
 `int_per_get_res(s, res)` - A response retrieved from either `if_get` or `if_get_sync` that contains the session key and result dictionary. If the key
 does not exist, null is returned.
+
+###Driver specs
+`if_per_spec_sync()` - Forces fsync of all operations, many platforms may just set a delay to ensure writes are completed.
