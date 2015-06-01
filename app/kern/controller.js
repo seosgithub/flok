@@ -22,7 +22,7 @@ function _embed(vc_name, sp, context, event_gw) {
   //Find the root view name
   <% if @debug %>
     if (cte === undefined) {
-      throw "Tried to embed a flok controller named: '" + vc_name + "' but you have not created that controller yet, add controller :" + vc_name + "do ...";
+      throw "Tried to embed a flok controller named: '" + vc_name + "' but you have not created that controller yet, add controller :" + vc_name + " do ...";
     }
   <% end %>
   var vname = cte.root_view;
