@@ -9,7 +9,7 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:controller_spec" do
   include_context "kern"
 
-#Can initialize a controller via embed and have the correct if_dispatch messages
+  #Can initialize a controller via embed and have the correct if_dispatch messages
   it "Can initiate a controller via _embed" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
@@ -52,6 +52,26 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {"secret" => secret}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+  end
+
+  it "Does raise a sensible error if a controller does not exist" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    did_error = false
+    #Run the embed function
+    begin
+      secret = SecureRandom.hex
+      ctx.eval %{
+        //Call embed on main root view, should fail
+        base = _embed("my_non_existant_controller", 0, {secret: "#{secret}"}, null);
+      }
+    rescue V8::Error => e
+      expect(e.message).to include("my_non_existant_controller")
+      did_error = true
+    end
+
+    expect(did_error).to eq(true)
   end
 
   #Can initialize a controller via embed and the sub-controller has the correct info
