@@ -62,3 +62,18 @@ def settings_dep key, value
   raise "#{ENV["PLATFORM"].inspect} does not support #{key.inspect} configuration in config.yml" unless config_yml.include? key
   skip "#{ENV["PLATFORM"].inspect} #{key.inspect} is not #{value.inspect} in config.yml; it is #{config_yml[key].inspect}"  unless value == config_yml[key]
 end
+
+#Restart the driver but persist any data that was saved
+def restart_driver_but_persist
+  #Ensure the pipe is fully drained before sending RESTART
+  @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+
+  @pipe.puts "RESTART"
+  begin
+    Timeout::timeout(10) do
+      expect(@pipe.readline).to eq("RESTART OK\n")
+    end
+  rescue Timeout::Error
+    raise "Tried to restart driver but timed out waiting for 'RESTART OK'"
+  end
+end

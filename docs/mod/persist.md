@@ -1,36 +1,19 @@
 #Persist (persist.js)
-Persistance management. Storage of data, etc.  Loosely based on redis.  Refer to [redios.io](http://redis.io/commands) for more detailed
-descriptions.
+Persistance management. Loosely based on redis.
 
-###Messages
-`if_per_hdel key field [field...]` - Delete one or more hash fields
-`if_per_hmget key field [field...]` - Get the value of multiple fields
+###Driver messages
+`if_per_set(ns, key, value)` - Set a key and value
+`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back
+`if_per_del(ns, key)` - Delete a particular key
+`if_per_del_ns(ns)` - Delete an entire namespace
 
-###Spec related
-`if_ui_spec_init` - Setup anything necessary for the spec tests, this may include adding prototype views to your hierarchy, etc.
-`if_ui_spec_views_at_spot(p)` - Sends a packet back that contains a listing of all the view pointers inside of a spot. If 0 is passed, the view pointers are from the root node. `[N(vp*), "spec", vp*]`
-`if_ui_spec_view_exists(vp)` - Checks whether or not a view still exists `[1, "spec", true]`
-`if_ui_spec_view_is_visible(vp)` - Checks whether or not a view is visible `[1, "spec", true]`
+###TODO driver messages
+`if_per_set_f(ns, key, tp)` - Tell the driver to dereference the telepointer and to save it to disk.
 
-#####You must be able to accept the following prototypes names:
-`spec_blank` - A blank view with no spots
-`spec_one_spot` - "A blank view with with one spot named `content` that takes up the entire view"
-`spec_two_spot` - "A blank view with with one spot named `a` and one spot named `b`.
+For race conditions, e.g, an asynchronous set is followed by a synchronous get, it is undefined as to what that behavior that will be.
+It is expected that the kernel should manage the write-back cache and that the driver should not attempt a write back cache unless
+it is convenient to do so.
 
-------
-
-## Overview 
-
-This driver controls two things called a **view** and a **spot**. 
-
- 1. **View** - A **view** holds your content.
- 2. **Spot** - Views can have blank **Spot**s where other views can be placed.
-
-## Examples
-Here is an example for the `chrome` driver of a live view built from two views.
-![](../images/view_and_spot.png)
-
-
-
-###A note on free
-If `free` is called on a view, that view is always already detached. If a *view* receives `free`, that *view* must call `free` on all of it's children before itself.
+###Kernel interrupts
+`int_per_get_res(s, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. If the key
+does not exist, null is returned.

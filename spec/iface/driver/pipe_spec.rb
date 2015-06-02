@@ -28,4 +28,9 @@ RSpec.describe "iface:driver:pipe_spec" do
 
     expect(pid).to die_within(6.seconds)
   end
+
+  it "does have the ability to receive a RESTART command" do
+    @pipe.puts "RESTART"
+    expect(@pipe).to readline_and_equal_x_within_y_seconds("RESTART OK", 5.seconds)
+  end
 end
