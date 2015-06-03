@@ -1,6 +1,11 @@
 #Services
-Services are entirely built into the Flok kernel. If you need custom actions for your services, they must be created as a driver and then
-you must adhere to the services API.
+Services are helper hubs that send and receive information typically from other services or directly from interrupts. They are meant
+to act as a glue between controllers and devices. Services can receive events and can run periodic events on longer intervals.
+
+##Daemons & Agents
+Services are either a `daemon` or an `agent`.  The only difference between these two is how the service is woken up (timers are allowed to run).
+A `daemon`'s periodic timers are always active; even when transaction queues are cleared. An `agent` is only active if a controller or another
+service holds a reference to the `agent`.
 
 ###Request
 You initiate a service request via `Request`. This may be called only in the controller at this time. This macro takes several parameters
