@@ -7,6 +7,51 @@ Services are either a `daemon` or an `agent`.  The only difference between these
 A `daemon`'s periodic timers are always active; even when transaction queues are cleared. An `agent` is only active if a controller or another
 service holds a reference to the `agent`.
 
+##Code
+All kernel service classes are placed in `./app/kern/services/` and are ruby files. Here is an example:
+```ruby
+#A sample service, all services have capital letters because they are like classes and are instantized
+service :Sample do
+  #Initialization#####################################################################################################################
+  #When a service is woken_up, this function is called. A service instances is guaranteed to never be woken up
+  on_wakeup %{
+  }
+
+  #When an agent service is no longer needed by a controller, AND the service has flushed all of it's transaction queues,
+  the service will receive a sleep request. At this point, you should remove all initialized data. If your service is
+  too expensive to destroy all initialized data each time it is woken and slept, then it is too expensive to wakeup at all
+  and you should reconsider your design. After this function calls, this service should act like it never existed and clear
+  all of it's initalized variables.
+  on_sleep %{
+  }
+  ####################################################################################################################################
+
+  #Session management#################################################################################################################
+  #Things 'connect' to a service, which is just a function call that objects, like controllers, make to a service instance
+  #that notify the service that that object is now connected. You may use this to start things like automatically sending
+  #events to controller instances.
+  on_connect %{
+  }
+
+  #When an object is destroyed, this notifies the service that that object no longer wishes to receive things from the service.
+  on_disconnect %{
+  }
+  ####################################################################################################################################
+
+  #Session management#################################################################################################################
+  #Services are a lot like controllers, they have a mechanism to handle function calls (not true events, these are directly called)
+  on :event, %{
+    #Services maintain their own context variables through using <%= @name %> macros to prefix variables, each instance will have a different name
+    <%= @name %>_hello = "hi";
+
+    #Inside here you receive...
+      bp - The base pointer of the 'thing' that invoked this function.
+      params - The parameters that were 'sent' (i.e. called)
+  }
+  ####################################################################################################################################
+end
+```
+
 ###Request
 You initiate a service request via `Request`. This may be called only in the controller at this time. This macro takes several parameters
 parameters, all of which must either be strict variable names or double quoted strings:
