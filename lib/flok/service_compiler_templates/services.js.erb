@@ -1,8 +1,26 @@
 <% @services.each do |s| %>
-  //////////////////////////////////////////////////
-  //Start of <%= s.name %> on_init
-  <%= s.get_on_init %>
-  //////////////////////////////////////////////////
+  //Start of <%= s.name %> on_wakeup
+  function <%= s.name %>_on_wakeup() {
+    <%= s._on_wakeup %>
+  }
+
+  function <%= s.name %>_on_sleep() {
+    <%= s._on_sleep %>
+  }
+
+  function <%= s.name %>_on_connect(bp) {
+    <%= s._on_connect %>
+  }
+
+  function <%= s.name %>_on_disconnect(bp) {
+    <%= s._on_disconnect %>
+  }
+  
+  <% s.event_handlers.each do |h| %>
+    function <%= s.name %>_on_<%= h[:name] %>(bp, params) {
+      <%= h[:str] %>
+    }
+  <% end %>
 
   //////////////////////////////////////////////////
   //Start of <%= s.name %> on_request

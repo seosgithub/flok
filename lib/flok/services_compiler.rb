@@ -43,10 +43,13 @@ module Flok
   end
 
   class Service
-    attr_accessor :name
+    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers
     def initialize name, &block
       @name = name
       @block = block
+
+      #These are the 'on' handlers
+      @event_handlers = []
 
       self.instance_eval(&block)
     end
@@ -63,20 +66,29 @@ module Flok
       @on_init = macro(str)
     end
 
-    def on_wakeup(str); end
+    def on_wakeup(str); @_on_wakeup = str; end
 
-    def on_sleep(str); end
+    def on_sleep(str); @_on_sleep = str; end
 
-    def on_connect(str); end
+    def on_connect(str); @_on_connect = str; end
 
-    def on_disconnect(str); end
+    def on_disconnect(str); @_on_disconnect = str; end
 
-    def on_event(name, str); end
+    def on(name, str)
+      @event_handlers << {
+        :name => name,
+        :str => str
+      }
+    end
 
     def every(time, str); end
 
     def type str
-      @type = str.to_s
+      @_type = str.to_s
+      unless ["daemon", "agent"].include? @_type
+        raise "You gave a type for the service, #{@_type.inspect} but this wasn't a valid type of service. Should be \
+        either 'daemon' or 'agent'"
+      end
     end
 
     def on_request str

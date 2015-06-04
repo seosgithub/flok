@@ -81,3 +81,23 @@ controller :controller do
   end
 end
 ```
+
+###Services when compiled
+Services get compiled through the `services_compiler` which generates the following functions
+```ruby
+$INAME_on_wakeup() {
+}
+
+$INAME_on_sleep() {
+}
+
+$INAME_on_connect(bp) {
+}
+
+$INAME_on_disconnect(bp) {
+}
+
+//For each 'on' function
+$INAME_on_XXXXX(bp, params) = {
+}
+```
