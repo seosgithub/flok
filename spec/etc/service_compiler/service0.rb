@@ -23,6 +23,6 @@ service :test do
   }
 
   every 5.seconds, %{
-    on_5_seconds_called = true;
+    on_every_5_sec_called = true;
   }
 end

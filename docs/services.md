@@ -100,4 +100,8 @@ $INAME_on_disconnect(bp) {
 //For each 'on' function
 $INAME_on_XXXXX(bp, params) = {
 }
+
+//For each 'every' function
+$INAME_on_every_xx_sec() {
+}
 ```

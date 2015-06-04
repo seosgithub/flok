@@ -44,6 +44,7 @@ RSpec.describe "lib/services_compiler" do
     expect(res).to eq(3)
 
     #on_event
+    ################################################################
     ctx.eval("test_on_hello(3, {hello: 'world'})")
     expect(ctx.eval("on_hello_called_bp")).to eq(3)
 
@@ -52,5 +53,10 @@ RSpec.describe "lib/services_compiler" do
     expect(params_res).to eq({
       "hello" => "world"
     })
+    ################################################################
+
+    #every_event
+    res = ctx.eval("test_every_5_sec(); on_every_5_sec_called")
+    expect(res).to eq(true)
   end
 end

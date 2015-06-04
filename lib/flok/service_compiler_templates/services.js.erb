@@ -16,16 +16,18 @@
     <%= s._on_disconnect %>
   }
   
+  //'Event' handlers
   <% s.event_handlers.each do |h| %>
     function <%= s.name %>_on_<%= h[:name] %>(bp, params) {
       <%= h[:str] %>
     }
   <% end %>
 
-  //////////////////////////////////////////////////
-  //Start of <%= s.name %> on_request
-  function service_<%= s.name %>_req(info, ep, ename) {
-    <%= s.get_on_request %>
-  }
-  //////////////////////////////////////////////////
+
+  //Timer receivers
+  <% s.every_handlers.each do |e| %>
+    function <%= s.name %>_every_<%= e[:seconds] %>_sec() {
+      <%= e[:str] %>
+    }
+  <% end %>
 <% end %>

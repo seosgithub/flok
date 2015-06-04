@@ -43,13 +43,16 @@ module Flok
   end
 
   class Service
-    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers
+    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers
     def initialize name, &block
       @name = name
       @block = block
 
       #These are the 'on' handlers
       @event_handlers = []
+
+      #These are for every 5.seconds
+      @every_handlers = []
 
       self.instance_eval(&block)
     end
@@ -81,7 +84,12 @@ module Flok
       }
     end
 
-    def every(time, str); end
+    def every(seconds, str)
+      @every_handlers << {
+        :seconds => seconds,
+        :str => str
+      }
+    end
 
     def type str
       @_type = str.to_s
