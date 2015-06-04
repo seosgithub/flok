@@ -5,6 +5,9 @@ function int_event(ep, event_name, info) {
   var f = evt[ep];
   if (f != undefined) {
     f(ep, event_name, info);
+    return true;
+  } else {
+    return false;
   }
 }
 
