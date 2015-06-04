@@ -1,4 +1,6 @@
 #Compile a controller ruby file into a javascript string
+require 'active_support'
+require 'active_support/core_ext/numeric'
 
 require 'erb'
 module Flok
@@ -59,6 +61,22 @@ module Flok
 
     def on_init str
       @on_init = macro(str)
+    end
+
+    def on_wakeup(str); end
+
+    def on_sleep(str); end
+
+    def on_connect(str); end
+
+    def on_disconnect(str); end
+
+    def on_event(name, str); end
+
+    def every(time, str); end
+
+    def type str
+      @type = str.to_s
     end
 
     def on_request str
