@@ -9,6 +9,7 @@ DEBUG:
     - debug
     - sockio
     - persist
+    - timer
 RELEASE:
   mods:
     - ui
@@ -18,3 +19,4 @@ RELEASE:
     - controller
     - sockio
     - persist
+    - timer
