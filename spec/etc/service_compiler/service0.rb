@@ -1,10 +1,22 @@
-service("test") do
-  on_init %{
+service :test do
+  type :daemon
+
+  on_wakeup %{
     test_service_var = true;
   }
 
-  on_request %{
-    //Services should allow for info, ep, and name
-    test_service_request = [info, ep, ename]
+  on_sleep %{
+  }
+
+  on_connect %{
+  }
+
+  on_disconnect %{
+  }
+
+  on_event "hello", %{
+  }
+
+  every 5.seconds, %{
   }
 end

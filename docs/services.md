@@ -12,6 +12,8 @@ All kernel service classes are placed in `./app/kern/services/` and are ruby fil
 ```ruby
 #A sample service, all services have capital letters because they are like classes and are instantized
 service :sample do
+  type "daemon"
+
   #Initialization#####################################################################################################################
   #When a service is woken_up, this function is called. A service instances is guaranteed to never be woken up
   on_wakeup %{
@@ -50,8 +52,8 @@ service :sample do
   }
 
   #Do something every 5 seconds if this service (a) has clients and (b) has nothing left in a transaction queue
-  every 5.seconds do
-  end
+  every 5.seconds %{
+  }
   ####################################################################################################################################
 end
 ```
