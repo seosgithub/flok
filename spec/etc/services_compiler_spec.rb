@@ -20,22 +20,37 @@ RSpec.describe "lib/services_compiler" do
     end
   end
 
-  it "Can call compile method and get on_init" do
-    ctx = compile "service0"
-
-    #The service defines a variable in on_init, this should be always accessible
-    res = ctx.eval("test_service_var")
-    expect(res).to eq(true)
+  it "Does fail to compile a controller with a non-existant type" do
+    expect { compile "service_bad_type" }.to raise_exception
   end
 
-  it "Can call compile method and get on_request" do
+  it "Can call compile method and get a copy of all the functions" do
     ctx = compile "service0"
 
-    #Should be able to call on_request generated request function
-    ctx.eval('service_test_req({}, 0, "test")')
+    #on_wakeup
+    res = ctx.eval("test_on_wakeup(); on_wakeup_called")
+    expect(res).to eq(true)
 
-    #That should have set a variable
-    res = JSON.parse(ctx.eval("JSON.stringify(test_service_request)"))
-    expect(res).to eq([{}, 0, "test"])
+    #on_sleep
+    res = ctx.eval("test_on_sleep(); on_sleep_called")
+    expect(res).to eq(true)
+
+    #on_connect
+    res = ctx.eval("test_on_connect(3); on_connect_called_bp")
+    expect(res).to eq(3)
+
+    #on_disconnect
+    res = ctx.eval("test_on_disconnect(3); on_disconnect_called_bp")
+    expect(res).to eq(3)
+
+    #on_event
+    ctx.eval("test_on_hello(3, {hello: 'world'})")
+    expect(ctx.eval("on_hello_called_bp")).to eq(3)
+
+    #Make sure json matches
+    params_res = JSON.parse(ctx.eval("on_hello_called_params"))
+    expect(params_res).to eq({
+      "hello" => "world"
+    })
   end
 end

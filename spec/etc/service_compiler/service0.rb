@@ -2,21 +2,27 @@ service :test do
   type :daemon
 
   on_wakeup %{
-    test_service_var = true;
+    on_wakeup_called = true;
   }
 
   on_sleep %{
+    on_sleep_called = true;
   }
 
   on_connect %{
+    on_connect_called_bp = bp;
   }
 
   on_disconnect %{
+    on_disconnect_called_bp = bp;
   }
 
-  on_event "hello", %{
+  on "hello", %{
+    on_hello_called_bp = bp;
+    on_hello_called_params = JSON.stringify(params);
   }
 
   every 5.seconds, %{
+    on_5_seconds_called = true;
   }
 end
