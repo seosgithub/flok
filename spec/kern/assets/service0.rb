@@ -11,5 +11,6 @@ service :my_service do
   }
 
   on_disconnect %{
+    on_disconnect_called = true;
   }
 end

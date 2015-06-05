@@ -23,8 +23,6 @@ module Flok
       services_renderer = ERB.new(services_erb)
       @src << services_renderer.result(context.get_binding)
 
-      #puts @src
-
       return @src
     end
   end

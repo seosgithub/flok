@@ -6,10 +6,10 @@ require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
-RSpec.describe "kern:service_spec" do
+RSpec.describe "kern:service_controller_spec" do
   include_context "kern"
 
-  it "service can be used inside a controller" do
+ it "service can be used inside a controller" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config0.rb")
 
@@ -45,5 +45,21 @@ RSpec.describe "kern:service_spec" do
 
     expect(ctx.eval("on_wakeup_called")).to eq(true)
     expect(ctx.eval("on_connect_called")).to eq(true)
+  end
+
+  it "Does signal disconnect to the service" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/service_controller1.rb'), File.read("./spec/kern/assets/service_config1.rb"), File.read("./spec/kern/assets/service0.rb")
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    expect(ctx.eval("on_disconnect_called")).to eq(true)
   end
 end
