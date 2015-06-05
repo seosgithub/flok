@@ -86,7 +86,8 @@ module Flok
 
     def every(seconds, str)
       @every_handlers << {
-        :seconds => seconds,
+        :name => "#{seconds}_sec_#{SecureRandom.hex[0..6]}",
+        :ticks => seconds*4,
         :str => str
       }
     end

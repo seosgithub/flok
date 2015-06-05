@@ -1,7 +1,15 @@
 <% @services.each do |s| %>
   //Start of <%= s.name %> on_wakeup
   function <%= s.name %>_on_wakeup() {
-    <%= s._on_wakeup %>
+    //The timer base pointer for incomming callout events
+    <%= s.name %>_timer_bp = tels(1);
+    reg_evt(<%= s.name %>_timer_bp, <%= s.name %>_handle_timer_events);
+
+    //Tell the timer to notify our timer event handlers
+    //The name is randomly generated for each one
+    <% s.every_handlers.each do |h| %>
+        reg_interval(<%= s.name %>_timer_bp, '<%= h[:name] %>', <%= h[:ticks] %>);
+    <% end %>
   }
 
   function <%= s.name %>_on_sleep() {
@@ -23,11 +31,16 @@
     }
   <% end %>
 
-
   //Timer receivers
-  <% s.every_handlers.each do |e| %>
-    function <%= s.name %>_every_<%= e[:seconds] %>_sec() {
-      <%= e[:str] %>
-    }
-  <% end %>
+  /////////////////////////////////////////////////////////////////////
+  function <%= s.name %>_handle_timer_events(ep, ename, info) {
+    <% s.every_handlers.each do |h| %>
+        if (ename === '<%= h[:name] %>') {
+          <%= h[:str] %>
+        }
+    <% end %>
+  }
+
+  
+  /////////////////////////////////////////////////////////////////////
 <% end %>
