@@ -32,30 +32,44 @@ class FlokCLI < Thor
       #1. Use the rake task
       system('rake build:world')
 
-      #2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM
+      #2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM and ./flok/app/kern/services/*.rb -> #$PROJECT/products/$PLATFORM/services
       FileUtils.cp_r "./products/#{platform}", local_products_path
+
+      #Copy built in services
+      Flok.src_glob("rb", "./app/kern/services", "./products/#{platform}/services/kern_services.rb")
     end
 
     #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
     controller_glob_path = "#{local_products_path}/#{platform}/glob/controllers.rb" 
     Flok.src_glob("rb", './app/controllers', controller_glob_path)
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
+    services_config_js = File.read "./config/services.rb"
 
+    #We are now inside the platform folder
     Dir.chdir File.join(local_products_path, platform) do
-      #3. Put user_compiler_js in glob folder
+      #3. Put user_compiler_js in glob folder and services into ./services/user_services.rb
       File.write "glob/user_compiler.js", user_compiler_js
+      Flok.src_glob("rb", './app/services', "./services/user_services.rb")
 
-      #4. Move application.js to the glob folder
+      #4. The `./products/$PLATFORM/services/*.rb` file are globbed into `./products/$PLATFORM/services/combined_services.rb`
+      Flok.src_glob("rb", "./services/", "./services/combined_services.rb")
+
+      #5. The service configuration in `./config/services.rb` is read and run through `services_compiler` and files from `./products/$PLATFORM/services/combined_services.rb` and write to ./glob/services.js
+      services_js = Flok::ServicesCompiler.compile(File.read("./services/combined_services.rb"), services_config_js)
+      File.write "./glob/services.js", services_js
+
+      #6. Move application.js to the glob folder
       FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
 
-      #5. Combine application.js and user_compiler.js.erb
+      #7. Combine application.js and user_compiler.js.erb and services.js
       File.open "glob/application_user.js.erb", "w" do |f|
         f.puts File.read("glob/application.js")
         f.puts File.read("glob/user_compiler.js")
+        f.puts File.read("glob/services.js")
       end
 
-      #6. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
+      #8. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
       erb_src = File.read "glob/application_user.js.erb"
       renderr = ERB.new(erb_src)
       context = ERBUserApplicationContext.new()

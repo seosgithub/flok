@@ -14,7 +14,7 @@ module Flok
 
       #Execute code in this context, the context will hold all the information
       #that is used to then generate code
-      context = ServicesCompilerContext.new
+      context = ServicesCompilerContext.new(config_context)
       context.instance_eval(rb_src, __FILE__, __LINE__)
 
       @src = ""
@@ -32,12 +32,22 @@ end
 #Compiler executes all rb code inside this context
 module Flok
   class ServicesCompilerConfigContext
+    attr_accessor :service_instances
+
+    def initialize
+      @service_instances = []
+    end
+
+    def service name, instance_name
+      @service_instances.push instance_name
+    end
   end
 
   class ServicesCompilerContext
-    attr_accessor :services
+    attr_accessor :services, :config
 
-    def initialize
+    def initialize config_context
+      @config = config_context
       @services = []
     end
 
