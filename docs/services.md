@@ -126,3 +126,11 @@ $INAME_on_every_xx_sec() {
 $INAME_event_handler(ep, event_name, info) {
 }
 ```
+
+###Services config for projects
+Inside a project, `./config/services.rb` holds the services configuration. This configuration file tells flok exactly what services it should
+instantize based on which class. The file contains a list of `service_instance` commands with the following format:
+```ruby
+
+###Spec service
+By default, there is a spec service class available called 'spec' when compiled with debug.

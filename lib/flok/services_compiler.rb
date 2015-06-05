@@ -6,7 +6,12 @@ require 'erb'
 module Flok
   module ServicesCompiler
     #Compile a ruby file containing flok controller definitions (from the services)
-    def self.compile rb_src
+    #The config is outlined in the documentation under docs/services.md
+    def self.compile rb_src, rb_config
+      #Execute the configuration file first
+      config_context = ServicesCompilerConfigContext.new
+      config_context.instance_eval(rb_config, __FILE__, __LINE__)
+
       #Execute code in this context, the context will hold all the information
       #that is used to then generate code
       context = ServicesCompilerContext.new
@@ -26,6 +31,9 @@ end
 
 #Compiler executes all rb code inside this context
 module Flok
+  class ServicesCompilerConfigContext
+  end
+
   class ServicesCompilerContext
     attr_accessor :services
 

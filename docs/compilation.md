@@ -13,14 +13,11 @@ as necessary.*
  1. `rake build` is run inside `./app/drivers/$PLATFORM` with the environmental variables set to BUILD_PATH=`./produts/$PLATFORM/driver` (and folder
  2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/1kern_config.js`
  3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.pre_macro.js`
- 4. All rb files inside `./app/kern/services/` are globbed into `./products/$PLATFORM/glob/kern_services.rb`
- 5. `./products/$PLATFORM/glob/kern_serivces.rb` is processed via `Flok::Services` and then exported as `./products/$PLATFORM/glob/kern_services.pre_macro.js`
- 6. All js files in `./products/$PLATFORM/glob/2kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/2kern.js
- 7. All js files in `./products/$PLATFORM/glob/kern_services.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/kern_services.js
- 8. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/glob/application.js.erb`
- 9. Auto-generated code is placed at the end (like PLATFORM global)
- 10. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section and appended to `glob/application.js.erb`
- 11. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
+ 4. All js files in `./products/$PLATFORM/glob/2kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/2kern.js
+ 5. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/glob/application.js.erb`
+ 6. Auto-generated code is placed at the end (like PLATFORM global)
+ 7. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section and appended to `glob/application.js.erb`
+ 8. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
 
 ##Erb variables
 All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end %>`. These files include:
