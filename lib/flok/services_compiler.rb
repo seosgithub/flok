@@ -8,7 +8,6 @@ module Flok
     #Compile a ruby file containing flok controller definitions (from the services)
     #The config is outlined in the documentation under docs/services.md
     def self.compile rb_src, rb_config
-      require 'pry'; binding.pry
       #Execute the configuration file first
       config_context = ServicesCompilerConfigContext.new
       config_context.instance_eval(rb_config, __FILE__, __LINE__)
@@ -17,6 +16,8 @@ module Flok
       #that is used to then generate code
       context = ServicesCompilerContext.new(config_context)
       context.instance_eval(rb_src, __FILE__, __LINE__)
+      context.ready
+
 
       @src = ""
       services_erb = File.read File.join(File.dirname(__FILE__), "./service_compiler_templates/services.js.erb")
@@ -57,14 +58,21 @@ module Flok
       #A hash containing the 'class' name of the service to a block that can be used with Service.new
       @_services = {}
 
+      @services = []
+    end
+
+    def ready
       #Create an array from the service_instances where each element in the array is the full code of the service
-      @services = @config.service_instances.map do |i|
+      @config.service_instances.each do |i|
         #Get the instance name and class name of the service, normally defined in a ./config/services.rb file
         sname = i[:instance_name]
         sclass = i[:class]
 
         sblock = @_services[sclass]
-        Service.new(sname, sblock)
+        raise "No service found for service_name: #{sclass.inspect} when trying to create service with instance name #{sname.inspect}. @_services contained: #{@_services.inspect} \n@config.service_instances contained: #{@config.service_instances.inspect}" unless sblock
+        @services << Service.new(sname) do
+          sblock.call
+        end
       end
     end
 
@@ -79,9 +87,8 @@ module Flok
 
   class Service
     attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers
-    def initialize name, &block
+    def initialize name
       @name = name
-      @block = block
 
       #These are the 'on' handlers
       @event_handlers = []
@@ -89,7 +96,7 @@ module Flok
       #These are for every 5.seconds
       @every_handlers = []
 
-      self.instance_eval(&block)
+      yield
     end
 
     def get_on_init

@@ -1,2 +1,1 @@
 #Services
-service :hello, :test
