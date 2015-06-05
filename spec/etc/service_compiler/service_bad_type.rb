@@ -1,6 +1,4 @@
 service :test do
-  type :rrr
-
   on_wakeup %{
     test_service_var = true;
   }

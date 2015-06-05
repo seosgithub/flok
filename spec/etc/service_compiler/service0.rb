@@ -1,6 +1,4 @@
 service :my_service do
-  type :daemon
-
   on_wakeup %{
     on_wakeup_called = true;
   }

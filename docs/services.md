@@ -4,24 +4,17 @@ to act as a glue between controllers and devices. Services can receive events an
 very similar to controllers except they do not contain actions and are meant to be used as singletons (although they are instantized, the 
 instances are globally shared).
 
-##Daemons & Agents
-Services are either a `daemon` or an `agent`.  The only difference between these two is how the service is woken up (timers are allowed to run).
-A `daemon`'s periodic timers are always active; even when transaction queues are cleared. An `agent` is only active if a controller or another
-service holds a reference to the `agent`.
-
 ##Code
 All kernel service classes are placed in `./app/kern/services/` and are ruby files. Here is an example:
 ```ruby
 #A sample service, all services have capital letters because they are like classes and are instantized
 service :sample do
-  type "daemon"
-
   #Initialization#####################################################################################################################
   #When a service is woken_up, this function is called. A service instances is guaranteed to never be woken up
   on_wakeup %{
   }
 
-  #When an agent service is no longer needed by a controller, AND the service has flushed all of it's transaction queues,
+  #When an agent (currently all) service is no longer needed by a controller, AND the service has flushed all of it's transaction queues,
   the service will receive a sleep request. At this point, you should remove all initialized data. If your service is
   too expensive to destroy all initialized data each time it is woken and slept, then it is too expensive to wakeup at all
   and you should reconsider your design. After this function calls, this service should act like it never existed and clear
@@ -131,6 +124,8 @@ $INAME_event_handler(ep, event_name, info) {
 Inside a project, `./config/services.rb` holds the services configuration. This configuration file tells flok exactly what services it should
 instantize based on which class. The file contains a list of `service_instance` commands with the following format:
 ```ruby
+service_instance :instance_name, :service_class
+```
 
 ###Spec service
 By default, there is a spec service class available called 'spec' when compiled with debug.

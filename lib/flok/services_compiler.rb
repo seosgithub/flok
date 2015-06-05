@@ -41,7 +41,7 @@ module Flok
       @service_instances = []
     end
 
-    def service name, instance_name
+    def service_instance instance_name, name
       @service_instances.push({
         :instance_name => instance_name,
         :class => name
