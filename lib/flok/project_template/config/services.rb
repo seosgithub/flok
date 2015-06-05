@@ -1,1 +1,2 @@
 #Services
+service :hello, :test

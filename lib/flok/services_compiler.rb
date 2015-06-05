@@ -8,6 +8,7 @@ module Flok
     #Compile a ruby file containing flok controller definitions (from the services)
     #The config is outlined in the documentation under docs/services.md
     def self.compile rb_src, rb_config
+      require 'pry'; binding.pry
       #Execute the configuration file first
       config_context = ServicesCompilerConfigContext.new
       config_context.instance_eval(rb_config, __FILE__, __LINE__)
@@ -32,6 +33,7 @@ end
 #Compiler executes all rb code inside this context
 module Flok
   class ServicesCompilerConfigContext
+    #Each service instance contains a :instance_name and :class
     attr_accessor :service_instances
 
     def initialize
@@ -39,7 +41,10 @@ module Flok
     end
 
     def service name, instance_name
-      @service_instances.push instance_name
+      @service_instances.push({
+        :instance_name => instance_name,
+        :class => name
+      })
     end
   end
 
@@ -48,7 +53,19 @@ module Flok
 
     def initialize config_context
       @config = config_context
-      @services = []
+
+      #A hash containing the 'class' name of the service to a block that can be used with Service.new
+      @_services = {}
+
+      #Create an array from the service_instances where each element in the array is the full code of the service
+      @services = @config.service_instances.map do |i|
+        #Get the instance name and class name of the service, normally defined in a ./config/services.rb file
+        sname = i[:instance_name]
+        sclass = i[:class]
+
+        sblock = @_services[sclass]
+        Service.new(sname, sblock)
+      end
     end
 
     def get_binding
@@ -56,7 +73,7 @@ module Flok
     end
 
     def service name, &block
-      @services << Service.new(name, &block)
+      @_services[name] = block
     end
   end
 

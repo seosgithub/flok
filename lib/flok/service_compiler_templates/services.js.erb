@@ -1,7 +1,3 @@
-<% @config.service_instances.each do |si| %>
-  "hello";
-<% end %>
-
 <% @services.each do |s| %>
   //Start of <%= s.name %> on_wakeup
   function <%= s.name %>_on_wakeup() {

@@ -36,7 +36,7 @@ class FlokCLI < Thor
       FileUtils.cp_r "./products/#{platform}", local_products_path
 
       #Copy built in services
-      Flok.src_glob("rb", "./app/kern/services", "./products/#{platform}/services/kern_services.rb")
+      Flok.src_glob("rb", "./app/kern/services", File.join(local_products_path, platform, "services/kern_services.rb"))
     end
 
     #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
@@ -55,6 +55,7 @@ class FlokCLI < Thor
       Flok.src_glob("rb", "./services/", "./services/combined_services.rb")
 
       #5. The service configuration in `./config/services.rb` is read and run through `services_compiler` and files from `./products/$PLATFORM/services/combined_services.rb` and write to ./glob/services.js
+      require 'pry'; binding.pry
       services_js = Flok::ServicesCompiler.compile(File.read("./services/combined_services.rb"), services_config_js)
       File.write "./glob/services.js", services_js
 
