@@ -1,4 +1,4 @@
-service :test do
+service :my_service do
   type :daemon
 
   on_wakeup %{

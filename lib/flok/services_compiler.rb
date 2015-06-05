@@ -70,9 +70,9 @@ module Flok
 
         sblock = @_services[sclass]
         raise "No service found for service_name: #{sclass.inspect} when trying to create service with instance name #{sname.inspect}. @_services contained: #{@_services.inspect} \n@config.service_instances contained: #{@config.service_instances.inspect}" unless sblock
-        @services << Service.new(sname) do
-          sblock.call
-        end
+        service = Service.new(sname)
+        service.instance_eval(&sblock)
+        @services << service
       end
     end
 
@@ -95,8 +95,6 @@ module Flok
 
       #These are for every 5.seconds
       @every_handlers = []
-
-      yield
     end
 
     def get_on_init

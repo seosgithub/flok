@@ -44,12 +44,12 @@ class FlokCLI < Thor
     Flok.src_glob("rb", './app/controllers', controller_glob_path)
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
     services_config_js = File.read "./config/services.rb"
+    Flok.src_glob("rb", './app/services', File.join(local_products_path, platform, "./services/user_services.rb"))
 
     #We are now inside the platform folder
     Dir.chdir File.join(local_products_path, platform) do
       #3. Put user_compiler_js in glob folder and services into ./services/user_services.rb
       File.write "glob/user_compiler.js", user_compiler_js
-      Flok.src_glob("rb", './app/services', "./services/user_services.rb")
 
       #4. The `./products/$PLATFORM/services/*.rb` file are globbed into `./products/$PLATFORM/services/combined_services.rb`
       Flok.src_glob("rb", "./services/", "./services/combined_services.rb")
