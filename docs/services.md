@@ -1,6 +1,8 @@
 #Services
 Services are helper hubs that send and receive information typically from other services or directly from interrupts. They are meant
-to act as a glue between controllers and devices. Services can receive events and can run periodic events on longer intervals.
+to act as a glue between controllers and devices. Services can receive events and can run periodic events on longer intervals. They are
+very similar to controllers except they do not contain actions and are meant to be used as singletons (although they are instantized, the 
+instances are globally shared).
 
 ##Daemons & Agents
 Services are either a `daemon` or an `agent`.  The only difference between these two is how the service is woken up (timers are allowed to run).
@@ -41,7 +43,7 @@ service :sample do
   ####################################################################################################################################
 
   #Do things##########################################################################################################################
-  #Services are a lot like controllers, they have a mechanism to handle function calls (not true events, these are directly called)
+  #Services are a lot like controllers, they have a mechanism to handle events
   on :event, %{
     #Services maintain their own context variables through using <%= @name %> macros to prefix variables, each instance will have a different name
     <%= @name %>_hello = "hi";
@@ -84,24 +86,43 @@ end
 
 ###Services when compiled
 Services get compiled through the `services_compiler` which generates the following functions
-```ruby
+```
 $INAME_on_wakeup() {
+  //Create a new base pointer
+  $INAME_bp = tels(1);
+
+  //Push all events to the event handler
+  reg_evt($INAME_BP, $INAME_event_handler);
+
+  <<user code>>
 }
 
 $INAME_on_sleep() {
+  <<user code>>
 }
 
 $INAME_on_connect(bp) {
+  <<user code>>
 }
 
 $INAME_on_disconnect(bp) {
+  <<user code>>
+
+  //Unregister so timer events will no longer fire here
+  unreg_evt($INAME_BP);
 }
 
 //For each 'on' function
 $INAME_on_XXXXX(bp, params) = {
+  <<user code>>
 }
 
 //For each 'every' function
 $INAME_on_every_xx_sec() {
+  <<user code>>
+}
+
+//Event handler
+$INAME_event_handler(ep, event_name, info) {
 }
 ```
