@@ -45,9 +45,11 @@ RSpec.describe "lib/services_compiler" do
     expect(res).not_to eq(nil)
 
     #on_event
-    ################################################################
     res = ctx.eval("test_on_hello");
     expect(res).not_to eq(nil)
-    ################################################################
+
+    #on_handle_timer_events
+    res = ctx.eval("test_handle_timer_events");
+    expect(res).not_to eq(nil)
   end
 end
