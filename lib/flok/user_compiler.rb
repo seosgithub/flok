@@ -15,8 +15,6 @@ module Flok
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
 
-      #puts @src
-
       return @src
     end
   end
@@ -265,12 +263,13 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :name, :spots, :macros
+    attr_accessor :name, :spots, :macros, :_services
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
       @spots = ['main']
       @macros = {}
+      @_services = []
 
       self.instance_eval(&block)
     end
@@ -283,6 +282,10 @@ module Flok
     #Names of spots
     def spots *spots
       @spots += spots
+    end
+
+    def services *instance_names
+      @_services = instance_names
     end
 
     #Pass through action

@@ -66,7 +66,7 @@ connection via `service :service_instance_name` where:
 ```ruby
 controller :controller do 
   spots "content"
-  service :my_service
+  services :my_service
 
   action :index do
     on_entry %{

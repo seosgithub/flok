@@ -11,7 +11,8 @@ ctable_entry {
   root_view,     //A constant string of the name of the view this controller sets as it's root view.
   actions,       //A dictionary [String:action_info] that corresponds to a dictionary of action_info object's based on the action's name.
   spots,         //An array fo spot names for this controller
-  name           //The name of the controller, useful for certain lookup operations, this is also the ctable key
+  name,          //The name of the controller, useful for certain lookup operations, this is also the ctable key
+  __init__       //A function that is called when this controller is created
 }
 ```
 

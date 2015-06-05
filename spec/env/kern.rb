@@ -26,13 +26,15 @@ shared_context "kern" do
 
   #Create a new flok project, add the given user_file (an .rb file containing controllers, etc.)
   #and then retrieve a V8 instance from this project's application_user.js
-  def flok_new_user user_controllers_src
+  def flok_new_user user_controllers_src, service_config=nil, service_src=nil
     temp_dir = new_temp_dir
     Dir.chdir temp_dir do
       flok "new test"
       Dir.chdir "test" do
         #Put controllers in
         File.write './app/controllers/user_controller.rb', user_controllers_src
+        File.write './config/services.rb', service_config if service_config
+        File.write './app/services/service0.rb', service_src if service_src
 
         #Build
         flok "build" #Will generate drivers/ but we will ignore that

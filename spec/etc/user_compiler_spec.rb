@@ -40,6 +40,13 @@ RSpec.describe "User compiler" do
     expect(actions).to eq(1)
   end
 
+  it "Can compile a controller and contain an __init__ function" do
+    ctx = compile "controller0"
+    actions = ctx.eval "ctable.my_controller.__init__"
+    expect(actions).not_to eq(nil)
+  end
+
+
   it "Can compile a controller with an action that contains an on_entry" do
     ctx = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
@@ -51,7 +58,6 @@ RSpec.describe "User compiler" do
     on_entry = ctx.eval "ctable.my_controller.name"
     expect(on_entry).to eq("my_controller")
   end
-
 
   it "Can compile a controller with an action that contains an event that responds to hello" do
     ctx = compile "controller0"

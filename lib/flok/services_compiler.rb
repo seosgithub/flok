@@ -18,7 +18,6 @@ module Flok
       context.instance_eval(rb_src, __FILE__, __LINE__)
       context.ready
 
-
       @src = ""
       services_erb = File.read File.join(File.dirname(__FILE__), "./service_compiler_templates/services.js.erb")
       services_renderer = ERB.new(services_erb)

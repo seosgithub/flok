@@ -9,18 +9,17 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:service_spec" do
   include_context "kern"
 
-  #Can create a service
-  it "Can initiate a controller via _embed" do
+  it "service can be used inside a controller" do
     #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/simple_service.rb')
+    ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config0.rb")
 
     #Run the embed function
     ctx.eval %{
       //Call embed on main root view
       base = _embed("my_controller", 0, {}, null);
 
-      //Drain queue with a test event
-      int_dispatch([3, "int_event", base, "start_request", {}]);
+      //Drain queue
+      int_dispatch([]);
     }
 
     base = ctx.eval("base")
@@ -29,17 +28,22 @@ RSpec.describe "kern:service_spec" do
     @driver.mexpect("if_controller_init", [base, base+1, "my_controller", {}])
     @driver.mexpect("if_attach_view", [base+1, 0])
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
+  end
 
-    #Emulate the if_net driver
-    if_net_req = @driver.get("if_net_req", 1) #1 is the network queue
+  it "Does call the wakeup and the connect for service when a controller is opened" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config1.rb"), File.read("./spec/kern/assets/service0.rb")
 
-    #int_net_cb(tp, success, info)
-    secret = SecureRandom.hex
-    @driver.int "int_net_cb", [if_net_req[3], true, {:secret => secret}] #if_net_req[3] is the telepointer
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
 
-    #Now we expect to have 'response' set as the controller event handler "request_response"
-    #should have been called
-    response = JSON.parse(ctx.eval("JSON.stringify(response)"))
-    expect(response).to eq({"success"=> true, "info" => {"secret" => secret}})
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    expect(ctx.eval("on_wakeup_called")).to eq(true)
+    expect(ctx.eval("on_connect_called")).to eq(true)
   end
 end
