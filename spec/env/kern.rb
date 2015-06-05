@@ -1,3 +1,4 @@
+require './spec/env/global.rb'
 require 'therubyracer'
 require './spec/lib/temp_dir'
 
