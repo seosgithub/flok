@@ -21,7 +21,7 @@ shared_context "kern" do
     bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
 
     #Now execute the command with a set of arguments
-    system("#{bin_path} #{args}")
+    return system("#{bin_path} #{args}")
   end
 
   #Create a new flok project, add the given user_file (an .rb file containing controllers, etc.)
@@ -37,7 +37,9 @@ shared_context "kern" do
         File.write './app/services/service0.rb', service_src if service_src
 
         #Build
-        flok "build" #Will generate drivers/ but we will ignore that
+        unless flok "build" #Will generate drivers/ but we will ignore that
+          raise "Build failed"
+        end
 
         #Execute
         @driver = FakeDriverContext.new

@@ -9,7 +9,7 @@ require './spec/lib/rspec_extensions.rb'
 RSpec.describe "kern:service_controller_spec" do
   include_context "kern"
 
-  it "service can be used inside a controller" do
+ it "service can be used inside a controller" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config0.rb")
 
@@ -192,5 +192,11 @@ RSpec.describe "kern:service_controller_spec" do
     expect(ping_bp).to eq(7)
     expect(ping_params).to eq({"hello" => "world"})
     expect(ping_sessions).to eq([my_base.to_s])
+  end
+
+  it "fails to compile when trying to Request() with something not defined in services" do
+    #Compile the controller
+    expect { flok_new_user File.read('./spec/kern/assets/service_controller3.rb'), File.read("./spec/kern/assets/service_config1.rb"), File.read("./spec/kern/assets/service2.rb")
+    }.to raise_exception
   end
 end

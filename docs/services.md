@@ -105,33 +105,19 @@ end
 Services get compiled through the `services_compiler` which generates the following functions
 ```
 $INAME_on_wakeup() {
-  //Create a new base pointer
-  $INAME_bp = tels(1);
-
-  //Push all events to the event handler
-  reg_evt($INAME_BP, $INAME_event_handler);
-
-  <<user code>>
 }
 
 $INAME_on_sleep() {
-  <<user code>>
 }
 
 $INAME_on_connect(bp) {
-  <<user code>>
 }
 
 $INAME_on_disconnect(bp) {
-  <<user code>>
-
-  //Unregister so timer events will no longer fire here
-  unreg_evt($INAME_BP);
 }
 
 //For each 'on' function
 $INAME_on_XXXXX(bp, params) = {
-  <<user code>>
 }
 
 //Event handler
@@ -148,3 +134,16 @@ service_instance :instance_name, :service_class
 
 ###Spec service
 By default, there is a spec service class available called 'spec' when compiled with debug.
+
+###Roughly how the services system works
+The services are all hard-coded function calls that are initialized with names like `my_instance_on_wakeup`.  You have a service *class* defined in
+either the kernel `./app/kern/services` or `./app/services` in a project. These files are then used as a template when you define a service in
+`./config/services.rb` in your project. The flok library `ServicesCompiler` then takes the config and services file and generates the output
+javascript code to support a service.  Services are talked to through the simple function naming scheme above with the exception of timers which open
+a new `evt` record every time in wakes up and stops the `evt` when it goes to sleep with a new base pointer. This means, a timer will not fire against
+a service if the `evt` is no longer active. Regular `on` requests are not events because there would be way to much overhead.
+
+The controller compiler, `UserCompiler`, mentioned in [Project](./project.md) provides the `services` method when defining a controller. This
+`services` method is used in the `UserCompiler` to inject service functions directly into the controller's `ctable` definition. `_embed` and `Goto
+macro` of the controllers then call `__init__` and `__dealloc__` of the `ctable` which is augmented with the necessary `services` like calling
+`connect` and `disconnect`.

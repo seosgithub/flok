@@ -42,26 +42,3 @@ controller_info {
   embeds: //An array of arrays, where position 0 is the spot after `main`, each element in the array is a view controller base pointer.
 }
 ```
-
-###stable_entry (static)
-Each service instance has it's own ctable entry. Unlike controller, service *instances* actually meta-class instances. You still need to 
-'instantize' the service instance via a `service_info`. Additionally, services are not meant to have multiple copies of. You may have
-multiple instances declared, but each will have it's own name. This is a completetly static structure
-
-```javascript
-stable_entry {
-  name,           //The name of the service instance
-  type,           //'daemon' or 'agent'
-  on_wakeup,
-  on_sleep,
-  on_disconnect,
-  handler         //A dictionary [String:f(context, info)] of event handlers for events that occurs
-}
-```
-
-###service_info
-Each service instance is a singleton; however, the singleton is created and destroyed if it is an `agent` and no longer needed.
-service_info {
-  context: {}, //Information held by the service
-  ste,         //Service table entry
-}

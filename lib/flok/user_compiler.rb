@@ -241,6 +241,8 @@ module Flok
           ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
 
+          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller.services.include? name
+
           out << %{
             #{name}_on_#{ename}(__base__, #{info});
           }
