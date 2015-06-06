@@ -78,9 +78,8 @@ For each service function, these are what you can access
     * `sessions` - A hash of currently active sessions where each key is a base pointer
 
 ###Service function in controllers
-When you are inside a controller, you may make as service request through `Request` after you declare that the controller uses a service
-connection via `service :service_instance_name` where:
-
+When you are inside a controller, you may make as service request through `Request`. **You must have already declared usage of the service through
+`services`**:
   * `Request(service_insatnce_name, ename, params)`
     * `service_instance_name` - The instance name of the service you are making a request from
     * `ename` - The name of the event to 'send' the service. (`on` handlers for service)

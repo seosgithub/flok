@@ -241,7 +241,7 @@ module Flok
           ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
 
-          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller.services.include? name
+          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller._services.include? name
 
           out << %{
             #{name}_on_#{ename}(__base__, #{info});
@@ -290,7 +290,7 @@ module Flok
     end
 
     def services *instance_names
-      @_services = instance_names
+      @_services = instance_names.map{|e| e.to_s}
     end
 
     #Pass through action
