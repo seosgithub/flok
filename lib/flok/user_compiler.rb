@@ -229,7 +229,7 @@ module Flok
             }]);
           }
           out.puts res
-        #Request(service_name, payload, event_name_cb)
+        #Request(service_instance_name, ename, info)
         elsif l =~ /Request/
           l.strip!
           l.gsub!(/Request\(/, "")
@@ -238,11 +238,11 @@ module Flok
           o = l.split(",").map{|e| e.strip}
 
           name = o.shift.gsub(/"/, "")
+          ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
-          event_name = o.shift
 
           out << %{
-            service_#{name}_req(#{info}, __base__, #{event_name});
+            #{name}_on_#{ename}(__base__, #{info});
           }
         else
           out.puts l

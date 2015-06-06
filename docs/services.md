@@ -4,6 +4,11 @@ to act as a glue between controllers and devices. Services can receive events an
 very similar to controllers except they do not contain actions and are meant to be used as singletons (although they are instantized, the 
 instances are globally shared).
 
+##Datatypes
+Services maintain the following datatypes per instance:
+  * `instance_name_sessions` - A hash that contains the connection view controllers as keys and 'true' as the values.
+  * `instance_name_n_sessions` - A count of the current number of active sessions
+
 ##Code
 All kernel service classes are placed in `./app/kern/services/` and are ruby files. Here is an example:
 ```ruby
@@ -26,7 +31,7 @@ service :sample do
   #Session management#################################################################################################################
   #Things 'connect' to a service, which is just a function call that objects, like controllers, make to a service instance
   #that notify the service that that object is now connected. You may use this to start things like automatically sending
-  #events to controller instances.
+  #events to controller instances. You have a session list called $NAME_sessions that is an array of currently connected clients.
   on_connect %{
   }
 
@@ -52,6 +57,25 @@ service :sample do
   ####################################################################################################################################
 end
 ```
+
+###Variables accesible
+For each service function, these are what you can access
+  * `on_wakeup`
+    * No variables yet
+  * `on_sleep`
+    * No variables left over
+  * `on_connect`
+    * `bp` - The base address of the controller that connected
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `on_disconnect`
+    * `bp` - The base address of the controller that disconnected
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `every x.seconds`
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `on`
+    * `bp` - The base address of the controller that sent event
+    * `params` - The parameters sent with the message
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
 
 ###Service function in controllers
 When you are inside a controller, you may make as service request through `Request` after you declare that the controller uses a service
@@ -107,11 +131,6 @@ $INAME_on_disconnect(bp) {
 
 //For each 'on' function
 $INAME_on_XXXXX(bp, params) = {
-  <<user code>>
-}
-
-//For each 'every' function
-$INAME_on_every_xx_sec() {
   <<user code>>
 }
 

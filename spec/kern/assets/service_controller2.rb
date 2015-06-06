@@ -27,6 +27,12 @@ controller :my_other_controller do
 
   action :my_action do
     on_entry %{
+      my_base = __base__;
+      var info = {
+        hello: "world"
+      }
+      Request("spec", "ping", info);
     }
   end
 end
+

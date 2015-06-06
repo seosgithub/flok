@@ -1,4 +1,8 @@
 <% @services.each do |s| %>
+  //Variables
+  var <%= s.name %>_sessions = {};  //Currently connected clients
+  var <%= s.name %>_n_sessions = 0;  //Number of sessions
+
   //Start of <%= s.name %> on_wakeup
   function <%= s.name %>_on_wakeup() {
     //Timer related
@@ -18,21 +22,44 @@
   }
 
   function <%= s.name %>_on_sleep() {
+    //Do not receive anymore timer events
+    dereg_evt(<%= s.name %>_timer_bp);
+
     <%= s._on_sleep %>
   }
 
   function <%= s.name %>_on_connect(bp) {
-    <%= s._on_wakeup %>
+    var sessions = <%= s.name %>_sessions;
+    <%= s.name %>_n_sessions += 1;
+
+    //First connection
+    if (<%= s.name %>_n_sessions === 1) {
+      <%= s.name %>_on_wakeup();
+    }
+
+    sessions[bp] = true;
     <%= s._on_connect %>
   }
 
   function <%= s.name %>_on_disconnect(bp) {
+    var sessions = <%= s.name %>_sessions;
+
+    <%= s.name %>_n_sessions -= 1;
+    delete sessions[bp];
+
     <%= s._on_disconnect %>
+
+    //No more connections
+    if (<%= s.name %>_n_sessions === 0) {
+      <%= s.name %>_on_sleep();
+    }
+
   }
   
   //'Event' handlers
   <% s.event_handlers.each do |h| %>
     function <%= s.name %>_on_<%= h[:name] %>(bp, params) {
+      var sessions = <%= s.name %>_sessions;
       <%= h[:str] %>
     }
   <% end %>
@@ -40,6 +67,8 @@
   //Timer receivers
   /////////////////////////////////////////////////////////////////////
   function <%= s.name %>_handle_timer_events(ep, ename, info) {
+    var sessions = <%= s.name %>_sessions;
+
     <% s.every_handlers.each do |h| %>
         if (ename === '<%= h[:name] %>') {
           <%= h[:str] %>

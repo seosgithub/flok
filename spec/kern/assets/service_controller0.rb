@@ -5,5 +5,9 @@ controller :my_controller do
   action :my_action do
     on_entry %{
     }
+
+    on "ping", %{
+      ping_called = true;
+    }
   end
 end

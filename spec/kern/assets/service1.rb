@@ -1,5 +1,6 @@
 service :my_service do
   on_wakeup %{
+    every_ticks = 0;
     on_wakeup_called = true; 
   }
 
@@ -16,9 +17,6 @@ service :my_service do
   }
 
   every 1.seconds, %{
-    for (var i = 0; i < Object.keys(sessions).length; ++i) {
-      var bp = Object.keys(sessions)[i];
-      int_event(bp, "ping", {});
-    }
+    every_ticks += 1;
   }
 end
