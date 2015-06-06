@@ -4,14 +4,14 @@ require './spec/env/etc'
 
 RSpec.describe "lib/services_compiler" do
   #Return a v8 instance of a compiled js file
-  def compile fn
+  def compile fn, config
     compiler = Flok::ServicesCompiler
     js_src(fn)
-    js_res = compiler.compile(js_src(fn), js_src('config0'))
+    js_res = compiler.compile(js_src(fn), js_src(config))
     ctx = V8::Context.new
     ctx.eval js_res
 
-    ctx
+    return ctx, js_res
   end
 
   #Get the source for a file in  ./service_compiler/*.rb
@@ -26,7 +26,7 @@ RSpec.describe "lib/services_compiler" do
   end
 
   it "Can call compile method and get a copy of all the functions" do
-    ctx = compile "service0"
+     ctx, _  = compile "service0", "config0"
 
     #on_wakeup
     res = ctx.eval("test_on_wakeup")
@@ -51,5 +51,10 @@ RSpec.describe "lib/services_compiler" do
     #on_handle_timer_events
     res = ctx.eval("test_handle_timer_events");
     expect(res).not_to eq(nil)
+  end
+
+  it "Can call compile method with options" do
+    ctx, js = compile "service1", "config2"
+    expect(js).to include("23rntoheuh3nthoeunthn23th");
   end
 end
