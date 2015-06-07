@@ -12,15 +12,24 @@ module Flok
     end
 
     #Get a list of modules for a particular environment for a platform
-    def self.mods platform, environment
+    def self.mods environment
       #Create array that looks like a javascript array with single quotes
-      mods = self.config_yml(platform, environment)['mods']
+      mods = self.config_yml(environment)['mods']
     end
 
-    #Get all config.yml information for a platform
-    def self.config_yml platform, environment
-      driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
-      raise "No config.yml found in your 'platform: #{platform}' driver" unless driver_config
+    #Get all config.yml information for a config_yml file based on FLOK_CONFIG
+    def self.config_yml environment
+      #Get the config.yml path
+      config_yml_path = ENV['FLOK_CONFIG']
+      if config_yml_path
+        raise "You didn't pass a FLOK_CONFIG variable for the config.yml" unless config_yml_path
+        raise "The FLOK_CONFIG given: #{config_yml_path.inspect} does not contain a file (config.yml)" unless File.exists?(config_yml_path)
+      else
+        $stderr.puts "Warning: You didn't specify FLOK_CONFIG, Using default config of ./app/drivers/#{ENV['PLATFORM']}/config.yml"
+        config_yml_path = "./app/drivers/#{ENV['PLATFORM']}/config.yml"
+      end
+
+      driver_config = YAML.load_file(config_yml_path)
       return driver_config[environment]
     end
   end
