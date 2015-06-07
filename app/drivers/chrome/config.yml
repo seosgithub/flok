@@ -10,8 +10,6 @@ DEBUG:
     - sockio
     - persist
     - timer
-  defines:
-    - spec_test
 RELEASE:
   mods:
     - ui
