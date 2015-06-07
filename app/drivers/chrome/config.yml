@@ -10,6 +10,9 @@ DEBUG:
     - sockio
     - persist
     - timer
+  defines:
+    - mem_pager
+    - sockio_pager
 RELEASE:
   mods:
     - ui
@@ -20,3 +23,6 @@ RELEASE:
     - sockio
     - persist
     - timer
+  defines:
+    - mem_pager
+    - sockio_pager
