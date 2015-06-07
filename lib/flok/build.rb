@@ -62,14 +62,18 @@ module Flok
     #3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$platform/glob/2kern.pre_macro.js`
     Flok.src_glob("js", './app/kern', "#{build_path}/glob/2kern.pre_macro.js")
 
-    #4. All js files in `./products/$PLATFORM/glob/2kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/2kern.js 
+    #4. All js files in `./app/kern/pagers/*.js` are appended to `./products/$PLATFORM/glob/3kern.pre_macro.js`
+    Flok.src_glob("js", './app/kern/pagers/', "#{build_path}/glob/3kern.pre_macro.js")
+
+    #5. All js files in `./products/$PLATFORM/glob/{2,3}kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/{2,3}kern.js
     require './app/kern/macro.rb'
     File.write("#{build_path}/glob/2kern.pre_macro.js", macro_process(File.read("#{build_path}/glob/2kern.pre_macro.js")))
+    File.write("#{build_path}/glob/3kern.pre_macro.js", macro_process(File.read("#{build_path}/glob/3kern.pre_macro.js")))
 
-    #5. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/glob/application.js.erb`
+    #6. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/glob/application.js.erb`
     Flok.src_glob("js", "#{build_path}/glob", "#{build_path}/glob/application.js.erb")
 
-    #6. Add custom commands
+    #7. Add custom commands
     ################################################################################################################
     #MODS - List mods listed in config.yml
     #---------------------------------------------------------------------------------------
@@ -87,7 +91,7 @@ module Flok
     #---------------------------------------------------------------------------------------
     ################################################################################################################
 
-    #7. Append relavent mods code in kernel with macros
+    #8. Append relavent mods code in kernel with macros
     mods.each do |mod|
       s = File.read("./app/kern/mod/#{mod}.js")
       open("#{build_path}/glob/application.js.erb", "a") do |f|
@@ -95,7 +99,7 @@ module Flok
       end
     end
 
-    #8. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
+    #9. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
     erb_src = File.read "#{build_path}/glob/application.js.erb"
     renderr = ERB.new(erb_src)
     context = ApplicationJSERBContext.new()

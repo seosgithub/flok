@@ -25,12 +25,24 @@ The paging service may be configured in your `./config/services.rb`. You must se
 namespace. See [VM Pagers](./vm/pagers.md) for more info.
 
 ```ruby
-service :vm, :vm, {
+service_instance :vm, :vm, {
   :pagers => [
-    "mem" => "local"
+    {
+      :name => "spec0",
+      :namespace => "user"
+    }
   ]
 }
 ```
+Each pager can only be used once. In the future, using multiple copies of pagers would be a welcome addition. For multiple memory pagers, you may use the `mem0`, `mem1`, and `mem2` pagers.
+
+  * Pager options
+    * `name` - The name of the pager, this is used to create functions to each pager like `$NAME_read_sync`
+    * `namespace` - The namespace of the pager, this is used during requests to the pager, each pager is bound to a namespace
+
+
+###Spec helpers
+The variable `vm_did_wakeup` is set to true in the wakeup part of the vm service.
 
 ##Requests
 
@@ -55,6 +67,8 @@ Request a page of memory synchronously *now*, does return:
       * `ns` - Namespace of the fault
       * `key` - Key of the fault
       * `page` - Value of the fault
+  * Spec
+    * Sets `vm_read_sync_called` to true
 
 ###`write`
 Write to a page

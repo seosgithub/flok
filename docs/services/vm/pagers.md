@@ -22,3 +22,9 @@ This pager dosen't do anything beyond allow you to set pages, write to them, and
 ###`sockio` - Network pager
   * Supported operations
     * `read`
+
+###Spec pagers
+###`spec0` 
+This pager assists with specs in ./spec/kern/vm_service_spec.js
+  * Supported operations
+    * `read_sync` - Will set the `spec0_read_sync_called` to be true.

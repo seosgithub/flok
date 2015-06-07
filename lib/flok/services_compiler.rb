@@ -118,6 +118,9 @@ module Flok
     def on_disconnect(str); @_on_disconnect = str; end
 
     def on(name, str)
+      render = ERB.new(str)
+      str = render.result(binding)
+
       @event_handlers << {
         :name => name,
         :str => str
