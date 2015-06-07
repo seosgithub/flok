@@ -38,10 +38,11 @@ module Flok
       @service_instances = []
     end
 
-    def service_instance instance_name, name
+    def service_instance instance_name, name, options={}
       @service_instances.push({
         :instance_name => instance_name,
-        :class => name
+        :class => name,
+        :options => options
       })
     end
   end
@@ -64,10 +65,11 @@ module Flok
         #Get the instance name and class name of the service, normally defined in a ./config/services.rb file
         sname = i[:instance_name]
         sclass = i[:class]
+        soptions = i[:options]
 
         sblock = @_services[sclass]
         raise "No service found for service_name: #{sclass.inspect} when trying to create service with instance name #{sname.inspect}. @_services contained: #{@_services.inspect} \n@config.service_instances contained: #{@config.service_instances.inspect}" unless sblock
-        service = Service.new(sname)
+        service = Service.new(sname, soptions)
         service.instance_eval(&sblock)
         @services << service
       end
@@ -83,9 +85,10 @@ module Flok
   end
 
   class Service
-    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers
-    def initialize name
+    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers, :options
+    def initialize name, options
       @name = name
+      @options = options
 
       #These are the 'on' handlers
       @event_handlers = []

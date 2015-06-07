@@ -131,6 +131,8 @@ instantize based on which class. The file contains a list of `service_instance` 
 service_instance :instance_name, :service_class
 ```
 
+Additionally, you may pass in a hash at the end of `service_instance` that will be available as `@options` inside the service definition `rb` file.
+
 ###Spec service
 By default, there is a spec service class available called 'spec' when compiled with debug.
 
