@@ -15,6 +15,11 @@ You create and build projects via the `flok` command. You must set the `$FLOK_EN
     * `$PLATFORM/` - A folder named after the platform you selected
       * `application_user.js` - The source for the flok application_user. Includes your application code statically linked
       * `drivers/` - Contains the driver code needed to implement the driver side interface
+  * `config/` - The configuration files
+    * `services.rb` - A list of service instances that are statically compiled into the kernel.  See [Services](./services.md) for details.
+    * `platforms/$PLATFORM/` - Platform dependent build options
+      * `config.yml` - Copied from the platform's config.yml folder in the kernel `./app/drivers/$PLATFORM/config.yml`. This is used when running
+          `flok build`
 
 ###application_user.js
 `application_user.js` is equivalent to the application_user build `application.js` except that it contains the users controllers statically linked (appended in *js*).
