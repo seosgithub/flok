@@ -23,6 +23,9 @@ class FlokCLI < Thor
     raise "$PLATFORM was not set" unless ENV['PLATFORM']
     platform = ENV['PLATFORM']
 
+    #Set the correct config.yml
+    ENV['FLOK_CONFIG'] = File.expand_path("./config/platforms/#{platform}/config.yml")
+
     #Create a products folder if it dosen't already exist
     Dir.mkdir("./products") unless File.exists?("./products")
 

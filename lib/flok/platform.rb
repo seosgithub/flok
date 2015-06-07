@@ -21,8 +21,10 @@ module Flok
       #Just converting an array into a hash of true values for easier lookup
       hash = {}
       defines_arr = self.config_yml(environment)['defines']
-      defines_arr.each do |e|
-        hash[e] = true
+      if defines_arr
+        defines_arr.each do |e|
+          hash[e] = true
+        end
       end
 
       return hash
