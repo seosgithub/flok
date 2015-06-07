@@ -31,6 +31,7 @@
 
   //Where socket.io data comes in
   function sockio_pager_sp_endpoint(bp, ename, info) {
+    console.log("hi");
     int_event(waiting_bp, "read_res", info);
   }
 <% end %>
