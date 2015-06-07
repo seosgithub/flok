@@ -19,7 +19,14 @@ module Flok
 
     #Get all config.yml information for a platform
     def self.config_yml platform, environment
-      driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
+      #If $FLOK_CONFIG is specified, then we will use that instead of the default config.yml,
+      #the config must be specified as an absolute path
+      if ENV['FLOK_CONFIG']
+        driver_config = YAML.load_file(ENV['FLOK_CONFIG'])
+      else
+        driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
+      end
+
       raise "No config.yml found in your 'platform: #{platform}' driver" unless driver_config
       return driver_config[environment]
     end

@@ -83,10 +83,6 @@ module Flok
     ################################################################################################################
     #MODS - List mods listed in config.yml
     #---------------------------------------------------------------------------------------
-    #Load the driver config.yml
-    driver_config = YAML.load_file("./app/drivers/#{platform}/config.yml")
-    raise "No config.yml found in your 'platform: #{platform}' driver" unless  driver_config
-
     #Create array that looks like a javascript array with single quotes
     mods = Flok::Platform.mods(platform, environment)
     mods_js_arr = "[" + mods.map{|e| "'#{e}'"}.join(", ") + "]"
