@@ -2,6 +2,10 @@
 spec0_data = {};
 spec0_read_count = 0;
 
+function spec0_init(options) {
+  spec0_init_options = options;
+}
+
 function spec0_read_sync(ns, bp, key) {
   spec0_read_count += 1;
 

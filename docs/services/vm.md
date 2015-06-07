@@ -29,7 +29,9 @@ service_instance :vm, :vm, {
   :pagers => [
     {
       :name => "spec0",
-      :namespace => "user"
+      :namespace => "user",
+      :options => {  //Passed to pager init function
+      }
     }
   ]
 }

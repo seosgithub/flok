@@ -12,6 +12,12 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
+
+    //Call init functions
+    <% @options[:pagers].each do |p| %>
+      <%= p[:name] %>_init(<%= (p[:options] || {}).to_json %>);
+    <% end %>
+
   }
 
   on_sleep %{
