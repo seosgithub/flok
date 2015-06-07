@@ -7,7 +7,7 @@ RSpec.describe "lib/services_compiler" do
   def compile fn
     compiler = Flok::ServicesCompiler
     js_src(fn)
-    js_res = compiler.compile(js_src(fn))
+    js_res = compiler.compile(js_src(fn), js_src('config0'))
     ctx = V8::Context.new
     ctx.eval js_res
 
