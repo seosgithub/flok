@@ -22,7 +22,15 @@ whenever anything in an entries changes.
 
 ###Configuration
 The paging service may be configured in your `./config/services.rb`. You must set an array of pagers where each pager is responsible for a particular
-namespace.
+namespace. See [VM Pagers](./vm/pagers.md) for more info.
+
+```ruby
+service :vm, :vm, {
+  :pagers => [
+    "mem" => "local"
+  ]
+}
+```
 
 ##Requests
 
@@ -32,10 +40,10 @@ Request (fault) a page of memory:
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace
   * Event Responses
-    * `page_fault_res`
+    * `read_res`
       * `ns` - Namespace of the fault
       * `key` - Key of the fault
-      * `entries` - Value of the fault
+      * `page` - Value of the fault
 
 ###`read_sync`
 Request a page of memory synchronously *now*, does return:
@@ -43,14 +51,14 @@ Request a page of memory synchronously *now*, does return:
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace
   * Event Responses
-    * `page_fault_res`
+    * `read_res`
       * `ns` - Namespace of the fault
       * `key` - Key of the fault
-      * `value` - Value of the fault
+      * `page` - Value of the fault
 
 ###`write`
 Write to a page
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace
-    * `entries` - The new entries of the page, if the page dosen't exist, it will be overwritten
+    * `page` - The returned page
