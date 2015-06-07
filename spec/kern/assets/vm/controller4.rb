@@ -5,9 +5,13 @@ controller :my_controller do
     on_entry %{
       var info = {
         ns: "user",
-        key: 33
+        key: 33,
+        value: 22
       };
 
+      Request("vm", "write", info);
+      Request("vm", "read", info);
+      Request("vm", "read", info);
       Request("vm", "read_sync", info);
     }
 

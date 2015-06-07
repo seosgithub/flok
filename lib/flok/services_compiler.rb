@@ -47,7 +47,7 @@ module Flok
     end
   end
 
-  class ServicesCompilerContext
+ class ServicesCompilerContext
     attr_accessor :services, :config
 
     def initialize config_context
@@ -105,17 +105,30 @@ module Flok
       return @on_request
     end
 
-    def on_init str
-      @on_init = macro(str)
+    def on_wakeup(str) 
+      render = ERB.new(str)
+      str = render.result(binding)
+      @_on_wakeup  = str
     end
 
-    def on_wakeup(str); @_on_wakeup = str; end
+    def on_sleep(str) 
+      render = ERB.new(str)
+      str = render.result(binding)
 
-    def on_sleep(str); @_on_sleep = str; end
+      @_on_sleep = str
+    end
 
-    def on_connect(str); @_on_connect = str; end
+    def on_connect(str) 
+      render = ERB.new(str)
+      str = render.result(binding)
+      @_on_connect = str
+    end
 
-    def on_disconnect(str); @_on_disconnect = str; end
+    def on_disconnect(str) 
+      render = ERB.new(str)
+      str = render.result(binding)
+      @_on_disconnect = str
+    end
 
     def on(name, str)
       render = ERB.new(str)
@@ -143,14 +156,10 @@ module Flok
       end
     end
 
-    def on_request str
-      @on_request = macro(str)
-    end
-
     def macro text
-      out = StringIO.new
+      #out = StringIO.new
 
-      text.split("\n").each do |l|
+      #text.split("\n").each do |l|
         ##Request(vc_name, spot_name, context) macro
         #if l =~ /Request/
           #l.strip!
@@ -166,11 +175,11 @@ module Flok
           #out << %{
           #}
         #else
-          out.puts l
+          #out.puts l
         #end
-      end
+      #end
 
-      return out.string
+      #return out.string
     end
   end
 end

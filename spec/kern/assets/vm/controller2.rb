@@ -8,7 +8,7 @@ controller :my_controller do
         key: 33
       };
 
-      Request("vm", "read_sync", info);
+      Request("vm", "read", info);
     }
 
     on "read_res", %{

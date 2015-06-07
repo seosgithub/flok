@@ -6,10 +6,12 @@ Here is a list of default pagers for the vm system.
 ##How to make your own pager
 A new pager can be created by adding the pager to the `./app/kern/services` folder or `./app/services/pagers` if you are in a project.
 
+**For all operations that are cacheable, you must write to vm_cache[ns][key]**
+
 Each pager must implement the following functions:
-  * `read(bp, key)`
-  * `read_sync(bp, key)`
-  * `write(bp, key, page)`
+  * `read(ns, bp, key)`
+  * `read_sync(ns, bp, key)`
+  * `write(key, page)`
 
 ##Default pagers
 ###`mem` - Default memory pager
