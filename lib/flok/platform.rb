@@ -17,6 +17,17 @@ module Flok
       mods = self.config_yml(environment)['mods']
     end
 
+    def self.defines environment
+      #Just converting an array into a hash of true values for easier lookup
+      hash = {}
+      defines_arr = self.config_yml(environment)['defines']
+      defines_arr.each do |e|
+        hash[e] = true
+      end
+
+      return hash
+    end
+
     #Get all config.yml information for a config_yml file based on FLOK_CONFIG
     def self.config_yml environment
       #Get the config.yml path
@@ -32,6 +43,7 @@ module Flok
       driver_config = YAML.load_file(config_yml_path)
       return driver_config[environment]
     end
+
   end
 
   #Alias

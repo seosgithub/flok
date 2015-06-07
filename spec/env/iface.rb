@@ -12,7 +12,7 @@ shared_context "iface:kern" do
   before(:each) do
     @pipe = IO.popen("rake pipe:kern", "r+")
     @pid = @pipe.pid
-    @mods = Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
+    @mods = Flok::Platform.mods ENV['FLOK_ENV']
   end
 
   after(:each) do
@@ -28,7 +28,7 @@ shared_context "iface:driver" do
   before(:each) do 
     @pipe = IO.popen("rake pipe:driver", "r+") 
     @pid = @pipe.pid
-    @mods = Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
+    @mods = Flok::Platform.mods ENV['FLOK_ENV']
   end
 
   after(:each) do
@@ -44,11 +44,11 @@ end
 
 #Get a list of modules based on the platform and environment
 def mods
-  Flok::Platform.mods ENV['PLATFORM'], ENV['FLOK_ENV']
+  Flok::Platform.mods ENV['FLOK_ENV']
 end
 
 def config_yml
-  Flok::Platform.config_yml ENV['PLATFORM'], ENV['FLOK_ENV']
+  Flok::Platform.config_yml ENV['FLOK_ENV']
 end
 
 #Ensure this platform supports a module, or skip the test (used inside before(:each) describe block, or `it` block)

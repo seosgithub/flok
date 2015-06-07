@@ -29,6 +29,7 @@ All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end
   * `@debug` - Set to `true` when FLOK_ENV=DEBUG
   * `@release` - Set to `true` FLOK_ENV=RELEASE
   * `@mods` - The set of modules supported by this platform and build configuration
+  * `@defines` - A hash that contains things under the `defines` section in a `config.yml`. Each item in the hash is `true`
 
 ```js
   //Example JS code for debug / release mode
@@ -37,4 +38,11 @@ All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end
   <% else %>
     //JS code for not debug mode
   <% end %>
+
+  <% if @defines['spec_test'] %>
+    //spec_helper_defines_spec_test
+  <% end %>
 ```
+
+####Spec Helpers
+The file contained in the kernel `./app/kern/spec_helper.js` is used to test things like variable setting from `config.yml`
