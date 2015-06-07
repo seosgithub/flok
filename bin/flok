@@ -27,6 +27,7 @@ class FlokCLI < Thor
     ENV['FLOK_CONFIG'] = File.expand_path("./config/platforms/#{platform}/config.yml")
 
     #Create a products folder if it dosen't already exist
+    FileUtils.rm_r "./products" if File.directory? "./products"
     Dir.mkdir("./products") unless File.exists?("./products")
 
     #Go into the flok gem project
