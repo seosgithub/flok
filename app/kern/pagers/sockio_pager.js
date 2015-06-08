@@ -10,6 +10,7 @@
     SEND("main", "if_sockio_init", options.url, sockio_pager_sp);
     reg_evt(sockio_pager_bp, sockio_pager_sp_endpoint);
     SEND("async", "if_sockio_fwd", sockio_pager_sp, "read_res", sockio_pager_bp);
+    SEND("async", "if_sockio_fwd", sockio_pager_sp, "notify", sockio_pager_bp);
   }
 
   function sockio_pager_read_sync(ns, bp, key) {
@@ -33,11 +34,16 @@
 
   //Where socket.io data comes in
   function sockio_pager_sp_endpoint(ep, ename, info) {
-    var bp = info.bp;
-    var key = info.key;
-    var value = info.value;
-    int_event(waiting_bp, "read_res", info);
-    vm_cache_write("net", key, value);
+    if (ename === "read_res") {
+      var bp = info.bp;
+      var key = info.key;
+      var value = info.value;
+      int_event(waiting_bp, "read_res", info);
+      vm_cache_write("net", key, value);
+    } else if (ename === "notify") {
+      var key = info.key;
+      vm_notify("user", key);
+    }
   }
 
   function sockio_watch(ns, key) {
