@@ -38,7 +38,7 @@ module Flok
         raise "You didn't pass a FLOK_CONFIG variable for the config.yml" unless config_yml_path
         raise "The FLOK_CONFIG given: #{config_yml_path.inspect} does not contain a file (config.yml)" unless File.exists?(config_yml_path)
       else
-        $stderr.puts "Warning: You didn't specify FLOK_CONFIG, Using default config of ./app/drivers/#{ENV['PLATFORM']}/config.yml"
+        #$stderr.puts "Warning: You didn't specify FLOK_CONFIG, Using default config of ./app/drivers/#{ENV['PLATFORM']}/config.yml"
         config_yml_path = "./app/drivers/#{ENV['PLATFORM']}/config.yml"
       end
 

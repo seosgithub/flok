@@ -3,6 +3,9 @@
   var <%= s.name %>_sessions = {};  //Currently connected clients
   var <%= s.name %>_n_sessions = 0;  //Number of sessions
 
+  //Static global
+  <%= s._global %>
+
   //Start of <%= s.name %> on_wakeup
   function <%= s.name %>_on_wakeup() {
     //Timer related

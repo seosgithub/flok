@@ -30,6 +30,17 @@ RSpec.describe "kern:service_controller_spec" do
     @driver.mexpect("if_event", [base, "action", {"from" => nil, "to" => "my_action"}])
   end
 
+ it "service can use the global block to create static functions" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config0.rb")
+
+    #Run the embed function
+    ctx.eval %{
+      spec_function(3);
+    }
+    expect(ctx.eval("spec_function_args")).to eq(3)
+  end
+
   it "Does call the wakeup and the connect for service when a controller is opened" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/service_controller0.rb'), File.read("./spec/kern/assets/service_config1.rb"), File.read("./spec/kern/assets/service0.rb")

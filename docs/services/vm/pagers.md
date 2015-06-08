@@ -10,9 +10,15 @@ A new pager can be created by adding the pager to the `./app/kern/services` fold
 
 Each pager must implement the following functions:
   * `init(options)` - Initialize a pager structure, passes options given in vm options hash for this pager in `./config/services.rb`
-  * `read(ns, bp, key)`
-  * `read_sync(ns, bp, key)`
+  * `read(bp, key)`
+  * `read_sync(bp, key)`
   * `write(key, page)`
+
+##Caching
+For pagers that wish to have their pages cached, they must set their `read` and `read_sync` to write to vm_cache.
+```js
+  vm_cache_write(ns, key, spec0_data[key])
+```
 
 ##Default pagers
 ###`mem` - Default memory pager

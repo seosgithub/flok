@@ -78,3 +78,6 @@ Write to a page
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace
     * `page` - The returned page
+
+##Methods
+`vm_cache_write(ns, key, spec0_data[key])` - Save a piece of data to the cache memory

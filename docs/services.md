@@ -14,6 +14,14 @@ All kernel service classes are placed in `./app/kern/services/` and are ruby fil
 ```ruby
 #A sample service, all services have capital letters because they are like classes and are instantized
 service :sample do
+  #Global space#######################################################################################################################
+  #In this space, you may define functions that are accessible to anything
+  global %{
+    function <%= @name %>_cache_save(x) {
+    };
+  }
+  ####################################################################################################################################
+
   #Initialization#####################################################################################################################
   #When a service is woken_up, this function is called. A service instances is guaranteed to never be woken up
   on_wakeup %{
@@ -134,7 +142,8 @@ service_instance :instance_name, :service_class
 Additionally, you may pass in a hash at the end of `service_instance` that will be available as `@options` inside the service definition `rb` file.
 
 ###Spec service
-By default, there is a spec service class available called 'spec' when compiled with debug.
+By default, there is a spec service class available called 'test' when compiled with debug. This service contains a function named `$iname_function(x)` that
+sets `$iname_function_args` to the input of that function.
 
 ###Roughly how the services system works
 The services are all hard-coded function calls that are initialized with names like `my_instance_on_wakeup`.  You have a service *class* defined in

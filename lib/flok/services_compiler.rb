@@ -85,7 +85,7 @@ module Flok
   end
 
   class Service
-    attr_accessor :name, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers, :options
+    attr_accessor :name, :_global, :_on_wakeup, :_on_sleep, :_on_connect, :_on_disconnect, :event_handlers, :every_handlers, :options
     def initialize name, options
       @name = name
       @options = options
@@ -103,6 +103,12 @@ module Flok
 
     def get_on_request
       return @on_request
+    end
+
+    def global(str)
+      render = ERB.new(str)
+      str = render.result(binding)
+      @_global = str
     end
 
     def on_wakeup(str) 
