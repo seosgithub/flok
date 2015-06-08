@@ -43,7 +43,7 @@
       vm_cache_write("net", key, value);
     } else if (ename === "notify") {
       var key = info.key;
-      vm_notify("user", key);
+      vm_notify("net", key);
     }
   }
 
