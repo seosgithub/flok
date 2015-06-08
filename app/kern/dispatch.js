@@ -96,6 +96,16 @@ function int_dispatch(q) {
     gpu_q_rem -= n;
   }
 
+  //Send async queue
+  if (async_q.length > 0) {
+    var out = [5];
+    for (var i = 0; i < async_q.length; ++i) {
+      out.push.apply(out, async_q[i]);
+    }
+    dump.push(out);
+    async_q = [];
+  }
+
   if (dump.length != 0) {
     if_dispatch(dump);
   }
@@ -125,6 +135,8 @@ function ping3(arg1) {
     SEND("cpu", "pong3");
   } else if (arg1 == "gpu") {
     SEND("gpu", "pong3");
+  } else if (arg1 == "async") {
+    SEND("async", "pong3");
   }
 }
 
@@ -139,6 +151,8 @@ function ping4(arg1) {
     SEND("cpu", "pong4");
   } else if (arg1 == "gpu") {
     SEND("gpu", "pong4");
+  } else if (arg1 == "async") {
+    SEND("async", "pong4");
   }
 }
 
@@ -152,6 +166,7 @@ function ping4_int(arg1) {
     ++cpu_q_rem;
   } else if (arg1 == "gpu") {
     ++gpu_q_rem;
+  } else if (arg1 == "async") {
   }
 }
 
@@ -161,6 +176,7 @@ net_q = [];
 disk_q = [];
 cpu_q = [];
 gpu_q = [];
+async_q = [];
 
 //Each queue has a max # of things that can be en-queued
 //These are decremented when the message is sent (not just queued)

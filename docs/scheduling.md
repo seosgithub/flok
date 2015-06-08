@@ -14,6 +14,7 @@ The first departure from a traditional operating system scheduler is that *Flok*
   2. `disk` - Transferring things to/from disk
   3. `cpu` - Tasks that tax the cpu
   4. `gpu` - Tasks that tax the gpu
+  5. `async` - Tasks that shouldn't run on the main thread, but are not scheduled limited.
 
 ##Flok also has two priority classes (Does not effect `main` queue):
   * `high` - Things that need to happen soon.
