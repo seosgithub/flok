@@ -7,7 +7,7 @@
   function sockio_pager_init(options) {
     sockio_pager_sp = tels(1);
     sockio_pager_bp = tels(1);
-    SEND("net", "if_sockio_init", options.url, sockio_pager_sp);
+    SEND("main", "if_sockio_init", options.url, sockio_pager_sp);
     reg_evt(sockio_pager_bp, sockio_pager_sp_endpoint);
     SEND("net", "if_sockio_fwd", sockio_pager_sp, "read_res", sockio_pager_bp);
   }
