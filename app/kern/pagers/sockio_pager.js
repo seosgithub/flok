@@ -34,6 +34,7 @@
 
   //Where socket.io data comes in
   function sockio_pager_sp_endpoint(ep, ename, info) {
+    console.log("endpoint hit with ename: " + ename);
     if (ename === "read_res") {
       var bp = info.bp;
       var key = info.key;
