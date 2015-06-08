@@ -14,7 +14,7 @@ function spec0_read_sync(ns, bp, key) {
     value: spec0_data[key],
   }
   int_event(bp, "read_res", info);
-  vm_cache[ns][key] = spec0_data[key];
+  //vm_cache[ns][key] = spec0_data[key];
 }
 
 function spec0_read(ns, bp, key) {
@@ -26,7 +26,7 @@ function spec0_read(ns, bp, key) {
   }
 
   int_event(bp, "read_res", info);
-  vm_cache[ns][key] = spec0_data[key];
+  vm_cache_write(ns, key, spec0_data[key]);
 }
 
 function spec0_write(key, value) {

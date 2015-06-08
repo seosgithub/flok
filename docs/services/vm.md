@@ -49,7 +49,7 @@ The variable `vm_did_wakeup` is set to true in the wakeup part of the vm service
 ##Requests
 
 ###`read`
-Request (fault) a page of memory:
+Request (fault) a page of memory, note that this can cause multiple `read_res` because of `read-sync-notify` where an immediate read from cache will trigger a synchronization which inturn may trigger a notification.
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace
@@ -60,7 +60,7 @@ Request (fault) a page of memory:
       * `page` - Value of the fault
 
 ###`read_sync`
-Request a page of memory synchronously *now*, does return:
+Request (fault) a page of memory synchronously, note that this can cause multiple `read_res` because of `read-sync-notify` where an immediate read from cache will trigger a synchronization which inturn may trigger a notification.
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `key` - The 'address' of the memory in the namespace

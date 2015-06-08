@@ -39,3 +39,8 @@ This pager assists with specs in ./spec/kern/vm_service_spec.js
     * `init(options)` - Will set the `spec0_init_options` to be what ever options it got.
     * `read` - Will set the `spec0_read_sync_called` to be true.
     * `read_sync` - Will set the `spec0_read_sync_called` to be true.
+###`spec1` 
+This pager is designed to test the read-sync-notify notification system. When this function is first called,
+it will return 'a' for any value. The second call to read will return `b`.
+  * Supported operations
+    * `init(options)`

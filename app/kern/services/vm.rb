@@ -1,4 +1,18 @@
 service :vm do
+  global %{
+    //Cache contains a blank hash for each namespace
+    vm_cache = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
+
+    //Cache
+    function vm_cache_write(ns, key, value) {
+      vm_cache[ns][key] = value;
+    }
+  }
+
   on_wakeup %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
@@ -6,12 +20,6 @@ service :vm do
       vm_did_wakeup = true;
     <% end %>
 
-    //Cache contains a blank hash for each namespace
-    vm_cache = {
-      <% @options[:pagers].each do |p| %>
-        <%= p[:namespace] %>: {},
-      <% end %>
-    };
 
     //Call init functions
     <% @options[:pagers].each do |p| %>
@@ -54,7 +62,6 @@ service :vm do
     var cres = vm_cache[params.ns][params.key]; 
     if (cres != undefined) {
       int_event(bp, "read_res", {key: params.key, value: cres});
-      return;
     }
 
     <% @options[:pagers].each do |p| %>

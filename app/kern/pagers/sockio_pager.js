@@ -37,5 +37,6 @@
     var key = info.key;
     var value = info.value;
     int_event(waiting_bp, "read_res", info);
+    vm_cache_write("net", key, value);
   }
 <% end %>
