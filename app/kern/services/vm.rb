@@ -127,4 +127,15 @@ service :vm do
       }
     <% end %>
   }
+
+  on "unwatch", %{
+    <% raise "No pagers given in options for vm" unless @options[:pagers] %>
+
+    <% @options[:pagers].each do |p| %>
+      if (params.ns === "<%= p[:namespace] %>") {
+        <%= p[:name] %>_unwatch(params.ns, params.key);
+      }
+    <% end %>
+  }
+
 end

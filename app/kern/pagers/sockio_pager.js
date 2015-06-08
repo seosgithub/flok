@@ -54,4 +54,13 @@
     SEND("async", "if_sockio_send", sockio_pager_sp, "watch", info);
   }
 
+  function sockio_pager_unwatch(ns, key) {
+    var info = {
+      ns: ns,
+      key: key
+    }
+    SEND("async", "if_sockio_send", sockio_pager_sp, "unwatch", info);
+  }
+
+
 <% end %>
