@@ -19,8 +19,10 @@
   function sockio_pager_read(ns, bp, key) {
     var info = {
       key: key,
-      value: sockio_pager_data[key],
+      bp: bp
     }
+
+    SEND("net", "if_sockio_send", sockio_pager_sp, "read", info);
 
     waiting_bp = bp;
   }
