@@ -46,7 +46,7 @@
     }
   }
 
-  function sockio_watch(ns, key) {
+  function sockio_pager_watch(ns, key) {
     var info = {
       ns: ns,
       key: key
