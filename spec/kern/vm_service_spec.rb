@@ -141,9 +141,33 @@ RSpec.describe "kern:vm_service" do
     #expect(ctx.eval("spec0_read_count")).to eq(1)
   #end
 
-  it "Can read through and then send another read_res for a change on the page" do
+  #it "Can read through and then send another read_res for a change on the page" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/vm/controller5.rb'), File.read("./spec/kern/assets/vm/config2.rb")
+
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {}, null);
+
+      #//Drain queue
+      #int_dispatch([]);
+    #}
+
+    ##read_res from spec is called multiple times and returns an array of the parms
+    #res = JSON.parse(ctx.eval("JSON.stringify(read_res_called_with)"))
+
+    ##Expect 2 responses, first is cache miss, second is cache hit, third is cache updated
+    #expect(res).to eq [
+      #{"key" => "my_key", "value" => "a"},
+      #{"key" => "my_key", "value" => "a"},
+      #{"key" => "my_key", "value" => "b"}
+    #]
+  #end
+
+  it "Can watch a key and then be sent a read_res whenever that key changes" do
     #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller5.rb'), File.read("./spec/kern/assets/vm/config2.rb")
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller6.rb'), File.read("./spec/kern/assets/vm/config3.rb")
 
     #Run the embed function
     ctx.eval %{
@@ -153,6 +177,9 @@ RSpec.describe "kern:vm_service" do
       //Drain queue
       int_dispatch([]);
     }
+
+    #Trigger notification
+    ctx.eval("spec2_spec_trigger()")
 
     #read_res from spec is called multiple times and returns an array of the parms
     res = JSON.parse(ctx.eval("JSON.stringify(read_res_called_with)"))
@@ -164,4 +191,5 @@ RSpec.describe "kern:vm_service" do
       {"key" => "my_key", "value" => "b"}
     ]
   end
+
 end

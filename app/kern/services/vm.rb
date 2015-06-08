@@ -7,9 +7,30 @@ service :vm do
       <% end %>
     };
 
+    //Notification listeners, converts ns+key to an array of base pointers
+    vm_notify_map = {};
+
     //Cache
     function vm_cache_write(ns, key, value) {
       vm_cache[ns][key] = value;
+    }
+
+    //Notification of a change
+    function vm_notify(ns, key) {
+      var a = vm_notify_map[ns];
+      if (a) {
+        var b = a[key];
+
+        if (b) {
+          for (var i = 0; i < b.length; ++i) {
+            <% @options[:pagers].each do |p| %>
+              if (ns === "<%= p[:namespace] %>") {
+                <%= p[:name] %>_read(ns, b[i], key);
+              }
+            <% end %>
+          }
+        }
+      }
     }
   }
 
@@ -25,7 +46,6 @@ service :vm do
     <% @options[:pagers].each do |p| %>
       <%= p[:name] %>_init(<%= (p[:options] || {}).to_json %>);
     <% end %>
-
   }
 
   on_sleep %{
@@ -77,6 +97,33 @@ service :vm do
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
         <%= p[:name] %>_write(params.key, params.value);
+      }
+    <% end %>
+  }
+
+  on "watch", %{
+    <% raise "No pagers given in options for vm" unless @options[:pagers] %>
+
+    //Ensure map exists
+    ////////////////////////////////////////////////
+    var a = vm_notify_map[params.ns];
+    if (!a) {
+      a = {};
+      vm_notify_map[params.ns] = a;
+    }
+
+    var b = a[params.key];
+    if (!b) {
+      b = [];
+      a[params.key] = b;
+    }
+
+    b.push(bp)
+    ////////////////////////////////////////////////
+
+    <% @options[:pagers].each do |p| %>
+      if (params.ns === "<%= p[:namespace] %>") {
+        <%= p[:name] %>_watch(params.ns, params.key);
       }
     <% end %>
   }

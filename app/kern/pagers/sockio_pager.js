@@ -39,4 +39,13 @@
     int_event(waiting_bp, "read_res", info);
     vm_cache_write("net", key, value);
   }
+
+  function sockio_watch(ns, key) {
+    var info = {
+      ns: ns,
+      key: key
+    }
+    SEND("async", "if_sockio_send", sockio_pager_sp, "watch", info);
+  }
+
 <% end %>
