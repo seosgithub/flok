@@ -50,6 +50,9 @@ class FlokCLI < Thor
     services_config_js = File.read "./config/services.rb"
     Flok.src_glob("rb", './app/services', File.join(local_products_path, platform, "./services/user_services.rb"))
 
+    #4. Move ./app/scripts/*.js into `./products/$PLATFORM/./glob/scripts.js`
+    Flok.src_glob("js", './app/scripts', File.join(local_products_path, platform, "./glob/scripts.js"))
+
     #We are now inside the platform folder
     Dir.chdir File.join(local_products_path, platform) do
       #3. Put user_compiler_js in glob folder and services into ./services/user_services.rb
@@ -66,11 +69,12 @@ class FlokCLI < Thor
       FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
 
-      #7. Combine application.js and user_compiler.js.erb and services.js
+      #7. Combine application.js and user_compiler.js.erb and services.js and scripts.js
       File.open "glob/application_user.js.erb", "w" do |f|
         f.puts File.read("glob/application.js")
         f.puts File.read("glob/user_compiler.js")
         f.puts File.read("glob/services.js")
+        f.puts File.read("glob/scripts.js")
       end
 
       #8. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
