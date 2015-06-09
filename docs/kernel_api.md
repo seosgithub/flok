@@ -9,6 +9,9 @@
   * `tel_exists(tp)` - Returns true or false depending on whether there is a telepointer that matches
 instead.
 
+##CRC32
+  * `crc32(seed, str)` - Will calculate a CRC32 based on a seed and a string
+
 ##Events
   * `reg_evt(ep, f)` - Register a function to be called when an event is processed by `int_event`. The function will receive `(ep, event_name, info)`.
 
