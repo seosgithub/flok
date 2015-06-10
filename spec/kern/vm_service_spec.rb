@@ -5,8 +5,10 @@ require './spec/env/kern.rb'
 require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
+require 'zlib'
 
 RSpec.describe "kern:vm_service" do
+  include Zlib
   include_context "kern"
 
  #it "Can be used inside a controller" do
@@ -165,31 +167,103 @@ RSpec.describe "kern:vm_service" do
     #]
   #end
 
-  it "Can watch a key and then be sent a read_res whenever that key changes" do
-    #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller6.rb'), File.read("./spec/kern/assets/vm/config3.rb")
+  #it "Can watch a key and then be sent a read_res whenever that key changes" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/vm/controller6.rb'), File.read("./spec/kern/assets/vm/config3.rb")
 
-    #Run the embed function
-    ctx.eval %{
-      //Call embed on main root view
-      base = _embed("my_controller", 0, {}, null);
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {}, null);
 
-      //Drain queue
-      int_dispatch([]);
+      #//Drain queue
+      #int_dispatch([]);
+    #}
+
+    ##Trigger notification
+    #ctx.eval("spec2_spec_trigger()")
+
+    ##read_res from spec is called multiple times and returns an array of the parms
+    #res = JSON.parse(ctx.eval("JSON.stringify(read_res_called_with)"))
+
+    ##Expect 2 responses, first is cache miss, second is cache hit, third is cache updated
+    #expect(res).to eq [
+      #{"key" => "my_key", "value" => "a"},
+      #{"key" => "my_key", "value" => "a"},
+      #{"key" => "my_key", "value" => "b"}
+    #]
+  #end
+
+  it "vm_rehash_page can calculate the hash correctly" do
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
+
+    #Run the check
+    res = ctx.eval %{
+      //Manually construct a page
+      var page = {
+        _head: null,
+        _next: null,
+        _id: "hello",
+        entries: [
+          {_id: "hello2", _sig: "nohteunth"},
+        ]
+      }
+
+      vm_rehash_page(page);
     }
 
-    #Trigger notification
-    ctx.eval("spec2_spec_trigger()")
+    #Calculate hash ourselves
+    hash = crc32("hello")
+    hash = crc32("nohteunth", hash)
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
 
-    #read_res from spec is called multiple times and returns an array of the parms
-    res = JSON.parse(ctx.eval("JSON.stringify(read_res_called_with)"))
+    #Expect the same hash
+    expect(page).to eq({
+      "_head" => nil,
+      "_next" => nil,
+      "_id" => "hello",
+      "entries" => [
+        {"_id" => "hello2", "_sig" => "nohteunth"}
+      ],
+      "_hash" => hash.to_s
+    })
+  end
 
-    #Expect 2 responses, first is cache miss, second is cache hit, third is cache updated
-    expect(res).to eq [
-      {"key" => "my_key", "value" => "a"},
-      {"key" => "my_key", "value" => "a"},
-      {"key" => "my_key", "value" => "b"}
-    ]
+  it "vm_rehash_page can calculate the hash correctly with head and next" do
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
+
+    #Run the check
+    res = ctx.eval %{
+      //Manually construct a page
+      var page = {
+        _head: "a",
+        _next: "b",
+        _id: "hello",
+        entries: [
+          {_id: "hello2", _sig: "nohteunth"},
+        ]
+      }
+
+      vm_rehash_page(page);
+    }
+
+    #Calculate hash ourselves
+    hash = crc32("a")
+    hash = crc32("b", hash)
+    hash = crc32("hello", hash)
+    hash = crc32("nohteunth", hash)
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+
+    #Expect the same hash
+    expect(page).to eq({
+      "_head" => "a",
+      "_next" => "b",
+      "_id" => "hello",
+      "entries" => [
+        {"_id" => "hello2", "_sig" => "nohteunth"}
+      ],
+      "_hash" => hash.to_s
+    })
   end
 
 end

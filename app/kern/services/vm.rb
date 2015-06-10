@@ -32,6 +32,23 @@ service :vm do
         }
       }
     }
+
+    function vm_rehash_page(page) {
+      var z = 0;
+
+      //head and next are optional
+      if (page._head) { var z = crc32(0, page._head) }
+      if (page._next) { z = crc32(z, page._next) }
+
+      z = crc32(z, page._id)
+
+      var e = page.entries;
+      for (var i = 0; i < e.length; ++i) {
+        z = crc32(z, e[i]._sig);
+      }
+
+      page._hash = z.toString();
+    }
   }
 
   on_wakeup %{

@@ -8,6 +8,8 @@ Client API covers controller action event handlers.
   * Send(event_name, info) - Send a custom event on the main queue.
   * Raise(event_name, info) - Will send an event to the parent view controller (and it will bubble up, following `event_gw` which is set in `Embed` as the parent controller
   * Lower(spot_name, event_name, info) - Send an event to a particular spot
+  * Helpers
+    * Page Modification - See [User Page Modification Helpers](./vm.md#user_page_modification_helpers) for a list of functions available.
 
 ### Controller Event Handlers
   * Variables
