@@ -32,7 +32,7 @@ The *default memory pager* does not do anything on `watch` or `unwatch`. It depe
 This pager does the following when calls are made to it's functions, it's designed to assist with `vm` kernel specs.
   * `init` - Sets `pg_spec0_init_params` to `{ns: ns, options: options}`
   * `watch` - Appends `{id: id, hash: hash}` to `pg_spec0_watchlist`
-  * `unwatch` - Removes hash containing id from `pg_spec0_watchlist`
+  * `unwatch` - appends id to `pg_spec0_unwatchlist`
   pg_* `write` - Writes the given page to `vm_cache_write`
 
 This pager only exists if the environment is in `DEBUG` mode (`@debug` is enabled).

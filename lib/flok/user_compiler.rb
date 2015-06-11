@@ -15,6 +15,8 @@ module Flok
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
 
+      puts @src
+
       return @src
     end
   end
@@ -169,7 +171,6 @@ module Flok
               int_event(vcs[i], #{event_name}, #{info});
             }
           }
-
         #GOTO(action_name)
         elsif l =~ /Goto/
           l.strip!
@@ -240,11 +241,23 @@ module Flok
           name = o.shift.gsub(/"/, "")
           ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
+        #VM Page macros
+        elsif l =~ /NewPage/
+          #Probably assignment like var x = NewPage
+          before_page = (l.split /NewPage.*/)[0]
 
-          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller._services.include? name
+          l.strip!
+          l.gsub!(/NewPage\(/, "")
+          l.gsub! /\)$/, ""
+          l.gsub! /\);$/, ""
+          o = l.split(",").map{|e| e.strip}
 
           out << %{
-            #{name}_on_#{ename}(__base__, #{info});
+            #{before_page} {
+              _head: null,
+              _next: null,
+              entries: [],
+            }
           }
         else
           out.puts l

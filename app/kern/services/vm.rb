@@ -10,6 +10,13 @@ service :vm do
     //Notification listeners, converts ns+key to an array of base pointers
     vm_notify_map = {};
 
+    //Namespaces and page ids that are current being watched
+    vm_watched_keys = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
+
     //Cache
     function vm_cache_write(ns, page) {
       vm_cache[ns][page._id] = page;
@@ -141,6 +148,14 @@ service :vm do
     b.push(bp)
     ////////////////////////////////////////////////
 
+    //Do not signal pager if there is a watch request already in place
+    //as pager already knows
+    if (vm_watched_keys[params.ns][params.id] > 0) {
+      vm_watched_keys[params.ns][params.id] += 1;
+      return;
+    }
+
+    vm_watched_keys[params.ns][params.id] = 1;
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
         <%= p[:name] %>_watch(params.id, cache_entry);
@@ -151,9 +166,12 @@ service :vm do
   on "unwatch", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
+    //Decrement watched count
+    vm_watched_keys[params.ns][params.id] -= 1;
+
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_unwatch(params.ns, params.key);
+        <%= p[:name] %>_unwatch(params.id);
       }
     <% end %>
   }

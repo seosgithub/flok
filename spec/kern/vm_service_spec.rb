@@ -316,25 +316,24 @@ RSpec.describe "kern:vm_service" do
     #})
   #end
 
-  it "Does call pagers watch function with a undefined page when no page exists in cache" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller7.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+  #it "Does call pagers watch function with a undefined page when no page exists in cache" do
+    #ctx = flok_new_user File.read('./spec/kern/assets/vm/controller7.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
-    ctx.eval %{
-      base = _embed("my_controller", 0, {}, null);
+    #ctx.eval %{
+      #base = _embed("my_controller", 0, {}, null);
 
-      //Drain queue
-      int_dispatch([]);
-    }
+      #//Drain queue
+      #int_dispatch([]);
+    #}
 
-    #We are watching a page that should have been stored in cache at this point
-    pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
+    ##We are watching a page that should have been stored in cache at this point
+    #pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
 
-    #Expect options and ns to match in config4
-    expect(pg_spec0_watchlist).to eq([{
-      "id" => "my_key"
-    }])
-  end
-
+    ##Expect options and ns to match in config4
+    #expect(pg_spec0_watchlist).to eq([{
+      #"id" => "my_key"
+    #}])
+  #end
 
   it "Does call pagers watch function with a page when the page requested for a watch is stored in cache" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller7.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
@@ -378,6 +377,83 @@ RSpec.describe "kern:vm_service" do
     expect(pg_spec0_watchlist).to eq([{
       "id" => "my_key",
       "page" => page
+    }])
+  end
+
+  it "multiple sequential watch requests for a namespace do not hit the pager multiple times" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #We are watching a page that should have been stored in cache at this point
+    pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
+
+    #Expect options and ns to match in config4
+    expect(pg_spec0_watchlist).to eq([{
+      "id" => "my_key"
+    }])
+  end
+
+  it "unwatch request to pager does call the pagers unwatch function" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller9.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #We are watching a page that should have been stored in cache at this point
+    pg_spec0_unwatchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_unwatchlist)"))
+
+    expect(pg_spec0_unwatchlist).to eq(["my_key"])
+  end
+
+  it "watch unwatch and watch request for a namespace does hit the pager multiple times" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller9.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #We are watching a page that should have been stored in cache at this point
+    pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
+
+    #Expect options and ns to match in config4
+    expect(pg_spec0_watchlist).to eq([{
+      "id" => "my_key"
+    }, {
+      "id" => "my_key"
+    }])
+  end
+
+  it "sends write requests to the pager" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller10.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #We are watching a page that should have been stored in cache at this point
+    pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
+
+    #Expect options and ns to match in config4
+    expect(pg_spec0_watchlist).to eq([{
+      "id" => "my_key"
+    }, {
+      "id" => "my_key"
     }])
   end
 end
