@@ -76,6 +76,8 @@ This is how you asynchronously **read a page** and request notifications for any
 
 Reads to the `vm_cache` will currently block; but reads to the disk will not block. This will be changed in the future so that `vm_cache` will not block when we have a `low_priority` internal queue configured for flok.
 
+This forwards to the pagers `watch` function with the given `id` of the page and the `hash` value of the page.
+
 **To re-iterate, flok has a different concept of what constitutes a read. Flok does not distinguish between a read and the want to know about changes to a page. Flok considers controllers that have just watched a page to have an invalid copy of that page, and thus need to be notified that the page has changed for first read**
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
@@ -110,7 +112,7 @@ Cache will periodically be synchronized to disk via the `pageout` service. When 
 
 ##Helper Methods
 ###Pager specific
-  * `vm_cache_write(ns, key, page)` - Save a page to cache memory. This will not recalculate the page hash.
+  * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
 
 ###Page modification
   * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
@@ -127,7 +129,7 @@ If you're creating a new page, please use these macros as well; just switch out 
 ####Per entry
   * `NewPage(page)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page (even the hash which will be disgarded later).
-  *  `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry)
+  * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry)
   * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. (Internally this inserts the entry with a `_timestamp` and creates a unique `_id`)
   * `EntryMutable(page, eindex)` - Returns a mutable entry at a specific index which you can then modify.
   * `SetPageNext(page, id)` - Sets the `_next` id for the page

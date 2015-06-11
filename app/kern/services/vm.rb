@@ -11,8 +11,8 @@ service :vm do
     vm_notify_map = {};
 
     //Cache
-    function vm_cache_write(ns, key, value) {
-      vm_cache[ns][key] = value;
+    function vm_cache_write(ns, page) {
+      vm_cache[ns][page._id] = page;
     }
 
     //Notification of a change
@@ -61,7 +61,7 @@ service :vm do
 
     //Call init functions
     <% @options[:pagers].each do |p| %>
-      <%= p[:name] %>_init(<%= (p[:options] || {}).to_json %>);
+      <%= p[:name] %>_init("<%= p[:namespace] %>", <%= (p[:options] || {}).to_json %>);
     <% end %>
   }
 
@@ -121,6 +121,9 @@ service :vm do
   on "watch", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
+    //Cache entry
+    var cache_entry = vm_cache[params.ns][params.id];
+
     //Ensure map exists
     ////////////////////////////////////////////////
     var a = vm_notify_map[params.ns];
@@ -140,7 +143,7 @@ service :vm do
 
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_watch(params.ns, params.key);
+        <%= p[:name] %>_watch(params.id, cache_entry);
       }
     <% end %>
   }

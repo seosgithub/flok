@@ -1,46 +1,38 @@
-#VM Pagers
-Here is a list of default pagers for the vm system.
+#Virtual Memory Pagers
+If you haven't already, read [VM Service](../vm.md) for context on pagers.
 
-=======
+------
+##Functions required for a pager
+  * `$NAME_init(ns, options)` - Initialize your pager with a namespace (`ns`) and a set of options passed in the `service :vm` options for this pager (See [VM Service](../vm.md)) for example of options hash.
+  * `$NAME_watch(id, page)` - A watch request has been placed for a page id. Multiple watch requests in the *vm service* **will not show up here**.
+      You will only get one watch rquest until you receive an unwatch request. You should attempt to update the page for that key as soon as possible
+      and then wait for future updates. Page is the either a cached page or `undefined`. You should never modify this directly, most pagers should use
+      `_hash` to check with a server if the page needs updating at this point. Some pagers may pre-fetch more pages if there is a `_next`.
+  * `$NAME_unwatch(id)` - There are no controllers that are watching the page with a page that contains this in the `_id` field
+  * `$NAME_write(page)` - You should write this page, e.g. to network, and/or write to `vm_cache_write`.  Alternatively, you can write the page over the network and then let the response from that call `vm_cache_write` in what ever listening code you have.
+    * `page` - A fully constructed page with correctly calculated `_hash` and timestamps on entries.
 
-##How to make your own pager
-A new pager can be created by adding the pager to the `./app/kern/services` folder or `./app/services/pagers` if you are in a project.
 
-**For all operations that are cacheable, you must write to vm_cache[ns][key]**
+ 
+##When are pagers invoked?
+Pagers handle all requests from controllers except for the following conditions:
+  1. There is a `watch` request placed but a previous `watch` request already exists for the requested page. The pager is already aware of the page watch request and is already waiting for a response. Cached pages would have been returned to the controller that made the `watch` request.
 
-Each pager must implement the following functions:
-  * `init(options)` - Initialize a pager structure, passes options given in vm options hash for this pager in `./config/services.rb`
-  * `read(bp, key)`
-  * `read_sync(bp, key)`
-  * `write(key, page)`
+##Where to put pagers
+A new pager class can be created by adding the pager to the `./app/kern/services/pagers/*.js`. Please remember that we do not currently support multiple pager instances for each class; while there is a namespace distinction that could be used to instantize the pager; we do not support statically generating multiple copies of the global variables needed per instance.
 
-##Caching
-For pagers that wish to have their pages cached, they must set their `read` and `read_sync` to write to vm_cache.
-```js
-  vm_cache_write(ns, key, spec0_data[key])
-```
+Please name your pagers `pg_XXXX` to help make it clear that you are writing a pager.
 
-##Default pagers
-###`mem` - Default memory pager
-This pager dosen't do anything beyond allow you to set pages, write to them, and delete them.
-  * Supported operations
-    * `read`
-    * `read_sync`
-    * `write`
+##Built-in Pagers
 
-###`sockio` - Network pager
-  * Supported operations
-    * `read`
+####Default memory pager | `pg_mem0`
+The *default memory pager* does not do anything on `watch` or `unwatch`. It depends on the cache to reply to `watch` and `watch_sync` requests created by controllers. Controllers may write to this pager via `write` which this pager will then send directly to `vm_cache_write`. This pager is always compiled into the kernel.
 
-###Spec pagers
-###`spec0` 
-This pager assists with specs in ./spec/kern/vm_service_spec.js
-  * Supported operations
-    * `init(options)` - Will set the `spec0_init_options` to be what ever options it got.
-    * `read` - Will set the `spec0_read_sync_called` to be true.
-    * `read_sync` - Will set the `spec0_read_sync_called` to be true.
-###`spec1` 
-This pager is designed to test the read-sync-notify notification system. When this function is first called,
-it will return 'a' for any value. The second call to read will return `b`.
-  * Supported operations
-    * `init(options)`
+####Spec pager | `pg_spec0`
+This pager does the following when calls are made to it's functions, it's designed to assist with `vm` kernel specs.
+  * `init` - Sets `pg_spec0_init_params` to `{ns: ns, options: options}`
+  * `watch` - Appends `{id: id, hash: hash}` to `pg_spec0_watchlist`
+  * `unwatch` - Removes hash containing id from `pg_spec0_watchlist`
+  pg_* `write` - Writes the given page to `vm_cache_write`
+
+This pager only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
