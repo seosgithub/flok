@@ -26,4 +26,19 @@ RSpec.describe "kern:functions_spec" do
     expect(res).not_to eq(res2)
   end
 
+ it "can use gen_id" do
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    #Run the check
+    res = ctx.eval("gen_id()")
+    res2 = ctx.eval("gen_id()")
+    reset_for_ctx
+
+    ctx2 = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    res3 = ctx2.eval("gen_id()")
+    expect(res.class).to eq(String)
+    expect(res).not_to eq(res2)
+    expect(res3).not_to eq(res)
+  end
 end

@@ -4,6 +4,10 @@ require './spec/lib/temp_dir'
 
 shared_context "kern" do
   before(:each) do
+    reset_for_ctx
+  end
+
+  def reset_for_ctx
     res=system('rake build:world')
     raise "Could not run build:world" unless res
     @ctx = V8::Context.new
@@ -13,6 +17,7 @@ shared_context "kern" do
       `killall phantomjs`
       `killall rspec`
     end
+
   end
 
   #Execute flok binary with a command

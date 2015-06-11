@@ -128,7 +128,8 @@ If you're creating a new page, please use these macros as well; just switch out 
 
 ####Per entry
   * `NewPage(page)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.
-  * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page (even the hash which will be disgarded later).
+  * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
+      `_hash` field.
   * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry)
   * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. (Internally this inserts the entry with a `_timestamp` and creates a unique `_id`)
   * `EntryMutable(page, eindex)` - Returns a mutable entry at a specific index which you can then modify.

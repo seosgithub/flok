@@ -12,6 +12,9 @@ instead.
 ##CRC32
   * `crc32(seed, str)` - Will calculate a CRC32 based on a seed and a string
 
+##Random string
+  * `gen_id()` - Will return a random unique id (8 character string).
+
 ##Events
   * `reg_evt(ep, f)` - Register a function to be called when an event is processed by `int_event`. The function will receive `(ep, event_name, info)`.
 
@@ -37,4 +40,4 @@ var payload = {from: null, to: action};
 SEND("main", "if_event", base, "action", payload);
 ```
 
-
+##Useful global variables

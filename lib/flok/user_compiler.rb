@@ -15,8 +15,6 @@ module Flok
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
 
-      puts @src
-
       return @src
     end
   end
@@ -258,6 +256,111 @@ module Flok
               _next: null,
               entries: [],
             }
+          }
+        elsif l =~ /CopyPage/
+          puts l.inspect
+          le = (l.split /CopyPage/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*)\);?/
+          page_var = $1
+
+          out << %{
+            var __page__ = {
+              _head: #{page_var}._head,
+              _next: #{page_var}._next,
+              _id: #{page_var}._id,
+              entries: [],
+            }
+
+            //This is a shallow clone, but we own this array
+            //When a mutable entry needs to be created, an entry will be cloned
+            //and swappend out
+            for (var i = 0; i < #{page_var}.entries.length; ++i) {
+              __page__.entries.push(#{page_var}.entries[i]);
+            }
+
+            #{lvar} __page__;
+          }
+        elsif l =~ /EntryDel/
+          le = (l.split /EntryDel/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          index_var = $2
+
+          out << %{
+            #{page_var}.entries.splice(#{index_var}, 1);
+          }
+
+        elsif l =~ /EntryInsert/
+          le = (l.split /EntryInsert/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*),(.*)\);?/
+          page_var = $1
+          index_var = $2
+          entry_var = $3
+
+          out << %{
+            #{entry_var}._sig = gen_id();
+            #{page_var}.entries.splice(#{index_var}, 0, #{entry_var});
+          }
+
+        elsif l =~ /SetPageNext/
+          le = (l.split /SetPageNext/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          value_var = $2
+
+          out << %{
+            #{page_var}._next = #{value_var};
+          }
+
+        elsif l =~ /SetPageHead/
+          le = (l.split /SetPageHead/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          value_var = $2
+
+          out << %{
+            #{page_var}._head = #{value_var};
+          }
+
+        elsif l =~ /EntryMutable/
+          le = (l.split /EntryMutable/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          index_var = $2
+
+          out << %{
+            //Duplicate entry
+            #{page_var}.entries.splice(#{index_var}, 1, JSON.parse(JSON.stringify(#{page_var}.entries[#{index_var}])));
           }
         else
           out.puts l
