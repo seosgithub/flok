@@ -79,6 +79,12 @@ shared_context "kern" do
       @q += JSON.parse(q)
     end
 
+    #When you're running these unit tests, you may need to log, but you will
+    #need to remove any _log statements before running other tests!
+    def log(msg)
+      $stderr.puts "v8: #{msg}"
+    end
+
     #Expect a certain message, with some arguments, and a certain priority
     #expect("if_init_view", ["test_view", {}]) === [[0, 4, "if_init_view", "test_view", {}]]
     def mexpect(msg_name, msg_args, priority=0)

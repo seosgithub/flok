@@ -364,6 +364,5 @@ RSpec.describe "kern:vm_service" do
         "test" => []
       }
     })
- end
-
+  end
 end
