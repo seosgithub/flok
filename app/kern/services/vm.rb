@@ -19,22 +19,18 @@ service :vm do
 
     //Cache
     function vm_cache_write(ns, page) {
-      vm_cache[ns][page._id] = page;
-    }
+      var old = vm_cache[ns][page._id];
+      if (old && old._hash == page._hash) { return; }
 
-    //Notification of a change
-    function vm_notify(ns, key) {
+      vm_cache[ns][page._id] = page;
+
       var a = vm_notify_map[ns];
       if (a) {
-        var b = a[key];
+        var b = a[page._id];
 
         if (b) {
           for (var i = 0; i < b.length; ++i) {
-            <% @options[:pagers].each do |p| %>
-              if (ns === "<%= p[:namespace] %>") {
-                <%= p[:name] %>_read(ns, b[i], key);
-              }
-            <% end %>
+            int_event(b, "read_res", page);
           }
         }
       }
@@ -56,6 +52,10 @@ service :vm do
 
       page._hash = z.toString();
     }
+
+    <% if @debug %>
+      vm_write_list = [];
+    <% end %>
   }
 
   on_wakeup %{
@@ -100,27 +100,19 @@ service :vm do
     int_event(bp, "read_sync_res", res);
   }
 
-  on "read", %{
-    <% raise "No pagers given in options for vm" unless @options[:pagers] %>
-
-    var cres = vm_cache[params.ns][params.key]; 
-    if (cres != undefined) {
-      int_event(bp, "read_res", {key: params.key, value: cres});
-    }
-
-    <% @options[:pagers].each do |p| %>
-      if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_read(params.ns, bp, params.key);
-      }
-    <% end %>
-  }
-
   on "write", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
+    //We are going to fix the _hash on the page
+    vm_rehash_page(params.page);
+
+    <% if @debug %>
+      vm_write_list.push(params.page);
+    <% end %>
+
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_write(params.key, params.value);
+        <%= p[:name] %>_write(params.page);
       }
     <% end %>
   }
@@ -139,14 +131,25 @@ service :vm do
       vm_notify_map[params.ns] = a;
     }
 
-    var b = a[params.key];
+    var b = a[params.id];
     if (!b) {
       b = [];
-      a[params.key] = b;
+      a[params.id] = b;
     }
 
+    <% if @debug %>
+      var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
+      if (midx != -1) {
+        throw "Multiple calls to watch for the ns: " +  params.ns + " and id: " + params.id
+      }
+    <% end %>
     b.push(bp)
     ////////////////////////////////////////////////
+
+    //If cache exists, then signal controller *now* while we wait for the pager
+    if (cache_entry) {
+      int_event(bp, "read_res", cache_entry);
+    }
 
     //Do not signal pager if there is a watch request already in place
     //as pager already knows
@@ -168,6 +171,9 @@ service :vm do
 
     //Decrement watched count
     vm_watched_keys[params.ns][params.id] -= 1;
+
+    var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
+    vm_notify_map[params.ns][params.id].splice(midx, 1);
 
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {

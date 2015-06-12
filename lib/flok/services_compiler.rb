@@ -17,6 +17,8 @@ module Flok
       context = ServicesCompilerContext.new(config_context)
       context.instance_eval(rb_src, __FILE__, __LINE__)
       context.ready
+      
+      puts @src
 
       @src = ""
       services_erb = File.read File.join(File.dirname(__FILE__), "./service_compiler_templates/services.js.erb")
@@ -95,6 +97,9 @@ module Flok
 
       #These are for every 5.seconds
       @every_handlers = []
+
+      @debug = true if ENV["FLOK_ENV"] == "DEBUG"
+      @release = true if ENV["FLOK_ENV"] == "RELEASE"
     end
 
     def get_on_init

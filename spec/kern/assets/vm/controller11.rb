@@ -12,15 +12,22 @@ controller :my_controller do
       SetPageNext(page, "next");
       EntryInsert(page, 0, entry);
 
-      var info = {
+      var watch_info = {
+        ns: "spec",
+        id: "test"
+      }
+
+      var write_info = {
         ns: "spec",
         page: page
       };
 
-      Request("vm", "write", info);
+      Request("vm", "watch", watch_info);
+      Request("vm", "write", write_info);
     }
 
     on "read_res", %{
+      read_res_params = params;
     }
   end
 end

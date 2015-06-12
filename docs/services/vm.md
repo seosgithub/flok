@@ -87,6 +87,8 @@ This forwards to the pagers `watch` function with the given `id` of the page and
       * `ns` - Namespace of the fault
       * `first` - A boolean that indicates whether this page was ever received on `page_update` before. i.e. is it a change after we were already given this page previously in a `page_update` for this receiver?
       * `page` - A dictionary object that is a reference to the page. This should be treated as immutable as it is a shared resource.
+  * Debug mode
+    * When `@debug`, an exception will be thrown if you attempt to watch the same key from one controller multiple times.
 
 ###`watch_sync`
 This request operates in the same way as `watch` but will cause a kernel panic if the page is not located in a cache (either `vm_cache` or disk). Additionally, reads to the `vm_cache` and disk cache will block until a read back is received. This may be used for things like getting sessions keys or names that you would like now before the UI renders. You will still receive updates.
@@ -99,16 +101,23 @@ This is how you **unwatch** a page. For view controllers that are destroyed, it 
     * `id` - Unwatch the page that contains this in the `_id` field
 
 ###`write`
-Creates a new page or overrides an existing one. If you are modifying an existing page, it is imperative that you do not modify the page yourself and use the modification helpers. These modification helpers implement copy on write (COW) as well as adjust timestamps on specific entries and create ids for new entries.  The proper way to do it is (a) edit the page with the modification helpers mentioned in [User page modification helpers](#user_page_modification_helpers) and (b) perform a write request. This request updates the `_hash` field. Additionally, if you are creating a page, it is suggested that you still use the modification helpers; just use the `NewPage` macro insead of `CopyPage`.
+Creates a new page or overrides an existing one. If you are modifying an existing page, it is imperative that you do not modify the page yourself and
+use the modification helpers. These modification helpers implement copy on write (COW) as well as adjust sigs on specific entries and create ids for new entries.  The proper way to do it is (a) edit the page with the modification helpers mentioned in [User page modification helpers](#user_page_modification_helpers) and (b) perform a write request. This request updates the `_hash` field. Additionally, if you are creating a page, it is suggested that you still use the modification helpers; just use the `NewPage` macro insead of `CopyPage`. Additionally, modifiying a page after making a write request is prohibited as the `vm` service may alter your page.
   * Parameters 
     * `ns` - The namespace of the page, e.g. 'user'
     * `page` - The page to write (create or update)
+  * Spec helpers
+    * If in `@debug` mode, the variable `vm_write_list` contains an array dictionary of the last page passed to the pager (tail is latest).
 
 ##Cache
-See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one.
+See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty.
 
 ###Pageout & Cache Synchronization
 Cache will periodically be synchronized to disk via the `pageout` service. When flok reloads itself, and the `vm` service gets a `watch` or `watch_sync` request, the `vm` service will attempt to read from the `vm_cache` first and then read the page from disk (write that disk read to cache). The only difference between `watch_sync` and `watch` is that `watch_sync` will synchronously pull from disk and panic if there is no cache available for the page). (Both `watch` and `watch_sync` will always call the pager's after the cache read as well.)
+
+###Datatypes & Structures (Opaque, do not directly modify)
+  * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`
+  * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][key]` which yields an array of controller base pointers.
 
 ##Helper Methods
 ###Pager specific
@@ -127,11 +136,12 @@ Aside, modifying a page goes against the semantics of the vm system; you're thin
 If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`. 
 
 ####Per entry
-  * `NewPage(page)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.
+  * `NewPage(id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.
+      `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.
   * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry)
-  * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. (Internally this inserts the entry with a `_timestamp` and creates a unique `_id`)
+  * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. (Internally this inserts the entry with a unique `_sig` and creates a unique `_id`)
   * `EntryMutable(page, eindex)` - Returns a mutable entry at a specific index which you can then modify.
   * `SetPageNext(page, id)` - Sets the `_next` id for the page
   * `SetPageHead(page, id)` - Sets the `_head` id for the page

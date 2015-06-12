@@ -14,7 +14,7 @@ module Flok
       ctable_erb = File.read File.join(File.dirname(__FILE__), "./user_compiler_templates/ctable.js.erb")
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
-
+      
       return @src
     end
   end
@@ -239,26 +239,36 @@ module Flok
           name = o.shift.gsub(/"/, "")
           ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
+          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller._services.include? name
+          out << %{
+            #{name}_on_#{ename}(__base__, #{info});
+          }
         #VM Page macros
         elsif l =~ /NewPage/
-          #Probably assignment like var x = NewPage
-          before_page = (l.split /NewPage.*/)[0]
+          le = (l.split /NewPage/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
 
-          l.strip!
-          l.gsub!(/NewPage\(/, "")
-          l.gsub! /\)$/, ""
-          l.gsub! /\);$/, ""
-          o = l.split(",").map{|e| e.strip}
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*)\);?/
+
+          #Get the id value the user wants, but we have to be careful
+          #because if nothing is passed, then we need to set it to null
+          id_var = $1.strip
+          if id_var == ""
+            id_var = "null"
+          end
 
           out << %{
-            #{before_page} {
+            #{lvar} {
               _head: null,
               _next: null,
               entries: [],
+              _id: #{id_var},
             }
           }
         elsif l =~ /CopyPage/
-          puts l.inspect
           le = (l.split /CopyPage/)
           lvar = le[0].strip #Probably var x = 
           exp = le[1].strip
@@ -313,6 +323,7 @@ module Flok
           entry_var = $3
 
           out << %{
+            #{entry_var}._id = gen_id();
             #{entry_var}._sig = gen_id();
             #{page_var}.entries.splice(#{index_var}, 0, #{entry_var});
           }

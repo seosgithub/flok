@@ -10,7 +10,7 @@ If you haven't already, read [VM Service](../vm.md) for context on pagers.
       `_hash` to check with a server if the page needs updating at this point. Some pagers may pre-fetch more pages if there is a `_next`.
   * `$NAME_unwatch(id)` - There are no controllers that are watching the page with a page that contains this in the `_id` field
   * `$NAME_write(page)` - You should write this page, e.g. to network, and/or write to `vm_cache_write`.  Alternatively, you can write the page over the network and then let the response from that call `vm_cache_write` in what ever listening code you have.
-    * `page` - A fully constructed page with correctly calculated `_hash` and timestamps on entries.
+    * `page` - A fully constructed page with correctly calculated `_hash` and _sigs on entries.
 
 
  

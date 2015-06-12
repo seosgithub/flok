@@ -1,4 +1,5 @@
 controller :my_controller do
+  spots "content"
   services :vm
 
   action :my_action do
@@ -9,7 +10,6 @@ controller :my_controller do
         id: "my_key"
       };
 
-      Request("vm", "watch", info);
       Request("vm", "watch", info);
     }
 
