@@ -17,13 +17,7 @@ function if_per_get(s, ns, key) {
   function async() {
     var _ns = store.namespace(ns);
     var res = _ns.get(key);
-    int_dispatch([2, "int_per_get_res", s, res]);
+    int_dispatch([2, "int_per_get_res", s, ns, res]);
   }
   setTimeout(async, 0);
-}
-
-function if_per_get_sync(s, ns, key) {
-  var _ns = store.namespace(ns);
-  var res = _ns.get(key);
-  int_dispatch([2, "int_per_get_res", s, res]);
 }

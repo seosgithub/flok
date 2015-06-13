@@ -39,5 +39,3 @@ variables in here.  If you need to pass a hash literal, array literal, etc, plea
 var payload = {from: null, to: action};
 SEND("main", "if_event", base, "action", payload);
 ```
-
-##Useful global variables

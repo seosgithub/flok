@@ -14,7 +14,7 @@ as necessary.*
  2. All js files in `./app/kern/config/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/1kern_config.js`
  3. All js files in `./app/kern/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/2kern.pre_macro.js`
  4. All js files in `./app/kern/pagers/*.js` are globbed togeather and sent to `./products/$PLATFORM/glob/3kern.pre_macro.js`
- 5. All js files in `./products/$PLATFORM/glob/{2,3}kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to `./products/$PLATFORM/glob/{2,3}kern.js`
+ 5. All js files in `./products/$PLATFORM/glob/{2,3}kern.pre_macro.js` are run through `./lib/flok/macro.rb's macro_process` and then sent to `./products/$PLATFORM/glob/{2,3}kern.js`
  6. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/glob/application.js.erb`
  7. Auto-generated code is placed at the end (like PLATFORM global)
  8. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section and appended to `glob/application.js.erb`

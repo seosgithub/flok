@@ -18,12 +18,11 @@ module Flok
       context.instance_eval(rb_src, __FILE__, __LINE__)
       context.ready
       
-      puts @src
-
       @src = ""
       services_erb = File.read File.join(File.dirname(__FILE__), "./service_compiler_templates/services.js.erb")
       services_renderer = ERB.new(services_erb)
       @src << services_renderer.result(context.get_binding)
+      File.write("/Users/seo/Desktop/dump.rb", @src)
 
       return @src
     end
@@ -113,32 +112,32 @@ module Flok
     def global(str)
       render = ERB.new(str)
       str = render.result(binding)
-      @_global = str
+      @_global = macro(str)
     end
 
     def on_wakeup(str) 
       render = ERB.new(str)
       str = render.result(binding)
-      @_on_wakeup  = str
+      @_on_wakeup  = macro(str)
     end
 
     def on_sleep(str) 
       render = ERB.new(str)
       str = render.result(binding)
 
-      @_on_sleep = str
+      @_on_sleep = macro(str)
     end
 
     def on_connect(str) 
       render = ERB.new(str)
       str = render.result(binding)
-      @_on_connect = str
+      @_on_connect = macro(str)
     end
 
     def on_disconnect(str) 
       render = ERB.new(str)
       str = render.result(binding)
-      @_on_disconnect = str
+      @_on_disconnect = macro(str)
     end
 
     def on(name, str)
@@ -147,7 +146,7 @@ module Flok
 
       @event_handlers << {
         :name => name,
-        :str => str
+        :str => macro(str)
       }
     end
 
@@ -155,7 +154,7 @@ module Flok
       @every_handlers << {
         :name => "#{seconds}_sec_#{SecureRandom.hex[0..6]}",
         :ticks => seconds*4,
-        :str => str
+        :str => macro(str)
       }
     end
 
@@ -168,6 +167,7 @@ module Flok
     end
 
     def macro text
+      return Flok.macro_process(text)
       #out = StringIO.new
 
       #text.split("\n").each do |l|

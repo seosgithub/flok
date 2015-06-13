@@ -3,7 +3,7 @@ Persistance management. Loosely based on redis.
 
 ###Driver messages
 `if_per_set(ns, key, value)` - Set a key and value
-`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back
+`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back, `s` is the session key that will also be sent back
 `if_per_del(ns, key)` - Delete a particular key
 `if_per_del_ns(ns)` - Delete an entire namespace
 
@@ -15,5 +15,6 @@ It is expected that the kernel should manage the write-back cache and that the d
 it is convenient to do so.
 
 ###Kernel interrupts
-`int_per_get_res(s, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. If the key
-does not exist, null is returned.
+`int_per_get_res(s, ns, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. Currently,
+the service `vm` owns this function; so session does not have an effect on the outcome; but the string `"vm"` should be used for now for any
+session keys involving persist.

@@ -1,5 +1,6 @@
 controller :my_controller do
   spots "content"
+  services :vm
 
   action :a do
 

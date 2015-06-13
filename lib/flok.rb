@@ -1,3 +1,4 @@
+require "flok/macro"
 require "flok/version"
 require "flok/utilities"
 require "flok/build"

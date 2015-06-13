@@ -107,6 +107,46 @@ shared_context "kern" do
       expect(priority).to eq(@cp)
     end
 
+    #Ignore all messages until this one is received, then keep that one in the queue
+    #There may be a lot going on and you're only interested in a part.
+    def ignore_up_to msg_name, priority=0
+      @did_get = []
+
+      loop do
+        if @q.count == 0 and @cq.count == 0
+          raise "Waited for the message #{msg_name.inspect} but never got it... did get: \n * #{@did_get.join("\n * ")}"
+        end
+        #Dequeue from multi-priority queue if possible
+        if @cq.nil? or @cq.count == 0
+          @cq = @q.shift
+          @cp = @cq.shift #save priority
+        end
+
+        #Check to see if it's the correct item
+        arg_len = @cq.shift
+        name = @cq.shift
+        if arg_len.class == String
+          $stderr.puts "Arg len is: #{arg_len.inspect}"
+          $stderr.puts "Name is #{name.inspect}"
+        end
+        args = @cq.shift(arg_len)
+
+        @did_get << name
+
+        if name == msg_name
+          raise "Found the message #{msg_name.inspect} while calling ignore_up_to... but it's the wrong priority: #{@cp}, should be #{priority}" if @cp != priority
+
+          #Unshift everything in reverse order, we are only peeking here...
+          args.reverse.each do |a|
+            @cq.unshift a
+          end
+          @cq.unshift name
+          @cq.unshift arg_len
+          break
+        end
+      end
+    end
+
     #Retrieve a message, we at least expect a name and priority
     def get msg_name, priority=0
       #Dequeue from multi-priority queue if possible

@@ -66,9 +66,8 @@ module Flok
     Flok.src_glob("js", './app/kern/pagers/', "#{build_path}/glob/3kern.pre_macro.js")
 
     #5. All js files in `./products/$PLATFORM/glob/{2,3}kern.pre_macro.js` are run through `./app/kern/macro.rb's macro_process` and then sent to ./products/$PLATFORM/glob/{2,3}kern.js
-    require './app/kern/macro.rb'
-    File.write("#{build_path}/glob/2kern.pre_macro.js", macro_process(File.read("#{build_path}/glob/2kern.pre_macro.js")))
-    File.write("#{build_path}/glob/3kern.pre_macro.js", macro_process(File.read("#{build_path}/glob/3kern.pre_macro.js")))
+    File.write("#{build_path}/glob/2kern.pre_macro.js", Flok.macro_process(File.read("#{build_path}/glob/2kern.pre_macro.js")))
+    File.write("#{build_path}/glob/3kern.pre_macro.js", Flok.macro_process(File.read("#{build_path}/glob/3kern.pre_macro.js")))
 
     #6. All js files are globbed from `./products/$platform/glob` and combined into `./products/$platform/glob/application.js.erb`
     Flok.src_glob("js", "#{build_path}/glob", "#{build_path}/glob/application.js.erb")
@@ -95,7 +94,7 @@ module Flok
     mods.each do |mod|
       s = File.read("./app/kern/mod/#{mod}.js")
       open("#{build_path}/glob/application.js.erb", "a") do |f|
-        f.puts macro_process(s)
+        f.puts Flok.macro_process(s)
       end
     end
 

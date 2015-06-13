@@ -1,18 +1,19 @@
 controller :my_controller do
-  spots "content"
   services :vm
 
   action :my_action do
     on_entry %{
-      var info = {
+      var watch_info = {
         ns: "spec",
-        id: "my_key"
-      };
+        id: "hello"
+      }
 
-      Request("vm", "watch", info);
+      read_res = [];
+      Request("vm", "watch", watch_info);
     }
 
     on "read_res", %{
+      read_res.push(params);
     }
   end
 end
