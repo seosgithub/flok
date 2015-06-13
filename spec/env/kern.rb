@@ -119,7 +119,9 @@ shared_context "kern" do
 
     #Ignore all messages until this one is received, then keep that one in the queue
     #There may be a lot going on and you're only interested in a part.
-    def ignore_up_to msg_name, priority=0
+    #If priority is nil, it won't matter what the priority is, useful for checking exceptions
+    #for non-existant messages
+    def ignore_up_to msg_name, priority=nil
       @did_get = []
 
       loop do
@@ -144,7 +146,9 @@ shared_context "kern" do
         @did_get << name
 
         if name == msg_name
-          raise "Found the message #{msg_name.inspect} while calling ignore_up_to... but it's the wrong priority: #{@cp}, should be #{priority}" if @cp != priority
+          if priority
+            raise "Found the message #{msg_name.inspect} while calling ignore_up_to... but it's the wrong priority: #{@cp}, should be #{priority}" if @cp != priority
+          end
 
           #Unshift everything in reverse order, we are only peeking here...
           args.reverse.each do |a|

@@ -139,7 +139,6 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
 ###Datatypes & Structures (Opaque, do not directly modify)
   * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`
   * `vm_dirty` - Pages recently written to cache go on the dirty list so that they may be written when the pageout handler runs. Dictionary contains map for `vm_dirty[ns][page._id] => page` for all dirty pages. Pages are removed from the dictionary when they are written in the pageout.
-  * `vm_disk_load` - Attempt to load a cached ns+key from disk. This will not write into `vm_cache` unless the key still dosen't exist (b/c disk may be beaten by a pager)
   * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][id]` which yields an array of controller base pointers.
   * `vm_bp_to_nmap` - A dictionary that maps a `bp` key (usually from a controller) to a dictionary. This dictionary contains a mapping of `bp => ns => id` to an array that contains `[node, index]` where `node` is a reference to `vm_notify_map[ns][id]`. This inverted map must (a) provide a way for `unwatch` to quickly remove entries from itself and (b) provide a way for all entries in `vm_notify_map` to be removed when something (usually a controller) disconrnects.
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.

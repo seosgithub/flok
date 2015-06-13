@@ -553,15 +553,52 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
-    @driver.ignore_up_to "if_per_get", 0
-    @driver.mexpect("if_per_get", ["vm", "spec", "test"])
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.mexpect("if_per_get", ["vm", "spec", "test"], 2)
   end
 
-  it "Only sends one disk read request when multiple watches are attempted" do
+  it "Does send a sync read request from disk cache when watching a key for the first time with sync: true" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19b.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Call pageout *now*
+      vm_pageout();
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
+  end
+
+  it "Only sends one disk read request when multiple non-sync watches are attempted" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
+      base2 = _embed("my_controller", base+2, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.get "if_per_get", 2
+
+    #There should not be another request for the drive
+    expect {
+      @driver.ignore_up_to "if_per_get"
+    }.to raise_exception
+  end
+
+  it "Only sends one disk read request when multiple watches are attempted, and the first watch is sync: true" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller_sync", 1, {}, null);
       base2 = _embed("my_controller", base+2, {}, null);
 
       //Drain queue
@@ -573,9 +610,80 @@ RSpec.describe "kern:vm_service" do
 
     #There should not be another request for the drive
     expect {
-      @driver.ignore_up_to "if_per_get", 0
+      @driver.ignore_up_to "if_per_get"
     }.to raise_exception
   end
+
+  it "Sends two disk read request when multiple watches are attempted, and the second watch is sync: true but the disk does not read back before it is requested" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+      base2 = _embed("my_controller_sync", base+2, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #The inner controller's on_entry is called before, so it's in reverse order
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.get "if_per_get", 0
+    @driver.ignore_up_to "if_per_get", 2
+  end
+
+  it "Sends one disk read request when multiple watches are attempted, and the second watch is sync: true and the disk *does* read back before it is requested" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb");
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    page0 = JSON.parse(ctx.eval("JSON.stringify(page0)"))
+    @driver.int "int_per_get_res", ["vm", "spec", page0]
+
+    ctx.eval %{
+      base2 = _embed("my_controller_sync", base+2, {}, null);
+    }
+
+    #The inner controller's on_entry is called before, so it's in reverse order
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.get "if_per_get", 2
+
+    #There should not be another request for the drive
+    expect {
+      @driver.ignore_up_to "if_per_get"
+    }.to raise_exception
+  end
+
+  it "Only sends one disk read request when multiple sync watches are attempted" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller_sync", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.get "if_per_get", 0
+
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+    @driver.int "int_per_get_res", ["vm", "spec", page]
+
+    ctx.eval %{
+      base2 = _embed("my_controller_sync", base+2, {}, null);
+    }
+
+    #There should not be another request for the drive
+    expect {
+      @driver.ignore_up_to "if_per_get"
+    }.to raise_exception
+  end
+
 
   it "Clears the dirty page when pageout runs" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
@@ -637,8 +745,8 @@ RSpec.describe "kern:vm_service" do
 
     #At this point, flok should have attempted to grab a page to fill
     #the *now* blank cache. We are going to send it the first page.
-    @driver.ignore_up_to "if_per_get", 0
-    @driver.get "if_per_get", 0
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.get "if_per_get", 2
     @driver.int "int_per_get_res", ["vm", "spec", page]
 
     #Now, we pretend that a pager has written to the cache because it has
@@ -649,9 +757,9 @@ RSpec.describe "kern:vm_service" do
     expect(res).to eq([
       page, page2
     ])
-  end
+ end
 
-  it "Responds once to watch with a missing cache but where the pager responds before the disk" do
+ it "Responds once to watch with a missing cache but where the pager responds before the disk" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller20.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
@@ -693,8 +801,8 @@ RSpec.describe "kern:vm_service" do
 
     #At this point, flok should have attempted to grab a page to fill
     #the *now* blank cache. We are going to send it the first page.
-    @driver.ignore_up_to "if_per_get", 0
-    @driver.get "if_per_get", 0
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.get "if_per_get", 2
 
     #Now, we pretend that a pager has written to the cache because it has
     #received data back
@@ -750,7 +858,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_set", ["spec", page["_id"], page])
 
     expect {
-      @driver.ignore_up_to "if_per_set", 0
+      @driver.ignore_up_to "if_per_set"
     }.to raise_exception
   end
 
@@ -784,7 +892,5 @@ RSpec.describe "kern:vm_service" do
 
     @driver.ignore_up_to "if_per_set", 0
     @driver.mexpect("if_per_set", ["spec", page2["_id"], page2])
-  end
-
-
+ end
 end

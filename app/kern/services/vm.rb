@@ -78,10 +78,6 @@ service :vm do
       };
     }
 
-    function vm_disk_load(ns, key) {
-      SEND("main", "if_per_get", "vm", ns, key);
-    }
-
     //Part of the persist module
     //res is page
     function int_per_get_res(s, ns, res) {
@@ -229,6 +225,11 @@ service :vm do
       int_event(bp, "read_res", cache_entry);
     }
 
+    //Send a request now for disk read for sync
+    if (!cache_entry && params.sync) {
+      SEND("main", "if_per_get", "vm", params.ns, params.id);
+    }
+
     //Do not signal pager if there is a watch request already in place
     //as pager already knows; if it's equal to 1, this is the 'first'
     //watch to go through as we have no info on it but just added it
@@ -238,8 +239,8 @@ service :vm do
     //disk request is slower than the pager response, that's ok...
     //the disk response will double check to see if the cache got set
     //somewhere and not set it itself.
-    if (!cache_entry) {
-      vm_disk_load(params.ns, params.id);
+    if (!cache_entry && !params.sync) {
+      SEND("disk", "if_per_get", "vm", params.ns, params.id);
     }
 
     //Now load the appropriate pager

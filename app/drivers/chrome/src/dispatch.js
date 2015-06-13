@@ -29,13 +29,32 @@ function if_dispatch(qq) {
     //The very first thing is the queue type
     var queueType = q.shift();
 
-    //Where there is still things left on the queue
-    while (q.length > 0) {
-      //Grab the first thing off the queue, this is the arg count
-      var argc = q.shift();
+    //Main queue events are run synchronously on w.r.t to this thread of execution
+    //Asynchronous events are dispatched individually
+    if (queueType === 0) {
+      //Where there is still things left on the queue
+      while (q.length > 0) {
+        //Grab the first thing off the queue, this is the arg count
+        var argc = q.shift();
 
-      //Grab the next thing and look that up in the function table. Pass args left
-      this[q.shift()].apply(null, q.splice(0, argc));
+        //Grab the next thing and look that up in the function table. Pass args left
+        this[q.shift()].apply(null, q.splice(0, argc));
+      }
+    } else {
+        //Dispatch asynchronous queue events
+        while (q.length > 0) {
+          //Grab the next thing and look that up in the function table. Pass args left
+          function({
+            var argc = q.shift();
+            var q0 = q.shift();
+            var q1 = q.splice(0, argc);
+            async_call = function() {
+              this[q0].apply(null, q1);
+            }
+
+            setTimeout(async_call, 0);
+          })();
+        }
     }
   }
 
