@@ -44,7 +44,7 @@ function if_dispatch(qq) {
         //Dispatch asynchronous queue events
         while (q.length > 0) {
           //Grab the next thing and look that up in the function table. Pass args left
-          function(){
+          (function(){
             var argc = q.shift();
             var q0 = q.shift();
             var q1 = q.splice(0, argc);
@@ -53,7 +53,7 @@ function if_dispatch(qq) {
             }
 
             setTimeout(async_call, 0);
-          }();
+          })();
         }
     }
   }
