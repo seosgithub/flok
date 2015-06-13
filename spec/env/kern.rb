@@ -190,5 +190,11 @@ shared_context "kern" do
           int_dispatch(#{msg});
         }
     end
+
+    def dump_q
+      q = @q
+      @q = []
+      return q
+    end
   end
 end

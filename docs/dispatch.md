@@ -22,7 +22,6 @@ There are various stages of message processing so it can be confusing as to what
   2. `disk` - Transferring things to/from disk
   3. `cpu` - Tasks that tax the cpu
   4. `gpu` - Tasks that tax the gpu
-  5. `async` - Tasks that shouldn't run on the main thread, but are not scheduled limited.
 
 ##Messages from the server
 Messages sent via `if_dispatch` to the server have a special format that looks like this:
