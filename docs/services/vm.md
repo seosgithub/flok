@@ -103,6 +103,7 @@ if (page is not resident in memory && not_synchronous) {
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `id` - Watching the page that contains this in the `_id` field
+    * `sync (optional)` - If set to `true` then the disk read will be performed synchronously.
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
       * `ns` - Namespace of the fault

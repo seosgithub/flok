@@ -36,20 +36,6 @@ RSpec.describe "iface:driver:persist" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 
- it "can set a persist, and then get" do
-    key = SecureRandom.hex
-    value = SecureRandom.hex
-
-    #disk is scheduling class 2
-    @pipe.puts [[2, 3, "if_per_set", "my_ns", key, value]].to_json
-    restart_driver_but_persist
-    @pipe.puts [[2, 3, "if_per_get", "session", "my_ns", key]].to_json
-
-    #expect a response
-    res = [2, "int_per_get_res", "session", "my_ns", value]
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
-  end
-
   it "Can set a persist, delete the key, and then get" do
     key = SecureRandom.hex
     value = SecureRandom.hex
