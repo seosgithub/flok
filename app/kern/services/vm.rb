@@ -65,7 +65,7 @@ service :vm do
           //For each mapping, write the page
           for (var i = 0; i < ids.length; ++i) {
             var p = id_to_page[ids[i]];
-            SEND("main", "if_per_set", "<%= p[:namespace] %>", ids[i], p);
+            SEND("disk", "if_per_set", "<%= p[:namespace] %>", ids[i], p);
           }
         <% end %>
         }

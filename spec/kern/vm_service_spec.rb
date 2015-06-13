@@ -536,7 +536,7 @@ RSpec.describe "kern:vm_service" do
 
     page = JSON.parse(ctx.eval("JSON.stringify(page)"))
 
-    @driver.ignore_up_to "if_per_set", 0
+    @driver.ignore_up_to "if_per_set", 2
     @driver.mexpect("if_per_set", ["spec", page["_id"], page])
   end
 
@@ -834,7 +834,7 @@ RSpec.describe "kern:vm_service" do
       @driver.int "int_timer", []
     end
 
-    @driver.ignore_up_to "if_per_set", 0
+    @driver.ignore_up_to "if_per_set", 2
     @driver.mexpect("if_per_set", ["spec", page["_id"], page])
   end
 
@@ -854,7 +854,7 @@ RSpec.describe "kern:vm_service" do
       @driver.int "int_timer", []
     end
 
-    @driver.ignore_up_to "if_per_set", 0
+    @driver.ignore_up_to "if_per_set", 2
     @driver.mexpect("if_per_set", ["spec", page["_id"], page])
 
     expect {
@@ -879,7 +879,7 @@ RSpec.describe "kern:vm_service" do
       @driver.int "int_timer", []
     end
 
-    @driver.ignore_up_to "if_per_set", 0
+    @driver.ignore_up_to "if_per_set", 2
     @driver.mexpect("if_per_set", ["spec", page["_id"], page])
 
     #Call next on controller which will write an new page
@@ -890,7 +890,7 @@ RSpec.describe "kern:vm_service" do
       @driver.int "int_timer", []
     end
 
-    @driver.ignore_up_to "if_per_set", 0
+    @driver.ignore_up_to "if_per_set", 2
     @driver.mexpect("if_per_set", ["spec", page2["_id"], page2])
  end
 end

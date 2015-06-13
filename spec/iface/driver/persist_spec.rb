@@ -32,7 +32,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [2, "int_per_get_res", "session", "my_ns", value]
+    res = [3, "int_per_get_res", "session", "my_ns", value]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 
@@ -47,7 +47,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [2, "int_per_get_res", "session", "my_ns", nil]
+    res = [3, "int_per_get_res", "session", "my_ns", nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 
@@ -66,11 +66,11 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key2]].to_json
 
     #Results for first key
-    res = [2, "int_per_get_res", "session", "my_ns", nil]
+    res = [3, "int_per_get_res", "session", "my_ns", nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
 
     #Expect a response
-    res = [2, "int_per_get_res", "session", "my_ns", value2]
+    res = [3, "int_per_get_res", "session", "my_ns", value2]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 
@@ -85,7 +85,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [2, "int_per_get_res", "session", "my_ns", nil]
+    res = [3, "int_per_get_res", "session", "my_ns", nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
   end
 end
