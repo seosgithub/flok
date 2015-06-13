@@ -22,7 +22,6 @@ module Flok
       services_erb = File.read File.join(File.dirname(__FILE__), "./service_compiler_templates/services.js.erb")
       services_renderer = ERB.new(services_erb)
       @src << services_renderer.result(context.get_binding)
-      File.write("/Users/seo/Desktop/dump.rb", @src)
 
       return @src
     end
