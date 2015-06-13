@@ -11,33 +11,33 @@ RSpec.describe "kern:dispatch_spec" do
   
   include_context "kern"
 
-  #it "Can call spec_dispatch" do
-    ##Compile the controller
-    #ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
+  it "Can call spec_dispatch" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
 
-    ##Register callout
-    #ctx.eval %{
-      #spec_dispatch_q(main_q, 2);
-    #}
+    #Register callout
+    ctx.eval %{
+      spec_dispatch_q(main_q, 2);
+    }
 
-    #main_q = ctx.dump "main_q"
-    #expect(main_q).to eq [[0, "spec"], [0, "spec"]]
-  #end
+    main_q = ctx.dump "main_q"
+    expect(main_q).to eq [[0, "spec"], [0, "spec"]]
+  end
 
-  #it "Does disptach an unlimited number of items from the main queue" do
-    ##Compile the controller
-    #ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
+  it "Does disptach an unlimited number of items from the main queue" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
 
-    ##Register callout
-    #ctx.eval %{
-      #spec_dispatch_q(main_q, 10);
-    #}
+    #Register callout
+    ctx.eval %{
+      spec_dispatch_q(main_q, 10);
+    }
 
-    #ctx.eval("int_dispatch([])")
-    #q = @driver.dump_q
+    ctx.eval("int_dispatch([])")
+    q = @driver.dump_q
 
-    #expect(q).to eq([[0, [0, "spec"]*10].flatten])
-  #end
+    expect(q).to eq([[0, [0, "spec"]*10].flatten])
+  end
 
   queues = [
     "main",
@@ -57,13 +57,69 @@ RSpec.describe "kern:dispatch_spec" do
 
       #Register callout
       ctx.eval %{
-        spec_dispatch_q(#{qname}_q, 10);
+        spec_dispatch_q(#{qname}_q, #{MAX_Q+1});
+      }
+
+      #Get partial queue, should have 'i' because we want more things than the max
+      ctx.eval("int_dispatch([])")
+      q = @driver.dump_q
+      expect(q).to eq(['i', [qindex, [0, "spec"]*MAX_Q].flatten])
+    end
+
+    it "Does dispatch the rest of the items after the first two incomplete disptaches" do
+      #Compile the controller
+      ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
+
+      #Register callout
+      ctx.eval %{
+        spec_dispatch_q(#{qname}_q, #{MAX_Q*3});
+      }
+
+      #Get partial queue, should have 'i' because we want more things than the max
+      ctx.eval("int_dispatch([])")
+      q = @driver.dump_q
+      expect(q).to eq(['i', [qindex, [0, "spec"]*MAX_Q].flatten])
+
+      #Get partial queue, should have 'i' because we want more things than the max
+      ctx.eval("int_dispatch([])")
+      q = @driver.dump_q
+      expect(q).to eq(['i', [qindex, [0, "spec"]*MAX_Q].flatten])
+
+      #Last piece, should not have an 'i'
+      ctx.eval("int_dispatch([])")
+      q = @driver.dump_q
+      expect(q).to eq([[qindex, [0, "spec"]*MAX_Q].flatten])
+    end
+
+
+    it "Does disptach at 5 number of items from the #{qname} queue" do
+      #Compile the controller
+      ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
+
+      #Register callout
+      ctx.eval %{
+        spec_dispatch_q(#{qname}_q, 5);
       }
 
       ctx.eval("int_dispatch([])")
       q = @driver.dump_q
 
-      expect(q).to eq(['i', [qindex, [0, "spec"]*MAX_Q].flatten])
+      expect(q).to eq([[qindex, [0, "spec"]*5].flatten])
+    end
+
+    it "Does disptach all at 4 number of items from the #{qname} queue" do
+      #Compile the controller
+      ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
+
+      #Register callout
+      ctx.eval %{
+        spec_dispatch_q(#{qname}_q, 4);
+      }
+
+      ctx.eval("int_dispatch([])")
+      q = @driver.dump_q
+
+      expect(q).to eq([[qindex, [0, "spec"]*4].flatten])
     end
   end
 end

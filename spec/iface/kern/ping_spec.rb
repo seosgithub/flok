@@ -3,6 +3,7 @@ require './spec/env/iface.rb'
 require 'securerandom'
 
 RSpec.describe "iface:kern:ping_spec" do
+  MAX_Q = 5
   include_context "iface:kern"
 
  it "supports ping" do
@@ -78,7 +79,7 @@ RSpec.describe "iface:kern:ping_spec" do
       #Don't redo last one because it's part of the first term (queue_name_b)
       unless index == queue_name_to_index.count-1
         queue_name_a = name
-        queue_name_b = @last_queue_name || queue_name_to_index.last
+        queue_name_b = @last_queue_name || queue_name_to_index.keys.last
         index_a = index
         index_b = queue_name_to_index[queue_name_b]
         @pipe.puts [1, "ping3", queue_name_a, 1, "ping3", queue_name_a, 1, "ping3", queue_name_b].to_json
@@ -97,27 +98,6 @@ RSpec.describe "iface:kern:ping_spec" do
 
       @pipe.puts [1, "ping3", queue_name].to_json
       expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, 0, "pong3"]], 6.seconds)
-    end
-  end
-
-  #Now make sure the max_n queuing works correctly
-  queue_name_to_index.each do |name, index|
-    it "supports ping-over-commit" do
-      #Main queue always queues all
-      if name != "main"
-        @pipe.puts ([1, "ping4", name]*6).to_json
-        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, *[0, "pong4"]*5]], 6.seconds)
-        @pipe.puts ([1, "ping4", name]).to_json
-
-        #Semantics aren't exact, but it should be nothing happens after 2 seconds (no response)
-        expect(@pipe).not_to readline_and_equal_json_x_within_y_seconds([], 1.seconds)
-
-        @pipe.puts ([1, "ping4_int", name]).to_json
-        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, 0, "pong4"]], 6.seconds)
-      else
-        @pipe.puts ([1, "ping4", name]*6).to_json
-        expect(@pipe).to readline_and_equal_json_x_within_y_seconds([[index, *[0, "pong4"]*6]], 6.seconds)
-      end
     end
   end
 end
