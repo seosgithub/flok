@@ -185,3 +185,11 @@ net_q_rem = 5;
 disk_q_rem = 5;
 cpu_q_rem = 5;
 gpu_q_rem = 5;
+
+<% if @debug %>
+function spec_dispatch_q(queue, count) {
+  for (var i = 0; i < count; ++i) {
+    queue.push([0, "spec"]);
+  }
+}
+<% end %>

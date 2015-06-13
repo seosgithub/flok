@@ -17,7 +17,16 @@ shared_context "kern" do
       `killall phantomjs`
       `killall rspec`
     end
+  end
 
+  class V8::Context
+    def dump variable
+      json_res = self.eval %{
+        JSON.stringify(#{variable});
+      }
+
+      return JSON.parse(json_res)
+    end
   end
 
   #Execute flok binary with a command
@@ -49,6 +58,7 @@ shared_context "kern" do
         #Execute
         @driver = FakeDriverContext.new
         v8 = V8::Context.new(:with => @driver)
+        @ctx = v8
         @driver.ctx = v8
         v8.eval %{
           //We must convert this to JSON because the fake driver will receive

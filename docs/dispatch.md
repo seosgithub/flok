@@ -41,9 +41,9 @@ apart of the `net` queue, and the *gpu* is part of queue 4.  Look above at *Reso
 ##Example of a session where the flok server does not respond with all messages right away to a client
 Imagine that a flok server has the following available in it's queues for transfer in int_dispatch
 ```javascript
-    main_q = [0, 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping"],
-    net_q = [1, 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", ...]  ,
-    gpu_q = [4, 1, "blur_button", 23]
+    main_q = [[0, "ping", [0, "ping"], [0, "ping"], [0, "ping"], [0, "ping"], [0, "ping"],
+    net_q = [[1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", ...]  ,
+    gpu_q = [[1, "blur_button", 23]]
 ```
 The `main_q` contains over 5 messages. However, because the `main_q` is dispatched synchronously, we will send those all at once. The `net_q` has
 6 messages; so we will only send 5 of those at once. The `gpu_q` only contains 1 message, so we will send that at once.
@@ -57,7 +57,7 @@ And it receives this in `res`:
 ```javascript
   'i',
   [0, 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping"],
-  [1, 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "..."]
+  [1, 1, "download", "..."], 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "..."]
   [4, 1, "blur_button", 23]
 ```
 
@@ -76,3 +76,12 @@ int_dispatch calls. We would always receive back if_dispatch; and thus it would 
     net_q = [1, 1, "download", ...]
     gpu_q = [4]
 ```
+
+##Spec helpers
+
+###Kernel
+The kernel has the function in `@debug`
+  * `spec_dispatch_q(queue, count)` - Which will internally queue the message [0, "spec"] to the queue given in `queue` `count` times
+
+###Driver 
+`dispatch_spec` to assist with testing of the 'i' re-request behavior.
