@@ -92,34 +92,34 @@ RSpec.describe "kern:dispatch_spec" do
     end
 
 
-    it "Does disptach at 5 number of items from the #{qname} queue" do
+    it "Does disptach at MAX_Q number of items from the #{qname} queue" do
       #Compile the controller
       ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
 
       #Register callout
       ctx.eval %{
-        spec_dispatch_q(#{qname}_q, 5);
+        spec_dispatch_q(#{qname}_q, #{MAX_Q});
       }
 
       ctx.eval("int_dispatch([])")
       q = @driver.dump_q
 
-      expect(q).to eq([[qindex, [0, "spec"]*5].flatten])
+      expect(q).to eq([[qindex, [0, "spec"]*MAX_Q].flatten])
     end
 
-    it "Does disptach all at 4 number of items from the #{qname} queue" do
+    it "Does disptach all at (MAX_Q-1) number of items from the #{qname} queue" do
       #Compile the controller
       ctx = flok_new_user File.read('./spec/kern/assets/blank.rb')
 
       #Register callout
       ctx.eval %{
-        spec_dispatch_q(#{qname}_q, 4);
+        spec_dispatch_q(#{qname}_q, #{MAX_Q}-1);
       }
 
       ctx.eval("int_dispatch([])")
       q = @driver.dump_q
 
-      expect(q).to eq([[qindex, [0, "spec"]*4].flatten])
+      expect(q).to eq([[qindex, [0, "spec"]*(MAX_Q-1)].flatten])
     end
   end
 end
