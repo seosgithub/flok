@@ -7,6 +7,13 @@
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
 function if_dispatch(qq) {
+  if (qq[0] == 'i') {
+    qq.shift();
+    if_dispatch_call_int_end = true
+  } else {
+    if_dispatch_call_int_end = false
+  }
+
   //If debug socket is attached, forward events to it
   //and do not process the events
   <% if @mods.include? "debug" %>
@@ -36,6 +43,12 @@ function if_dispatch(qq) {
   <% if @mods.include? "debug" %>
     }
   <% end %>
+
+
+  if (if_dispatch_call_int_end) {
+    if_dispatch_call_int_end = false;
+    int_dispatch([])
+  }
 }
 
 function ping() {
@@ -49,4 +62,7 @@ function ping1(arg1) {
 function ping2(arg1, arg2) {
   int_dispatch([1, "pong2", arg1])
   int_dispatch([2, "pong2", arg1, arg2])
+}
+
+function ping_nothing() {
 }

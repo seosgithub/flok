@@ -36,12 +36,13 @@ live in `./app/kern/mod/` and have the convention of being called `int_*`.
 
 On the client, the driver decides on how messages are handled. At a minimum, the client must support the `if_dispatch` function
 call. The driver is given a queue suggestion based on the first number for each message queue in the `if_dispatch` call. See
-[Scheduling](./scheduling.md) for more information.
+[Dispatching](./disptach.md) for more information.
 
 ### Ping
 Both the client and server are responsible for being able to reply to a few test messages.
 
 #####For the client
+  - Given `[[0, 0, "ping_nothing"]]`, do nothing. Used for `dispatch_spec`
   - Given `[[0, 0, "ping"]]` respond with `[0, pong]`
   - Given `[[0, 1, "ping1", arg]]` respond with `[1, pong1, arg]`
   - Given `[[0, 2, "ping2", arg1, arg2]]` respond with `[1, "pong2", arg1]` and `[2, "pong2", arg1, arg2]`
@@ -72,6 +73,10 @@ Both the client and server are responsible for being able to reply to a few test
       - Then given `[1, "ping4", queue_index]` respond with `[]`
 	  - Given `[0, "ping4_int"]` respond with `[[queue_index, 0, "pong4"]]`
   - *If the queue_index is 0 (main), it should queue all 6*
+
+### Dispatch Spec
+
+    - Given `['i', *]` for a queue will force the client to request another queue after it is done processing.
 
 ### Protocols
 Protocols are informal conventions used in Flok when sending certain messages.
