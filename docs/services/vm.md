@@ -72,13 +72,34 @@ you will want to copy your pager into a seperate piece of code and rename it so 
 ##Requests
 
 ###`watch`
-This is how you asynchronously **read a page** and request notifications for any updates to a page. When you first watch a page, you will receive a local cached copy if it is available. For the first watch of a page, the pager will be notified that a watch request has been placed for a page. Subsequent watches will not notify the pager because the VM system does not consider a `watch` and subsequent read backs to controllers to be a *transaction*, it considers a *watch* independent from subsequent reads back to the controllers.  For pages that are not locally cached, either in `vm_cache` or disk, you will have to wait for a response.
+This is how you **read a page** and request notifications for any updates to a page. The following happens when you watch a page:
+```js
+if (page is resident in memory from previous cache write)
+  send the caller a read_res event *now*
 
-Reads to the `vm_cache` will currently block; but reads to the disk will not block. This will be changed in the future so that `vm_cache` will not block when we have a `low_priority` internal queue configured for flok.
+increment_page_ref()
 
-This forwards to the pagers `watch` function with the given `id` of the page and the `hash` value of the page.
+//Synchronously request disk load from cache; this will block
+//Even if we have a request in progress; the synchronous
+//may pre-empt that event because the disk queue might be loaded;
+//so we need to send this anyway
+if (page is not redisent in memory and synchronous) {
+  try_sync_load_from_disk_and_update_cache()
+}
 
-**To re-iterate, flok has a different concept of what constitutes a read. Flok does not distinguish between a read and the want to know about changes to a page. Flok considers controllers that have just watched a page to have an invalid copy of that page, and thus need to be notified that the page has changed for first read**
+//Only notify if this is the first reference, other controllers who attempt a watch will not signal the pager because the pager already knows
+//about this page
+if first_reference {
+  pager_watch()
+}
+
+//Again, only attempt this if the page is not requested by anyone else and is not synchronous (because we would have already tried). The pager will be notified in the meantime, if the disk
+//comes after the pager notification; then the disk will not do anything.
+if (page is not resident in memory && not_synchronous) {
+  //This is an asynchronous request
+  try_load_from_disk_and_update_cache()
+}
+```
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `id` - Watching the page that contains this in the `_id` field
@@ -89,9 +110,6 @@ This forwards to the pagers `watch` function with the given `id` of the page and
       * `page` - A dictionary object that is a reference to the page. This should be treated as immutable as it is a shared resource.
   * Debug mode
     * When `@debug`, an exception will be thrown if you attempt to watch the same key from one controller multiple times.
-
-###`watch_sync`
-This request operates in the same way as `watch` but will cause a kernel panic if the page is not located in a cache (either `vm_cache` or disk). Additionally, reads to the `vm_cache` and disk cache will block until a read back is received. This may be used for things like getting sessions keys or names that you would like now before the UI renders. You will still receive updates.
 
 ###`unwatch`
 This is how you **unwatch** a page. For view controllers that are destroyed, it is not necessary to manually `unwatch` as the `vm` service will be notified on it's disconnection and automatically remove any watched pages for it's base pointer. This should be used for thingcs like scroll lists where the view controller is no longer interested in part of a page-list.

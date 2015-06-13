@@ -10,11 +10,14 @@ can have a total of `(N*5)` messages assuming there are `N` queue types (at the 
 as most requests on the flok client will not use multiple resources in one pipelined stage. The client is responsible for requesting more data until no more data is available.
 
 ##Confusion about synchronous and asynchronous
-There are various stages of message processing so it can be confusing as to what is excatly synchronous and asynchronous. 
-
+There are various stages of message processing so it can be confusing as to what is excatly synchronous and asynchronous. Flok assumes a few things
   1. The disptach mechanism, `int_dispatch`, is always called by the client synchronously, and the javascript core will always respond synchronously to `if_disptach`. 
-  2. The client `if_dispatch` handler will then process the main queue on it's same synchronous thread and then dispatch, asynchronously, the remaining queues.
-  3. This isn't necessarily apart of flok, but the `if_dispatch` that triggers an asynchronous queuing of a message will then usually trigger a function which itself is asynchronously dispatched.
+  2. The client `if_dispatch` handler will then process the main queue on it's same synchronous thread and then dispatch, asynchronously, the remaining queues; the queues may either each dispatch messages asynchronously or synchronously w.r.t to the original queue. (out of order and parallel are supported)
+
+For example, if we dispatch on the `main` queue a disk read request, flok would expect that the disk read would block the javascript core and return execution as soon as the disk read completed. Flok would also presume that the disk read was done at the fastest
+and highest priority of IO and CPU.
+
+Flok would expect that same disk requets, dispatched on an asynhcronous queue, like `disk`, that the request would not execute on the same thread of execution and could execute out of order.
 
 ##The standard Flok queues (resources) are defined with the labels:
   0. `main` - User-interface displaying, etc.
