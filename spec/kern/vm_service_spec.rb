@@ -11,7 +11,7 @@ RSpec.describe "kern:vm_service" do
   include Zlib
   include_context "kern"
 
- it "vm_rehash_page can calculate the hash correctly" do
+it "vm_rehash_page can calculate the hash correctly" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
@@ -537,7 +537,7 @@ RSpec.describe "kern:vm_service" do
     page = JSON.parse(ctx.eval("JSON.stringify(page)"))
 
     @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page["_id"], page])
+    @driver.mexpect("if_per_set", ["spec", page["_id"], page], 2)
   end
 
   it "Does send a read request from disk cache when watching a key for the first time" do
@@ -835,7 +835,7 @@ RSpec.describe "kern:vm_service" do
     end
 
     @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page["_id"], page])
+    @driver.mexpect("if_per_set", ["spec", page["_id"], page], 2)
   end
 
   it "Does not attempt to write twice to disk after 41 seconds if there is no pending data to write" do
@@ -855,7 +855,7 @@ RSpec.describe "kern:vm_service" do
     end
 
     @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page["_id"], page])
+    @driver.mexpect("if_per_set", ["spec", page["_id"], page], 2)
 
     expect {
       @driver.ignore_up_to "if_per_set"
@@ -880,7 +880,7 @@ RSpec.describe "kern:vm_service" do
     end
 
     @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page["_id"], page])
+    @driver.mexpect("if_per_set", ["spec", page["_id"], page], 2)
 
     #Call next on controller which will write an new page
     ctx.eval %{ int_dispatch([3, "int_event", base, "next", {}]); }
