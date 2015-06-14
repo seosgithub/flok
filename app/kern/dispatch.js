@@ -30,6 +30,9 @@ function int_dispatch(q) {
   //Now push all of what we can back
   var dump = [];
 
+  //Add 'i' to start
+  var incomplete = false;
+
   //Send main queue
   if (main_q.length > 0) {
     var out = [0];
@@ -43,20 +46,21 @@ function int_dispatch(q) {
   if (net_q.length > 0 && net_q_rem > 0) {
     //Always pick the minimum between the amount remaining and the q length
     var n = net_q.length < net_q_rem ? net_q.length : net_q_rem;
+    if (n != net_q.length) { incomplete = true; }
 
     var out = [1];
     var piece = net_q.splice(0, n);
     for (var i = 0; i < piece.length; ++i) {
       out.push.apply(out, piece[i]);
     }
-    dump.push(out);
 
-    net_q_rem -= n;
+    dump.push(out);
   }
 
   if (disk_q.length > 0 && disk_q_rem > 0) {
     //Always pick the minimum between the amount remaining and the q length
     var n = disk_q.length < disk_q_rem ? disk_q.length : disk_q_rem;
+    if (n != disk_q.length) { incomplete = true; }
 
     var out = [2];
     var piece = disk_q.splice(0, n);
@@ -64,13 +68,12 @@ function int_dispatch(q) {
       out.push.apply(out, piece[i]);
     }
     dump.push(out);
-
-    disk_q_rem -= n;
   }
 
   if (cpu_q.length > 0 && cpu_q_rem > 0) {
     //Always pick the minimum between the amount remaining and the q length
     var n = cpu_q.length < cpu_q_rem ? cpu_q.length : cpu_q_rem;
+    if (n != cpu_q.length) { incomplete = true; }
 
     var out = [3];
     var piece = cpu_q.splice(0, n);
@@ -78,13 +81,12 @@ function int_dispatch(q) {
       out.push.apply(out, piece[i]);
     }
     dump.push(out);
-
-    cpu_q_rem -= n;
   }
 
   if (gpu_q.length > 0 && gpu_q_rem > 0) {
     //Always pick the minimum between the amount remaining and the q length
     var n = gpu_q.length < gpu_q_rem ? gpu_q.length : gpu_q_rem;
+    if (n != gpu_q.length) { incomplete = true; }
 
     var out = [4];
     var piece = gpu_q.splice(0, n);
@@ -92,9 +94,9 @@ function int_dispatch(q) {
       out.push.apply(out, piece[i]);
     }
     dump.push(out);
-
-    gpu_q_rem -= n;
   }
+
+  if (incomplete) { dump.unshift("i"); }
 
   if (dump.length != 0) {
     if_dispatch(dump);
@@ -169,3 +171,11 @@ net_q_rem = 5;
 disk_q_rem = 5;
 cpu_q_rem = 5;
 gpu_q_rem = 5;
+
+<% if @debug %>
+function spec_dispatch_q(queue, count) {
+  for (var i = 0; i < count; ++i) {
+    queue.push([0, "spec"]);
+  }
+}
+<% end %>

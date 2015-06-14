@@ -90,6 +90,9 @@ function _embed(vc_name, sp, context, event_gw) {
   //Register the event handler callback
   reg_evt(base, controller_event_callback);
 
+  //Call __init__
+  cte.__init__(base);
+
   //Call the on_entry function with the base address
   cte.actions[action].on_entry(base);
 

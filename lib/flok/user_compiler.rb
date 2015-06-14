@@ -14,9 +14,7 @@ module Flok
       ctable_erb = File.read File.join(File.dirname(__FILE__), "./user_compiler_templates/ctable.js.erb")
       ctable_renderer = ERB.new(ctable_erb)
       @src << ctable_renderer.result(context.get_binding)
-
-      #puts @src
-
+      
       return @src
     end
   end
@@ -171,7 +169,6 @@ module Flok
               int_event(vcs[i], #{event_name}, #{info});
             }
           }
-
         #GOTO(action_name)
         elsif l =~ /Goto/
           l.strip!
@@ -193,6 +190,9 @@ module Flok
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
                 //Free +1 because that will be the 'main' view
                 main_q.push([1, "if_free_view", embeds[i][j]+1]);
+
+                //Call dealloc on the controller
+                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
 
                 <% if @debug %>
                   var vp = embeds[i][j]+1;
@@ -228,7 +228,7 @@ module Flok
             }]);
           }
           out.puts res
-        #Request(service_name, payload, event_name_cb)
+        #Request(service_instance_name, ename, info)
         elsif l =~ /Request/
           l.strip!
           l.gsub!(/Request\(/, "")
@@ -237,11 +237,141 @@ module Flok
           o = l.split(",").map{|e| e.strip}
 
           name = o.shift.gsub(/"/, "")
+          ename = o.shift.gsub(/"/, "")
           info = o.shift.gsub(/"/, "")
-          event_name = o.shift
+          raise "You tried to Request the service #{name.inspect}, but you haven't added that to your 'services' for this controller (#{@controller.name.inspect})" unless @controller._services.include? name
+          out << %{
+            #{name}_on_#{ename}(__base__, #{info});
+          }
+        #VM Page macros
+        elsif l =~ /NewPage/
+          le = (l.split /NewPage/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*)\);?/
+
+          #Get the id value the user wants, but we have to be careful
+          #because if nothing is passed, then we need to set it to null
+          id_var = $1.strip
+          if id_var == ""
+            id_var = "null"
+          end
 
           out << %{
-            service_#{name}_req(#{info}, __base__, #{event_name});
+            #{lvar} {
+              _head: null,
+              _next: null,
+              entries: [],
+              _id: #{id_var},
+            }
+          }
+        elsif l =~ /CopyPage/
+          le = (l.split /CopyPage/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*)\);?/
+          page_var = $1
+
+          out << %{
+            var __page__ = {
+              _head: #{page_var}._head,
+              _next: #{page_var}._next,
+              _id: #{page_var}._id,
+              entries: [],
+            }
+
+            //This is a shallow clone, but we own this array
+            //When a mutable entry needs to be created, an entry will be cloned
+            //and swappend out
+            for (var i = 0; i < #{page_var}.entries.length; ++i) {
+              __page__.entries.push(#{page_var}.entries[i]);
+            }
+
+            #{lvar} __page__;
+          }
+        elsif l =~ /EntryDel/
+          le = (l.split /EntryDel/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          index_var = $2
+
+          out << %{
+            #{page_var}.entries.splice(#{index_var}, 1);
+          }
+
+        elsif l =~ /EntryInsert/
+          le = (l.split /EntryInsert/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*),(.*)\);?/
+          page_var = $1
+          index_var = $2
+          entry_var = $3
+
+          out << %{
+            #{entry_var}._id = gen_id();
+            #{entry_var}._sig = gen_id();
+            #{page_var}.entries.splice(#{index_var}, 0, #{entry_var});
+          }
+
+        elsif l =~ /SetPageNext/
+          le = (l.split /SetPageNext/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          value_var = $2
+
+          out << %{
+            #{page_var}._next = #{value_var};
+          }
+
+        elsif l =~ /SetPageHead/
+          le = (l.split /SetPageHead/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          value_var = $2
+
+          out << %{
+            #{page_var}._head = #{value_var};
+          }
+
+        elsif l =~ /EntryMutable/
+          le = (l.split /EntryMutable/)
+          lvar = le[0].strip #Probably var x = 
+          exp = le[1].strip
+
+          #For CopyPage(original_page), page_var is original_page
+          #This only supports variable names at this time
+          exp.match /\((.*?),(.*)\);?/
+          page_var = $1
+          index_var = $2
+
+          out << %{
+            //Duplicate entry
+            #{page_var}.entries.splice(#{index_var}, 1, JSON.parse(JSON.stringify(#{page_var}.entries[#{index_var}])));
           }
         else
           out.puts l
@@ -265,12 +395,13 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :name, :spots, :macros
+    attr_accessor :name, :spots, :macros, :_services
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
       @spots = ['main']
       @macros = {}
+      @_services = []
 
       self.instance_eval(&block)
     end
@@ -283,6 +414,10 @@ module Flok
     #Names of spots
     def spots *spots
       @spots += spots
+    end
+
+    def services *instance_names
+      @_services = instance_names.map{|e| e.to_s}
     end
 
     #Pass through action

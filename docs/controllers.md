@@ -23,7 +23,8 @@ Let's write a `fuc` controller that has 2 tabs and a content area. The view is i
 
 ```ruby
 controller "tab_controller" do
-  spaces "content"
+  spots "content"
+  services "my_service" #See docs on services for what this means
 
   #You can also define macros for shared action traits
   macro "my_macro" do

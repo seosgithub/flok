@@ -1,74 +1,159 @@
 #Services
-Services are entirely built into the Flok kernel. If you need custom actions for your services, they must be created as a driver and then
-you must adhere to the services API.
+Services are helper hubs that send and receive information typically from other services or directly from interrupts. They are meant
+to act as a glue between controllers and devices. Services can receive events and can run periodic events on longer intervals. They are
+very similar to controllers except they do not contain actions and are meant to be used as singletons (although they are instantized, the 
+instances are globally shared).
 
-###Request
-You initiate a service request via `Request`. This may be called only in the controller at this time. This macro takes several parameters
-parameters, all of which must either be strict variable names or double quoted strings:
+##Datatypes
+Services maintain the following datatypes per instance:
+  * `instance_name_sessions` - A hash that contains the connection view controllers as keys and 'true' as the values.
+  * `instance_name_n_sessions` - A count of the current number of active sessions
 
-  * `Request(name, info, event_name)`
-    * `name` - The name of the service you are making a request from
-    * `info` - The information to give the service
-    * `event_name` - The name of the event when a callback occurs
+##Code
+All kernel service classes are placed in `./app/kern/services/` and are ruby files. Here is an example:
+```ruby
+#A sample service, all services have capital letters because they are like classes and are instantized
+service :sample do
+  #Global space#######################################################################################################################
+  #In this space, you may define functions that are accessible to anything
+  global %{
+    function <%= @name %>_cache_save(x) {
+    };
+  }
+  ####################################################################################################################################
 
-Callbacks are handled by redirecting them through the [event](./mod/event.md) interface `int_event`.  You should register with `reg_evt` to receive
-events back from a service. The request itself is not made via the event system, only the response is.  This may seem a little odd because normally
-events come in from the outside while this is an internally generated event.
-
-###Request API
-Registering a service involves adding files to the `./app/kern/services` folder. All *ruby* files in this folder are used in the compilation of 
-services. You declare services in the following format. Your service should not depend on anything except particular module functions.
-
-```
-service("rest") do
-  on_init %{
-    #Code inserted here is put into the global space, add initialization
-    #procedures, functions that need to be called, etc.
-    #
-    #You may use the function respond(info) within here to 
-
-    #Store the in-progress requests as a list of hashes
-    #that contain an array in the order of [event_pointer, evenct_name]
-    var service_rest_tp_to_einfo = {}
-
-    function service_rest_callback(tp, success, info) {
-      //Lookup event info
-      var einfo = service_rest_tp_to_einfo[tp];
-
-      //Send info back to service
-      int_event(einfo[0], einfo[1], {:success => success, :info => info});
-
-      //Remove entries in telepointer table and rest service info
-      tel_del(tp);
-      delete service_rest_tp_to_einfo[tp];
-    }
+  #Initialization#####################################################################################################################
+  #When a service is woken_up, this function is called. A service instances is guaranteed to never be woken up
+  on_wakeup %{
   }
 
-  on_request %{
-    #Code that handles a payload goes here.
-    #You have access to `info`, `ep`, and `ename` which was given in the Request macro
-
-    //Create a GET request that will respond to the telepointer
-    var tp = tel_reg(service_rest_callback);
-
-    //Now register the event information to respond to when a callback is received
-    service_rest_tp_to_einfo[tp] = [ep, ename]
-
-    //Start the request
-    SEND("net", "if_net_req", "GET", info.url, info.params, tp)
+  #When an agent (currently all) service is no longer needed by a controller, AND the service has flushed all of it's transaction queues,
+  the service will receive a sleep request. At this point, you should remove all initialized data. If your service is
+  too expensive to destroy all initialized data each time it is woken and slept, then it is too expensive to wakeup at all
+  and you should reconsider your design. After this function calls, this service should act like it never existed and clear
+  all of it's initalized variables.
+  on_sleep %{
   }
+  ####################################################################################################################################
+
+  #Session management#################################################################################################################
+  #Things 'connect' to a service, which is just a function call that objects, like controllers, make to a service instance
+  #that notify the service that that object is now connected. You may use this to start things like automatically sending
+  #events to controller instances. You have a session list called $NAME_sessions that is an array of currently connected clients.
+  on_connect %{
+  }
+
+  #When an object is destroyed, this notifies the service that that object no longer wishes to receive things from the service.
+  on_disconnect %{
+  }
+  ####################################################################################################################################
+
+  #Do things##########################################################################################################################
+  #Services are a lot like controllers, they have a mechanism to handle events
+  on :event, %{
+    #Services maintain their own context variables through using <%= @name %> macros to prefix variables, each instance will have a different name
+    <%= @name %>_hello = "hi";
+
+    #Inside here you receive...
+      bp - The base pointer of the 'thing' that invoked this function.
+      params - The parameters that were 'sent' (i.e. called)
+  }
+
+  #Do something every 5 seconds if this service (a) has clients and (b) has nothing left in a transaction queue
+  every 5.seconds %{
+  }
+  ####################################################################################################################################
 end
 ```
 
-This is then compiled down to
-```js
-//***************************************
-//on_init code is appended to the outside
-//....
-//***************************************
+###Variables accesible
+For each service function, these are what you can access
+  * `on_wakeup`
+    * No variables yet
+  * `on_sleep`
+    * No variables left over
+  * `on_connect`
+    * `bp` - The base address of the controller that connected
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `on_disconnect`
+    * `bp` - The base address of the controller that disconnected
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `every x.seconds`
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
+  * `on`
+    * `bp` - The base address of the controller that sent event
+    * `params` - The parameters sent with the message
+    * `sessions` - A hash of currently active sessions where each key is a base pointer
 
-//Your request code is put inside a function
-function service_rest_req(info, ep, ename) {
-  //on_request code
+###Service function in controllers
+When you are inside a controller, you may make as service request through `Request`. **You must have already declared usage of the service through
+`services`**:
+  * `Request(service_insatnce_name, ename, params)`
+    * `service_instance_name` - The instance name of the service you are making a request from
+    * `ename` - The name of the event to 'send' the service. (`on` handlers for service)
+    * `params` - Any information you'd like to send along with the service.
+
+###Example controller
+```ruby
+controller :controller do 
+  spots "content"
+  services :my_service
+
+  action :index do
+    on_entry %{
+      //Request can be placed anywhere in the controller
+      Request("my_service", "hello", {});
+    }
+  end
+end
+```
+
+###Services when compiled
+Services get compiled through the `services_compiler` which generates the following functions
+```
+$INAME_on_wakeup() {
+}
+
+$INAME_on_sleep() {
+}
+
+$INAME_on_connect(bp) {
+}
+
+$INAME_on_disconnect(bp) {
+}
+
+//For each 'on' function
+$INAME_on_XXXXX(bp, params) = {
+}
+
+//Event handler
+$INAME_event_handler(ep, event_name, info) {
 }
 ```
+
+###Services config for projects
+Inside a project, `./config/services.rb` holds the services configuration. This configuration file tells flok exactly what services it should
+instantize based on which class. The file contains a list of `service_instance` commands with the following format:
+```ruby
+service_instance :instance_name, :service_class
+```
+
+Additionally, you may pass in a hash at the end of `service_instance` that will be available as `@options` inside the service definition `rb` file.
+
+###Spec service
+By default, there is a spec service class available called 'test' when compiled with debug. This service contains a function named `$iname_function(x)` that
+sets `$iname_function_args` to the input of that function.
+
+###Roughly how the services system works
+The services are all hard-coded function calls that are initialized with names like `my_instance_on_wakeup`.  You have a service *class* defined in
+either the kernel `./app/kern/services` or `./app/services` in a project. These files are then used as a template when you define a service in
+`./config/services.rb` in your project. The flok library `ServicesCompiler` then takes the config and services file and generates the output
+javascript code to support a service.  Services are talked to through the simple function naming scheme above with the exception of timers which open
+a new `evt` record every time in wakes up and stops the `evt` when it goes to sleep with a new base pointer. This means, a timer will not fire against
+a service if the `evt` is no longer active. Regular `on` requests are not events because there would be way to much overhead.
+
+The controller compiler, `UserCompiler`, mentioned in [Project](./project.md) provides the `services` method when defining a controller. This
+`services` method is used in the `UserCompiler` to inject service functions directly into the controller's `ctable` definition. `_embed` and `Goto
+macro` of the controllers then call `__init__` and `__dealloc__` of the `ctable` which is augmented with the necessary `services` like calling
+`connect` and `disconnect`.

@@ -1,24 +1,26 @@
-#Process one js code file at a time
-def macro_process text
-  out = StringIO.new
+module Flok
+  #Process one js code file at a time
+  def self.macro_process text
+    out = StringIO.new
 
-  text.split("\n").each do |l|
-    #Send macro
-    if l =~ /SEND/
-      l.strip!
-      l.gsub!(/SEND\(/, "")
-      l.gsub! /\)$/, ""
-      l.gsub! /\);$/, ""
-      o = l.split(",").map{|e| e.strip}
+    text.split("\n").each do |l|
+      #Send macro
+      if l =~ /SEND/
+        l.strip!
+        l.gsub!(/SEND\(/, "")
+        l.gsub! /\)$/, ""
+        l.gsub! /\);$/, ""
+        o = l.split(",").map{|e| e.strip}
 
-      queue_name = o.shift.gsub(/"/, "")
+        queue_name = o.shift.gsub(/"/, "")
 
-      res = %{#{queue_name}_q.push([#{o.count-1}, #{o.join(", ")}])}
-      out.puts res
-    else
-      out.puts l
+        res = %{#{queue_name}_q.push([#{o.count-1}, #{o.join(", ")}])}
+        out.puts res
+      else
+        out.puts l
+      end
     end
-  end
 
-  return out.string
+    return out.string
+  end
 end

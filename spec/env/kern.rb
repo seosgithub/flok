@@ -1,8 +1,13 @@
+require './spec/env/global.rb'
 require 'therubyracer'
 require './spec/lib/temp_dir'
 
 shared_context "kern" do
   before(:each) do
+    reset_for_ctx
+  end
+
+  def reset_for_ctx
     res=system('rake build:world')
     raise "Could not run build:world" unless res
     @ctx = V8::Context.new
@@ -14,31 +19,46 @@ shared_context "kern" do
     end
   end
 
+  class V8::Context
+    def dump variable
+      json_res = self.eval %{
+        JSON.stringify(#{variable});
+      }
+
+      return JSON.parse(json_res)
+    end
+  end
+
   #Execute flok binary with a command
   def flok args
     #Get path to the flok binary relative to this file
     bin_path = File.join(File.dirname(__FILE__), "../../bin/flok")
 
     #Now execute the command with a set of arguments
-    system("#{bin_path} #{args}")
+    return system("#{bin_path} #{args}")
   end
 
   #Create a new flok project, add the given user_file (an .rb file containing controllers, etc.)
   #and then retrieve a V8 instance from this project's application_user.js
-  def flok_new_user user_controllers_src
+  def flok_new_user user_controllers_src, service_config=nil, service_src=nil
     temp_dir = new_temp_dir
     Dir.chdir temp_dir do
       flok "new test"
       Dir.chdir "test" do
         #Put controllers in
         File.write './app/controllers/user_controller.rb', user_controllers_src
+        File.write './config/services.rb', service_config if service_config
+        File.write './app/services/service0.rb', service_src if service_src
 
         #Build
-        flok "build" #Will generate drivers/ but we will ignore that
+        unless flok "build" #Will generate drivers/ but we will ignore that
+          raise "Build failed"
+        end
 
         #Execute
         @driver = FakeDriverContext.new
         v8 = V8::Context.new(:with => @driver)
+        @ctx = v8
         @driver.ctx = v8
         v8.eval %{
           //We must convert this to JSON because the fake driver will receive
@@ -69,6 +89,12 @@ shared_context "kern" do
       @q += JSON.parse(q)
     end
 
+    #When you're running these unit tests, you may need to log, but you will
+    #need to remove any _log statements before running other tests!
+    def log(msg)
+      $stderr.puts "v8: #{msg}"
+    end
+
     #Expect a certain message, with some arguments, and a certain priority
     #expect("if_init_view", ["test_view", {}]) === [[0, 4, "if_init_view", "test_view", {}]]
     def mexpect(msg_name, msg_args, priority=0)
@@ -89,6 +115,50 @@ shared_context "kern" do
       expect(name).to eq(msg_name)
       expect(args).to eq(msg_args)
       expect(priority).to eq(@cp)
+    end
+
+    #Ignore all messages until this one is received, then keep that one in the queue
+    #There may be a lot going on and you're only interested in a part.
+    #If priority is nil, it won't matter what the priority is, useful for checking exceptions
+    #for non-existant messages
+    def ignore_up_to msg_name, priority=nil
+      @did_get = []
+
+      loop do
+        if @q.count == 0 and @cq.count == 0
+          raise "Waited for the message #{msg_name.inspect} but never got it... did get: \n * #{@did_get.join("\n * ")}"
+        end
+        #Dequeue from multi-priority queue if possible
+        if @cq.nil? or @cq.count == 0
+          @cq = @q.shift
+          @cp = @cq.shift #save priority
+        end
+
+        #Check to see if it's the correct item
+        arg_len = @cq.shift
+        name = @cq.shift
+        if arg_len.class == String
+          $stderr.puts "Arg len is: #{arg_len.inspect}"
+          $stderr.puts "Name is #{name.inspect}"
+        end
+        args = @cq.shift(arg_len)
+
+        @did_get << name
+
+        if name == msg_name
+          if priority
+            raise "Found the message #{msg_name.inspect} while calling ignore_up_to... but it's the wrong priority: #{@cp}, should be #{priority}" if @cp != priority
+          end
+
+          #Unshift everything in reverse order, we are only peeking here...
+          args.reverse.each do |a|
+            @cq.unshift a
+          end
+          @cq.unshift name
+          @cq.unshift arg_len
+          break
+        end
+      end
     end
 
     #Retrieve a message, we at least expect a name and priority
@@ -123,6 +193,12 @@ shared_context "kern" do
         @ctx.eval %{
           int_dispatch(#{msg});
         }
+    end
+
+    def dump_q
+      q = @q
+      @q = []
+      return q
     end
   end
 end

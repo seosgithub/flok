@@ -1,7 +1,9 @@
 sp_to_sockio = {}
 
 function if_sockio_init(url, sp) {
-  sp_to_sockio[sp] = io(url);
+  sp_to_sockio[sp] = io(url, {
+    "forceNew": true
+  });
 }
 
 function if_sockio_fwd(sp, event_name, bp) {

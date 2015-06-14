@@ -4,13 +4,14 @@ require './spec/env/etc'
 
 RSpec.describe "lib/services_compiler" do
   #Return a v8 instance of a compiled js file
-  def compile fn
+  def compile fn, config
     compiler = Flok::ServicesCompiler
     js_src(fn)
-    js_res = compiler.compile(js_src(fn))
+    js_res = compiler.compile(js_src(fn), js_src(config))
     ctx = V8::Context.new
     ctx.eval js_res
-    ctx
+
+    return ctx, js_res
   end
 
   #Get the source for a file in  ./service_compiler/*.rb
@@ -20,22 +21,48 @@ RSpec.describe "lib/services_compiler" do
     end
   end
 
-  it "Can call compile method and get on_init" do
-    ctx = compile "service0"
+  #it "Does fail to compile a controller with a non-existant type" do
+    #expect { compile "service_bad_type" }.to raise_exception
+  #end
 
-    #The service defines a variable in on_init, this should be always accessible
-    res = ctx.eval("test_service_var")
-    expect(res).to eq(true)
-  end
+  #it "Can call compile method and get a copy of all the functions" do
+     #ctx, _  = compile "service0", "config0"
 
-  it "Can call compile method and get on_request" do
-    ctx = compile "service0"
+    ##on_wakeup
+    #res = ctx.eval("test_on_wakeup")
+    #expect(res).not_to eq(nil)
 
-    #Should be able to call on_request generated request function
-    ctx.eval('service_test_req({}, 0, "test")')
+    ##on_sleep
+    #res = ctx.eval("test_on_sleep")
+    #expect(res).not_to eq(nil)
 
-    #That should have set a variable
-    res = JSON.parse(ctx.eval("JSON.stringify(test_service_request)"))
-    expect(res).to eq([{}, 0, "test"])
+    ##on_connect
+    #res = ctx.eval("test_on_connect");
+    #expect(res).not_to eq(nil)
+
+    ##on_disconnect
+    #res = ctx.eval("test_on_disconnect")
+    #expect(res).not_to eq(nil)
+
+    ##on_event
+    #res = ctx.eval("test_on_hello");
+    #expect(res).not_to eq(nil)
+
+    ##on_handle_timer_events
+    #res = ctx.eval("test_handle_timer_events");
+    #expect(res).not_to eq(nil)
+  #end
+
+  #it "Can call compile method with options" do
+    #ctx, js = compile "service1", "config2"
+    #expect(js).to include("23rntoheuh3nthoeunthn23th");
+  #end
+
+  #If SEND works, then all kernel macros should work
+  it "Can compile with a SEND macro" do
+     ctx, src  = compile "service3", "config0"
+
+     expect(src).not_to include("SEND")
+     expect(src).to include("_q.push")
   end
 end

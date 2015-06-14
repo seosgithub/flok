@@ -1,6 +1,16 @@
 ctable = {
   <% @controllers.each do |c| %>
       <%= c.name %>: {
+        __init__: function(__base__) {
+          <% c._services.each do |s| %>
+              <%= s %>_on_connect(__base__);
+          <% end %>
+        },
+        __dealloc__: function(__base__) {
+          <% c._services.each do |s| %>
+              <%= s %>_on_disconnect(__base__);
+          <% end %>
+        },
         name: '<%= c.name %>',
         root_view: '<%= c.name %>',
         spots: <%= c.spots.to_json %>,
