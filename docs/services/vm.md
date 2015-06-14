@@ -106,9 +106,7 @@ if (page is not resident in memory && not_synchronous) {
     * `sync (optional)` - If set to `true` then the disk read will be performed synchronously.
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
-      * `ns` - Namespace of the fault
-      * `first` - A boolean that indicates whether this page was ever received on `page_update` before. i.e. is it a change after we were already given this page previously in a `page_update` for this receiver?
-      * `page` - A dictionary object that is a reference to the page. This should be treated as immutable as it is a shared resource.
+    * Returns an immutable page in params
   * Debug mode
     * When `@debug`, an exception will be thrown if you attempt to watch the same key from one controller multiple times.
 
