@@ -891,6 +891,6 @@ it "vm_rehash_page can calculate the hash correctly" do
     end
 
     @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page2["_id"], page2])
+    @driver.mexpect("if_per_set", ["spec", page2["_id"], page2], 2)
  end
 end
