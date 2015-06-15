@@ -1,8 +1,6 @@
 //Configure pg_mem0, pg_mem1, pg_mem2
 <% [0, 1, 2].each do |i| %>
   function pg_mem<%= i %>_init(ns, options) {
-    pg_mem<%= i %>_watchlist = [];
-    pg_mem<%= i %>_unwatchlist = [];
     pg_mem<%= i %>_init_params = {ns: ns, options: options};
     pg_mem<%= i %>_ns = ns;
 

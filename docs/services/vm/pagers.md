@@ -37,6 +37,18 @@ This pager does the following when calls are made to it's functions, it's design
 
 These pagers only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
 
+####Net Sim pager | `pg_net_sim`
+This pager is designed to simulate a slowly loading data like a network interface. It does not allow writes.
+  * `init` - Sets `pg_net_sim_spec_did_init` to `true`
+  * `watch` - Set a timer that will elapse after 2 seconds at which point the data will be loaded into the cache.
+  * `unwatch` - Does nothing
+  * `write` - Does nothing
+  * Functions
+    * `pg_net_sim_load_pages(arr)` - Given an array of pages, the net sim will load these pages and then when `watch` is called,
+      it will load those pages, after 2 seconds, into the `vm_cache`
+
+These pagers only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
+
 ####Mem pager | `pg_mem0`, `pg_mem1`, `pg_mem2`
 This pager provides you with local memory that will be automatically cached to disk. It has 3 copies
 (`pg_mem0`, `pg_mem'`) etc. because you can use each one in a different namespace.
