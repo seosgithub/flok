@@ -28,17 +28,18 @@ Please name your pagers `pg_XXXX` to help make it clear that you are writing a p
 ####Default memory pager | `pg_mem0`
 The *default memory pager* does not do anything on `watch` or `unwatch`. It depends on the cache to reply to `watch` and `watch_sync` requests created by controllers. Controllers may write to this pager via `write` which this pager will then send directly to `vm_cache_write`. This pager is always compiled into the kernel.
 
-####Spec pager | `pg_spec0`
+####Spec pager | `pg_spec0`, `pg_spec1`
 This pager does the following when calls are made to it's functions, it's designed to assist with `vm` kernel specs.
   * `init` - Sets `pg_spec0_init_params` to `{ns: ns, options: options}`
   * `watch` - Appends `{id: id, hash: hash}` to `pg_spec0_watchlist`
   * `unwatch` - appends id to `pg_spec0_unwatchlist`
   * `write` - Writes the given page to `vm_cache_write`
 
-This pager only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
+These pagers only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
 
-####Mem pager | `pg_mem0`
-This pager provides you with local memory that will be automatically cached to disk
+####Mem pager | `pg_mem0`, `pg_mem1`, `pg_mem2`
+This pager provides you with local memory that will be automatically cached to disk. It has 3 copies
+(`pg_mem0`, `pg_mem'`) etc. because you can use each one in a different namespace.
   * `init` - Sets `pg_mem0_spec_did_init` to `true` if `@debug`
   * `watch` - Does nothing
   * `unwatch` - Does nothing

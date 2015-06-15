@@ -67,10 +67,9 @@ service :vm do
             var p = id_to_page[ids[i]];
             SEND("disk", "if_per_set", "<%= p[:namespace] %>", ids[i], p);
           }
-        <% end %>
         }
+        <% end %>
 
-      //Clear dirty list
       vm_dirty = {
         <% @options[:pagers].each do |p| %>
           <%= p[:namespace] %>: {},

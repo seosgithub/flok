@@ -67,6 +67,7 @@ shared_context "kern" do
             if_dispatch_json(JSON.stringify(q));
           }
         }
+        File.write "/Users/Seo/Desktop/dump.rb", File.read('./products/chrome/application_user.js') 
         v8.eval File.read('./products/chrome/application_user.js')
         return v8
       end
