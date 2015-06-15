@@ -1,4 +1,4 @@
-#The mem0, mem1, mem2 pagers
+#The pg_mem0 pager
 
 Dir.chdir File.join File.dirname(__FILE__), '../../'
 require './spec/env/kern.rb'
@@ -11,8 +11,8 @@ RSpec.describe "kern:vm_service_mem_pagers" do
   include Zlib
   include_context "kern"
 
-  it "Can initialize the mem0 pager" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+  it "Can initialize the pg_mem0 pager" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/pg_mem/config.rb") 
     ctx.eval %{
       //Call embed on main root view
       base = _embed("my_controller", 0, {}, null);
@@ -23,5 +23,20 @@ RSpec.describe "kern:vm_service_mem_pagers" do
 
     res = ctx.eval("pg_mem0_spec_did_init")
     expect(res).to eq(true)
+  end
+
+  it "Can make a write request to pg_mem0 and have that written in cache" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_mem/write.rb'), File.read("./spec/kern/assets/vm/pg_mem/config.rb") 
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    page = ctx.dump "page"
+    vm_cache = ctx.dump("vm_cache")
+    expect(page).to eq(vm_cache["local"]["test"])
   end
 end
