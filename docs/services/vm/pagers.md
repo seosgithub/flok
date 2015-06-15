@@ -36,3 +36,10 @@ This pager does the following when calls are made to it's functions, it's design
   * `write` - Writes the given page to `vm_cache_write`
 
 This pager only exists if the environment is in `DEBUG` mode (`@debug` is enabled).
+
+####Mem pager | `pg_mem0`
+This pager provides you with local memory that will be automatically cached to disk
+  * `init` - Sets `pg_mem0_spec_did_init` to `true` if `@debug`
+  * `watch` - Does nothing
+  * `unwatch` - Does nothing
+  * `write` - Writes the given page to `vm_cache_write`
