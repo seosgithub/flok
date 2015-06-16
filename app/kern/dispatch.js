@@ -9,6 +9,15 @@
 //Here is an example with two successive calls
 //  [2, 'mul', 3, 4, 1, 'print', 'hello world']
 function int_dispatch(q) {
+  //If there are things on the defer queue, then grab
+  //one of them for now and do it
+  if (edefer_q.length > 0) {
+    var ep = edefer_q.shift();
+    var ename = edefer_q.shift();
+    var info = edefer_q.shift();
+    int_event(ep, ename, info);
+  }
+
   //Where there is still things left on the queue
   while (q.length > 0) {
     //Grab the first thing off the queue, this is the arg count
@@ -96,7 +105,7 @@ function int_dispatch(q) {
     dump.push(out);
   }
 
-  if (incomplete) { dump.unshift("i"); }
+  if (incomplete || edefer_q.length > 0) { dump.unshift("i"); }
 
   if (dump.length != 0) {
     if_dispatch(dump);

@@ -66,9 +66,14 @@ And it receives this in `res`:
 ```
 
 Notice how it's the same as the int_dispatch from the server except that queue 1 (`net_q`) is missing 1 message ([1, "download", "..."]). The 'i' at the start
-indicates that the request is 'incomplete' and the client should request with a blank request array following completion of dequing all these events.
-So the flok server still ha the following in it's queues. The `net_q` will be transfered after the next client request which will take place
+indicates that the request is 'incomplete' and the client should request with a blank request array following completion of dequing all these events. The second request should be **asynchronous** w.r.t to the frist request and the third request asynchronous w.r.t to the second request. This is because, if there were enough events, the main thread would be blocked until the full queue was finished de-queing. This raises an issue; what happends if a request comes through before the asynchronous request comes through? Nothing special. Clients should prioritize the request queue to dispatch things that need `int_event` *now* instead of wait until the queue is drained. While the requests will do the same thing either which way; you don't want to pre-empt the higher priority request while it's waiting for a low priority queue drain else you lose the benefits.
+So the flok server still has the following in it's queues. The `net_q` will be transfered after the next client request which will take place
 after the `int_dispatch` call as the client should always call `int_dispatch` as many times until it gets a blank que `int_dispatch` as many times until it gets a blank queue.
+
+Additionally, the `i` flag can be used with no information initially given. This arises when the `event` module en-queues an incomplete request because the `event` module needs to support defering the next event call.
+
+
+**Again, we can not stress how important it is to ensure that incompletion de-queueing is asynchronous. Behaviorally, your program will be the same; but it has a much larger opportunity to cause latency as the de-queing itself (and remmeber, requests that request incompleteness but are not incomplete themselves are **still** synchronous**
 
 Note that:
 While at first you might think we need to test that int_dispatch called intra-respond of our if_event needs to test whether or not we still send

@@ -1,6 +1,9 @@
 //Event handler table
 evt = {};
 
+//Event defer queue
+edefer_q = [];
+
 function int_event(ep, event_name, info) {
   var f = evt[ep];
   if (f != undefined) {
@@ -17,6 +20,12 @@ function reg_evt(ep, f) {
 
 function dereg_evt(ep) {
   delete evt[ep];
+}
+
+function int_event_defer(ep, ename, info) {
+  edefer_q.push(ep);
+  edefer_q.push(ename);
+  edefer_q.push(info);
 }
 
 //Spec helpers
