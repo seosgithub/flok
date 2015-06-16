@@ -16,7 +16,11 @@ service :vm do
     vm_bp_to_nmap = {};
 
     //Notification listeners, converts ns+key to an array of base pointers
-    vm_notify_map = {};
+    vm_notify_map = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
 
     //Cache
     function vm_cache_write(ns, page) {
@@ -26,14 +30,11 @@ service :vm do
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
 
-      var a = vm_notify_map[ns];
-      if (a) {
-        var b = a[page._id];
-
-        if (b) {
-          for (var i = 0; i < b.length; ++i) {
-            int_event(b, "read_res", page);
-          }
+      //Try to lookup view controller(s) to notify
+      var nbp = vm_notify_map[ns][page._id];
+      if (nbp) {
+        for (var i = 0; i < nbp.length; ++i) {
+          int_event(nbp[i], "read_res", page);
         }
       }
     }
@@ -189,24 +190,18 @@ service :vm do
 
     //Ensure map exists
     ////////////////////////////////////////////////
-    var a = vm_notify_map[params.ns];
-    if (!a) {
-      a = {};
-      vm_notify_map[params.ns] = a;
-    }
-
-    var b = a[params.id];
+    var b = vm_notify_map[params.ns][params.id];
     if (!b) {
       b = [];
-      a[params.id] = b;
+      vm_notify_map[params.ns][params.id] = b;
     }
 
-    <% if @debug %>
-      var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
-      if (midx != -1) {
-        throw "Multiple calls to watch for the ns: " +  params.ns + " and id: " + params.id
-      }
-    <% end %>
+    //Check if it exists, if it's already being watched, ignore it
+    var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
+    if (midx != -1) {
+      return;
+    }
+
     b.push(bp)
     ////////////////////////////////////////////////
 
@@ -250,25 +245,22 @@ service :vm do
     <% end %>
   }
 
-  on "unwatch", %{
-    <% raise "No pagers given in options for vm" unless @options[:pagers] %>
-
-    var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
-    vm_notify_map[params.ns][params.id].splice(midx, 1);
-
-    delete vm_bp_to_nmap[bp][params.ns][params.id];
-
-    <% @options[:pagers].each do |p| %>
-      if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_unwatch(params.id);
-      }
-    <% end %>
-  }
 
   on "unwatch", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
+    //It won't have an array if it was never watched
+    if (vm_notify_map[params.ns][params.id] === undefined) {
+      return;
+    }
+
+    //Get the position of bp in the watch array, this may not exist, in which case
+    //this controller is not actually watching it.
     var midx = vm_notify_map[params.ns][params.id].indexOf(bp)
+    if (midx === -1) {
+      return;
+    }
+
     vm_notify_map[params.ns][params.id].splice(midx, 1);
 
     delete vm_bp_to_nmap[bp][params.ns][params.id];

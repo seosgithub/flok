@@ -107,8 +107,6 @@ if (page is not resident in memory && not_synchronous) {
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
     * Returns an immutable page in params
-  * Debug mode
-    * When `@debug`, an exception will be thrown if you attempt to watch the same key from one controller multiple times.
 
 ###`unwatch`
 This is how you **unwatch** a page. For view controllers that are destroyed, it is not necessary to manually `unwatch` as the `vm` service will be notified on it's disconnection and automatically remove any watched pages for it's base pointer. This should be used for thingcs like scroll lists where the view controller is no longer interested in part of a page-list.
@@ -135,8 +133,8 @@ Cache will periodically be synchronized to disk via the `pageout` service. When 
 Pageout is embodied in the function named `vm_pageout()`. This will asynchronously write `vm_dirty` to disk and clear `vm_dirty` once the write has been commited. `vm_pageout()` is called every minute by the interval timer in this service.
 
 ###Datatypes & Structures (Opaque, do not directly modify)
-  * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`
-  * `vm_dirty` - Pages recently written to cache go on the dirty list so that they may be written when the pageout handler runs. Dictionary contains map for `vm_dirty[ns][page._id] => page` for all dirty pages. Pages are removed from the dictionary when they are written in the pageout.
+  * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`. Contains all namespaces by default with blank hashes.
+  * `vm_dirty` - Pages recently written to cache go on the dirty list so that they may be written when the pageout handler runs. Dictionary contains map for `vm_dirty[ns][page._id] => page` for all dirty pages. Pages are removed from the dictionary when they are written in the pageout. Contains all namespaces by default with blank hashes.
   * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][id]` which yields an array of controller base pointers.
   * `vm_bp_to_nmap` - A dictionary that maps a `bp` key (usually from a controller) to a dictionary. This dictionary contains a mapping of `bp => ns => id` to an array that contains `[node, index]` where `node` is a reference to `vm_notify_map[ns][id]`. This inverted map must (a) provide a way for `unwatch` to quickly remove entries from itself and (b) provide a way for all entries in `vm_notify_map` to be removed when something (usually a controller) disconrnects.
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.

@@ -8,8 +8,9 @@ controller :my_controller do
         id: "test"
       }
 
+      Request("vm", "watch", watch_info);
       Request("vm", "unwatch", watch_info);
-      Request("vm", "unwatch", watch_info);
+      Request("vm", "watch", watch_info);
     }
   end
 end
