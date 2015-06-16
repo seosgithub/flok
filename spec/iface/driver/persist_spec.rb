@@ -22,6 +22,17 @@ RSpec.describe "iface:driver:persist" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 5.seconds)
   end
 
+ it "retuns null when calling get on a blank key" do
+    key = SecureRandom.hex
+    value = SecureRandom.hex
+
+    @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
+
+    #Expect a response
+    res = [3, "int_per_get_res", "session", "my_ns", nil]
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
+  end
+
   it "Can set a persist, and then get" do
     key = SecureRandom.hex
     value = SecureRandom.hex

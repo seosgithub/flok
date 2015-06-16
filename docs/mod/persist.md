@@ -3,7 +3,7 @@ Persistance management. Loosely based on redis.
 
 ###Driver messages
 `if_per_set(ns, key, value)` - Set a key and value
-`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back, `s` is the session key that will also be sent back
+`if_per_get(s, ns, key)` - Get a key's value, a message `int_get_res` will be sent back, `s` is the session key that will also be sent back. If there is no key, `null` will be sent back.
 `if_per_del(ns, key)` - Delete a particular key
 `if_per_del_ns(ns)` - Delete an entire namespace
 
