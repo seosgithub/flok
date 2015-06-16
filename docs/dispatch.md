@@ -7,7 +7,7 @@ we will be forced to block anyway, so it makes sense to allow large tranfers (bu
 
 In order to relieve this problem, *flok* restricts the number of pipelined messages **per queue** to 5 with the exception of the `main` queue (the only synchronous queue). That means you
 can have a total of `(N*5)` messages assuming there are `N` queue types (at the time of this writing, there are 5 not including the `main` queue). It is unlikely that all queues will be used
-as most requests on the flok client will not use multiple resources in one pipelined stage. The client is responsible for requesting more data until no more data is available.
+as most requests on the flok client will not use multiple resources in one pipelined stage. The client is responsible for requesting more data until no more data is available. The client knows about more data waiting by receiving the string "i" at the start of the response array (see below).
 
 ##Confusion about synchronous and asynchronous
 There are various stages of message processing so it can be confusing as to what is excatly synchronous and asynchronous. Flok assumes a few things
