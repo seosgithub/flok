@@ -277,6 +277,7 @@ RSpec.describe "kern:vm_service" do
     })
 
     expect(vm_bp_to_nmap).to eq({
+      bp.to_s  => {}
     })
 
   end
@@ -565,6 +566,30 @@ RSpec.describe "kern:vm_service" do
     expect(vm_bp_to_nmap).to eq({
       base.to_s => {
         "spec" => {}
+      }
+    })
+  end
+
+  it "Does not crash when a new a controller disconnects without watches" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16b.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    #vm_bp_To_nmap should be blank
+    base = ctx.eval("base")
+    vm_bp_to_nmap = JSON.parse(ctx.eval("JSON.stringify(vm_bp_to_nmap)"));
+    expect(vm_bp_to_nmap).to eq({})
+
+    #vm_notify_map should not contain the entries for the base address anymore
+    base = ctx.eval("base")
+    vm_notify_map = JSON.parse(ctx.eval("JSON.stringify(vm_notify_map)"));
+    expect(vm_notify_map).to eq({
+      "spec" => {
       }
     })
   end

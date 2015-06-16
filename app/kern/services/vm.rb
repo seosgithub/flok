@@ -112,6 +112,7 @@ service :vm do
   }
 
   on_connect %{
+    vm_bp_to_nmap[bp] = {};
   }
 
   on_disconnect %{
@@ -208,7 +209,6 @@ service :vm do
     //Add to vm_bp_to_nmap
     ////////////////////////////////////////////////
     //Construct 
-    if (vm_bp_to_nmap[bp] === undefined) { vm_bp_to_nmap[bp] = {}; }
     if (vm_bp_to_nmap[bp][params.ns] === undefined) { vm_bp_to_nmap[bp][params.ns] = {}; }
 
     //Add reverse mapping, length-1 because it was just pushed
