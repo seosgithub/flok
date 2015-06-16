@@ -63,10 +63,15 @@ function if_dispatch(qq) {
     }
   <% end %>
 
-
+  //If the array was marked incomplete, we need to grab
+  //more info so we send a blank array for a request
   if (if_dispatch_call_int_end) {
     if_dispatch_call_int_end = false;
-    int_dispatch([])
+
+    var call = function() {
+      int_dispatch([]);
+    };
+    setTimeout(call, 0);
   }
 }
 

@@ -4,7 +4,7 @@ require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
-RSpec.describe "kern:timer_service_spec" do
+RSpec.describe "kern:callout_spec" do
   include_context "kern"
 
 it "Can register for single-shot a callout event 1 tick in the future" do

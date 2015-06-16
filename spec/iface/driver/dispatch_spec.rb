@@ -4,12 +4,18 @@ require './spec/env/iface.rb'
 RSpec.describe "iface:driver:dispatch_spec" do
   include_context "iface:driver"
 
-  it "Does automatically dispatch a blank array (signaling int_disptach) when a bulk queue is received prefixed with 'r' indicating incomplete-ness" do
+  it "Does automatically dispatch a blank array (signaling int_disptach) when a bulk queue is received prefixed with 'i' indicating incomplete-ness" do
     @pipe.puts ['i', [0, 0, "ping_nothing"]].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([], 6.seconds)
   end
 
-  it "Does not dispatch a blank array (signaling int_disptach) when a bulk queue is received prefixed without 'r' indicating incomplete-ness" do
+  it "Does automatically dispatch a blank array (signaling int_disptach) when a blank queue is received prefixed with 'i' indicating incomplete-ness" do
+    @pipe.puts ['i'].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([], 6.seconds)
+  end
+
+
+  it "Does not dispatch a blank array (signaling int_disptach) when a bulk queue is received prefixed without 'i' indicating incomplete-ness" do
     @pipe.puts [[0, 0, "ping_nothing"]].to_json
     expect(@pipe).not_to readline_and_equal_json_x_within_y_seconds([], 6.seconds)
   end
