@@ -11,7 +11,30 @@ RSpec.describe "kern:vm_service" do
   include Zlib
   include_context "kern"
 
-it "vm_rehash_page can calculate the hash correctly" do
+  it "Contains a preloaded vm_cache, vm_dirty, and vm_notify_map for each namespace with a blank hash" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    vm_cache = ctx.dump("vm_cache")
+    vm_dirty = ctx.dump("vm_dirty")
+    vm_notify_map = ctx.dump("vm_notify_map")
+
+    res = {
+      "spec0" => {}, 
+      "spec1" => {}
+    }
+
+    expect(vm_cache).to eq(res)
+    expect(vm_dirty ).to eq(res)
+    expect(vm_notify_map).to eq(res)
+  end
+
+  it "vm_rehash_page can calculate the hash correctly" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
@@ -198,8 +221,8 @@ it "vm_rehash_page can calculate the hash correctly" do
     }])
   end
 
-  it "throws an exception if multiple watches are attempted" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_2watch.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+  it "does not throw an exception if multiple watches are attempted" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_2watch.rb'), File.read("./spec/kern/assets/vm/config6.rb") 
 
     expect {
       ctx.eval %{
@@ -208,11 +231,31 @@ it "vm_rehash_page can calculate the hash correctly" do
         //Drain queue
         int_dispatch([]);
       }
-    }.to raise_exception
+    }.not_to raise_exception
+
+    bp = ctx.eval("base")
+    vm_notify_map = ctx.dump("vm_notify_map")
+    vm_bp_to_nmap = ctx.dump("vm_bp_to_nmap")
+
+    expect(vm_notify_map).to eq({
+      "spec" => {
+        "test" => [bp]
+      },
+      "spec1" => {}
+    })
+
+    expect(vm_bp_to_nmap).to eq({
+      bp.to_s => {
+        "spec" => {
+          "test" => [[bp], 0]
+        }
+      }
+    })
+
   end
 
-  it "throws an exception if unwatch is called before watch" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_ewatch.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+  it "does not throw an exception if multiple unwatches are requested" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_ewatch.rb'), File.read("./spec/kern/assets/vm/config6.rb") 
 
     expect {
       ctx.eval %{
@@ -221,7 +264,95 @@ it "vm_rehash_page can calculate the hash correctly" do
         //Drain queue
         int_dispatch([]);
       }
-    }.to raise_exception
+    }.not_to raise_exception
+
+    bp = ctx.eval("base")
+    vm_notify_map = ctx.dump("vm_notify_map")
+    vm_bp_to_nmap = ctx.dump("vm_bp_to_nmap")
+
+    expect(vm_notify_map).to eq({
+      "spec" => {
+      },
+      "spec1" => {}
+    })
+
+    expect(vm_bp_to_nmap).to eq({
+      bp.to_s  => {}
+    })
+
+  end
+
+  it "does not throw an exception if unwatch is called before watch on a particular controller; but it was already watched at one point" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_ewatch2.rb'), File.read("./spec/kern/assets/vm/config6.rb") 
+
+    expect {
+      ctx.eval %{
+        base = _embed("my_watch_controller", 1, {}, null);
+        base = _embed("my_controller", 1, {}, null);
+
+        //Drain queue
+        int_dispatch([]);
+      }
+    }.not_to raise_exception
+  end
+
+  it "does allow watch, unwatch, and then re-watch to work" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_ewatch3.rb'), File.read("./spec/kern/assets/vm/config6.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    bp = ctx.eval("base")
+    vm_notify_map = ctx.dump("vm_notify_map")
+    vm_bp_to_nmap = ctx.dump("vm_bp_to_nmap")
+
+    expect(vm_notify_map).to eq({
+      "spec" => {
+        "test" => [bp]
+      },
+      "spec1" => {}
+    })
+
+    expect(vm_bp_to_nmap).to eq({
+      bp.to_s => {
+        "spec" => {
+          "test" => [[bp], 0]
+        }
+      }
+    })
+  end
+
+  it "does allow unwatch, watch, and then re-unwatch to work" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_exc_ewatch4.rb'), File.read("./spec/kern/assets/vm/config6.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    bp = ctx.eval("base")
+    vm_notify_map = ctx.dump("vm_notify_map")
+    vm_bp_to_nmap = ctx.dump("vm_bp_to_nmap")
+
+    expect(vm_notify_map).to eq({
+      "spec" => {
+        "test" => []
+      },
+      "spec1" => {}
+    })
+
+    expect(vm_bp_to_nmap).to eq({
+      bp.to_s => {
+        "spec" => {
+        }
+      }
+    })
   end
 
   it "multiple sequential watch requests from two controllers for a namespace do not hit the pager multiple times" do
@@ -435,6 +566,30 @@ it "vm_rehash_page can calculate the hash correctly" do
     expect(vm_bp_to_nmap).to eq({
       base.to_s => {
         "spec" => {}
+      }
+    })
+  end
+
+  it "Does not crash when a new a controller disconnects without watches" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16b.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    #vm_bp_To_nmap should be blank
+    base = ctx.eval("base")
+    vm_bp_to_nmap = JSON.parse(ctx.eval("JSON.stringify(vm_bp_to_nmap)"));
+    expect(vm_bp_to_nmap).to eq({})
+
+    #vm_notify_map should not contain the entries for the base address anymore
+    base = ctx.eval("base")
+    vm_notify_map = JSON.parse(ctx.eval("JSON.stringify(vm_notify_map)"));
+    expect(vm_notify_map).to eq({
+      "spec" => {
       }
     })
   end

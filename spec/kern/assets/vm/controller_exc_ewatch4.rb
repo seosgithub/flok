@@ -9,6 +9,7 @@ controller :my_controller do
       }
 
       Request("vm", "unwatch", watch_info);
+      Request("vm", "watch", watch_info);
       Request("vm", "unwatch", watch_info);
     }
   end
