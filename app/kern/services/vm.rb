@@ -81,6 +81,9 @@ service :vm do
     //Part of the persist module
     //res is page
     function int_per_get_res(s, ns, res) {
+      //If the key didn't exist, ignore it
+      if (res === null) { return; }
+
       //If there is already a cached entry, a pager beat us to it
       //ignore this for now because the pager should be more up to
       //date
