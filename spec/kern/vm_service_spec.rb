@@ -443,17 +443,30 @@ RSpec.describe "kern:vm_service" do
     expect(read_res_params).to eq(vm_write_list)
   end
 
-  it "does send two watch callbacks to a controller if there is cached content" do
+  it "non-sync watch does send two watch callbacks to a controller if there is cached content" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller12.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
-
-      //Drain queue
-      int_dispatch([]);
     }
 
+    #Should not have read anything at this point in time
     read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    expect(read_res_params.length).to eq(0)
+
+    ctx.eval("int_dispatch([])")
+
+    #Now we read the first after it de-queued
+    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    expect(read_res_params.length).to eq(1)
+
+    ctx.eval("int_dispatch([])")
+
+    #And now the second
+    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    expect(read_res_params.length).to eq(2)
+
+    #And they should have been read in order
     vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list)"));
     expect(read_res_params).to eq(vm_write_list)
   end

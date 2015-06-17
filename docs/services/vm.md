@@ -103,7 +103,7 @@ if (page is not resident in memory && not_synchronous) {
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `id` - Watching the page that contains this in the `_id` field
-    * `sync (optional)` - If set to `true` then the disk read will be performed synchronously.
+    * `sync (optional)` - If set to `true` then the disk read and cache read will be performed synchronously. Additionally, all future cache reads / updates will be performed synchronously.
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
     * Returns an immutable page in params
@@ -125,7 +125,7 @@ use the modification helpers. These modification helpers implement copy on write
     * If in `@debug` mode, the variable `vm_write_list` contains an array dictionary of the last page passed to the pager (tail is latest).
 
 ##Cache
-See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty.
+See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty. `vm_cache_write` notifies controllers asynchronously and is not effected by the `watch` flag on controllers.
 
 ###Pageout & Cache Synchronization
 Cache will periodically be synchronized to disk via the `pageout` service. When flok reloads itself, and the `vm` service gets a `watch` or `watch_sync` request, the `vm` service will attempt to read from the `vm_cache` first and then read the page from disk (write that disk read to cache). The only difference between `watch_sync` and `watch` is that `watch_sync` will synchronously pull from disk and panic if there is no cache available for the page). (Both `watch` and `watch_sync` will always call the pager's after the cache read as well.)
