@@ -6,7 +6,7 @@ You create and build projects via the `flok` command. You must set the `$FLOK_EN
 
  * `flok new <path>` - Create a new flok project
  * `flok build` - Build a flok project. Generates files in `./products`
- * `flok server` - Trigger auto-rebuild when a file is modified in the `./app` folder and hosts the `products/$PLATFORM` folder on `http://localhost:9992/`. e.g. `http://localhost:9992/application_user.js`
+ * `flok server` - Trigger auto-rebuild when a file is requested in the `./app` folder and hosts the `products/$PLATFORM` folder on `http://localhost:9992/`. e.g. `http://localhost:9992/application_user.js`. Outputs `SERVER STARTED` when server is fully launched.
 
 ###Folder structure
   * `app/`
@@ -29,7 +29,7 @@ You create and build projects via the `flok` command. You must set the `$FLOK_EN
 ###User build process
   1. The gem is build via `build:world` using the platform given in build.
   2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM and ./flok/app/kern/services/*.rb -> $PROJECT/products/$PLATFORM/services/kern_services.rb
-  3. The controllers in `./app/controllers/*.rb` are run through the `user_compiler` in `./lib/flok/user_compiler.rb` and then saved to the projects
+  3. The controllers in `./app/controllers/**/*.rb` are run through the `user_compiler` in `./lib/flok/user_compiler.rb` and then saved to the projects
   `./products/$PLATFORM/glob/user_compiler.js` and the `./app/services/*.rb` are globbed into `./products/$PLATFORM/services/user_services.rb`
   4. The `./products/$PLATFORM/services/*.rb` file are globbed into `./products/$PLATFORM/services/combined_services.rb`
   5. The service configuration in `./config/services.rb` is read and run through `services_compiler` and files from

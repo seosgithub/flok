@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'flok'
+require_relative '../lib/flok'
 require 'thor'
 require 'fileutils'
 require 'webrick'
@@ -45,7 +45,8 @@ class FlokCLI < Thor
 
     #3. Build the client's ./app/controllers/*.rb into './products/$PLATFORM/user_compiler.js'
     controller_glob_path = "#{local_products_path}/#{platform}/glob/controllers.rb" 
-    Flok.src_glob("rb", './app/controllers', controller_glob_path)
+    Flok.src_glob_r("rb", './app/controllers', controller_glob_path)
+
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
     services_config_js = File.read "./config/services.rb"
     Flok.src_glob("rb", './app/services', File.join(local_products_path, platform, "./services/user_services.rb"))
@@ -95,29 +96,49 @@ class FlokCLI < Thor
     #Ensure puts does something because it's on another thread
     $stdout.sync = true
 
-    ###########################################################################
-    #We execute two tasks that run at the same time, (1) the webrick hoster
-    #and (2) the guard reloader that triggers build
-    ###########################################################################
-    #1) Launch webrick server
-    server = WEBrick::HTTPServer.new :Port => 9992, :DocumentRoot => "./products/#{platform}", :StartCallback => Proc.new {
-    }
-    server_started = false
+    begin
+      @pid = fork do
+        server = WEBrick::HTTPServer.new :Port => 9992, :DocumentRoot => ".", :StartCallback => Proc.new {
+          puts "SERVER STARTED"
+        }
 
-    #2) Wait for initial build to launch (all_on_start)
-    sh2("guard") do |inp, out|
-      loop do
-        res = out.readline
-        if res =~ /BUILD RAN/
-          #Start server
-          Thread.new { server.start } unless server_started
-          server_started = true
+        @build_q = Queue.new
+        @build_q.push 0
+        server.mount_proc "/" do |req, res|
+          #Semaphore for build; multiple requests execute 1 build
+          unless @build_q.empty?
+            @build_q.pop
 
-          puts "BUILD RAN"
-        else
-          $stderr.puts res
+            _res = system("#{__FILE__} build")
+
+            @build_q.push 0
+          else
+            @build_q.pop
+            @build_q.push 0
+            _res = true
+          end
+
+          $stderr.puts "res = #{_res}"
+
+          #/products/application_user.js, etc. local path with dot
+          path = "./products/#{platform}/#{req.path}"
+          if _res == true
+            res.body = File.read(path)
+          else
+            res.body = ""
+          end
+          res.header["Access-Control-Allow-Origin"] = "*"
+          #res.header["Content-Type"] = "json/text"
         end
+
+        server.start
       end
+
+      loop do
+        sleep 1
+      end
+    ensure
+      Process.kill :KILL, @pid
     end
   end
 
