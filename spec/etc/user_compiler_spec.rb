@@ -58,6 +58,16 @@ RSpec.describe "User compiler" do
     expect(on_entry).not_to eq(nil)
   end
 
+  it "on_entry controller has more code than non on_entry controller" do
+    ctx = compile "controller0"
+    on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
+
+    ctx2 = compile "controller0b"
+    on_entry2 = ctx2.eval "ctable.my_controller.actions.my_action.on_entry"
+    expect(on_entry2.to_s.length).to be < on_entry.to_s.length
+  end
+
+
   it "Can compile a controller with an action that contains the name" do
     ctx = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.name"

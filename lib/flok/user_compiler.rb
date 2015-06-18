@@ -67,6 +67,7 @@ module Flok
       @controller = controller
       @name = name
       @ctx = ctx
+      @_on_entry_src = ""
       @ons = [] #Event handlers
 
       self.instance_eval(&block)
@@ -78,7 +79,7 @@ module Flok
     end
 
     def on_entry_src
-      return @on_entry_src || ""
+      return @_on_entry_src
     end
 
     def on name, js_src
