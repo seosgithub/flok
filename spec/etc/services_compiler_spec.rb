@@ -21,46 +21,46 @@ RSpec.describe "lib/services_compiler" do
     end
   end
 
-  #it "Does fail to compile a controller with a non-existant type" do
-    #expect { compile "service_bad_type" }.to raise_exception
-  #end
+  it "Does fail to compile a controller with a non-existant type" do
+    expect { compile "service_bad_type" }.to raise_exception
+  end
 
-  #it "Can call compile method and get a copy of all the functions" do
-     #ctx, _  = compile "service0", "config0"
+  it "Can call compile method and get a copy of all the functions" do
+     ctx, _  = compile "service0", "config0b"
 
-    ##on_wakeup
-    #res = ctx.eval("test_on_wakeup")
-    #expect(res).not_to eq(nil)
+    #on_wakeup
+    res = ctx.eval("test_on_wakeup")
+    expect(res).not_to eq(nil)
 
-    ##on_sleep
-    #res = ctx.eval("test_on_sleep")
-    #expect(res).not_to eq(nil)
+    #on_sleep
+    res = ctx.eval("test_on_sleep")
+    expect(res).not_to eq(nil)
 
-    ##on_connect
-    #res = ctx.eval("test_on_connect");
-    #expect(res).not_to eq(nil)
+    #on_connect
+    res = ctx.eval("test_on_connect");
+    expect(res).not_to eq(nil)
 
-    ##on_disconnect
-    #res = ctx.eval("test_on_disconnect")
-    #expect(res).not_to eq(nil)
+    #on_disconnect
+    res = ctx.eval("test_on_disconnect")
+    expect(res).not_to eq(nil)
 
-    ##on_event
-    #res = ctx.eval("test_on_hello");
-    #expect(res).not_to eq(nil)
+    #on_event
+    res = ctx.eval("test_on_hello");
+    expect(res).not_to eq(nil)
 
-    ##on_handle_timer_events
-    #res = ctx.eval("test_handle_timer_events");
-    #expect(res).not_to eq(nil)
-  #end
+    #on_handle_timer_events
+    res = ctx.eval("test_handle_timer_events");
+    expect(res).not_to eq(nil)
+  end
 
-  #it "Can call compile method with options" do
-    #ctx, js = compile "service1", "config2"
-    #expect(js).to include("23rntoheuh3nthoeunthn23th");
-  #end
+  it "Can call compile method with options" do
+    ctx, js = compile "service1", "config2"
+    expect(js).to include("23rntoheuh3nthoeunthn23th");
+  end
 
   #If SEND works, then all kernel macros should work
   it "Can compile with a SEND macro" do
-     ctx, src  = compile "service3", "config0"
+     ctx, src  = compile "service3", "config0b"
 
      expect(src).not_to include("SEND")
      expect(src).to include("_q.push")
