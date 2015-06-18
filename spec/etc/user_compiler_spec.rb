@@ -46,9 +46,14 @@ RSpec.describe "User compiler" do
     expect(actions).not_to eq(nil)
   end
 
-
   it "Can compile a controller with an action that contains an on_entry" do
     ctx = compile "controller0"
+    on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
+    expect(on_entry).not_to eq(nil)
+  end
+
+  it "Can compile a controller with an action that does not contains an on_entry" do
+    ctx = compile "controller0b"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
     expect(on_entry).not_to eq(nil)
   end
