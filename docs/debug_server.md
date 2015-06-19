@@ -5,6 +5,8 @@ information. The key `debug_attach` holds a protocol key like `socket_io`. This 
 The `debug` module implements the `debug server`. Although, the server is a seperate
 piece of code that dosen't fit into the same `if` and `int` paradigm. The specs in the `debug server` also use various `debug` module helpers.
 
+======
+
 ## `socket_io` Protocol
 This protocol states that the driver must repeadeately attempt to connect to the socket.io port located at `localhost:9999`.
 
