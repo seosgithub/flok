@@ -60,41 +60,8 @@ module Flok
     attr_accessor :controller_name, :action_name, :name
   end
 
-  class UserCompilerAction
-    attr_accessor :controller, :name, :ons
-
-    def initialize controller, name, ctx, &block
-      @controller = controller
-      @name = name
-      @ctx = ctx
-      @_on_entry_src = ""
-      @ons = [] #Event handlers
-
-      self.instance_eval(&block)
-    end
-
-    def on_entry js_src
-      #returns a string
-      @_on_entry_src = macro(js_src)
-    end
-
-    def on_entry_src
-      return @_on_entry_src
-    end
-
-    def on name, js_src
-      @ons << {:name => name, :src => macro(js_src)}
-    end
-
-    def macro js_src
-      lines = js_src.split("\n").map do |line|
-        
-      end
-
-      return lines.join("\n")
-    end
-
-    def macro text
+  module UserCompilerMacro
+    def _macro text
       out = StringIO.new
 
       text.split("\n").each do |l|
@@ -386,6 +353,35 @@ module Flok
       return out.string
     end
 
+  end
+
+  class UserCompilerAction
+    attr_accessor :controller, :name, :ons
+    include UserCompilerMacro
+
+    def initialize controller, name, ctx, &block
+      @controller = controller
+      @name = name
+      @ctx = ctx
+      @_on_entry_src = ""
+      @ons = [] #Event handlers
+
+      self.instance_eval(&block)
+    end
+
+    def on_entry js_src
+      #returns a string
+      @_on_entry_src = _macro(js_src)
+    end
+
+    def on_entry_src
+      return @_on_entry_src
+    end
+
+    def on name, js_src
+      @ons << {:name => name, :src => _macro(js_src)}
+    end
+
     #You can def things in controller and use them as macros inside actions
     #But these defs. live in the UserCompilerController instance and we need
     #to delegate these calls to the controller that are not available in the action
@@ -400,7 +396,9 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :name, :spots, :macros, :_services
+    include UserCompilerMacro
+
+    attr_accessor :name, :spots, :macros, :_services, :_on_entry
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
@@ -414,6 +412,10 @@ module Flok
     #Create an action macro
     def macro name, &block
       @macros[name] = block
+    end
+
+    def on_entry str
+      @_on_entry = _macro(str)
     end
 
     #Names of spots

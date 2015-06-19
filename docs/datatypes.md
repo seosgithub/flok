@@ -12,7 +12,7 @@ ctable_entry {
   actions,       //A dictionary [String:action_info] that corresponds to a dictionary of action_info object's based on the action's name.
   spots,         //An array fo spot names for this controller
   name,          //The name of the controller, useful for certain lookup operations, this is also the ctable key
-  __init__,      //A function that is called when this controller is created. Signals service connection
+  __init__,      //A function that is called when this controller is created. Signals service connection and the controller on_entry bits
   __dealloc__    //A function that is called when this controller is destroyed via parent controller switching actions in Goto. Signals services d/c
 }
 ```

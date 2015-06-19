@@ -17,7 +17,10 @@ Client API covers controller action event handlers.
     * `params` - What was passed in the event
     * `__base__` - The address of the controller
     * `__info__` - Holds the `context`, current action, etc. See [Datatypes](./datatypes.md)
-### Controller on_entry
+### Controller on_entry (actions)
     * `context` - The information for the controllers context
     * `__base__` - The address of the controller
     * `__info__` - Holds the `context`, current action, etc. See [Datatypes](./datatypes.md)
+### Controller on_entry (global)
+    * `context` - The information for the controllers context
+    * `__base__` - The address of the controller

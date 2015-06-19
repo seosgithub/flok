@@ -5,6 +5,15 @@ ctable = {
           <% c._services.each do |s| %>
               <%= s %>_on_connect(__base__);
           <% end %>
+
+          //Controller information, includes action, etc. (controller_info)
+          var __info__ = tel_deref(__base__);
+
+          //The 'context' which is user-defined
+          var context = __info__.context;
+
+          //Call global on entry
+          <%= c._on_entry %>
         },
         __dealloc__: function(__base__) {
           <% c._services.each do |s| %>
