@@ -26,6 +26,10 @@ controller "tab_controller" do
   spots "content"
   services "my_service" #See docs on services for what this means
 
+  #Global on_entry, will only be run once on the first action
+  on_entry %{
+  }
+
   #You can also define macros for shared action traits
   macro "my_macro" do
     on "shared_clicked" do
