@@ -34,7 +34,7 @@ service :vm do
       var nbp = vm_notify_map[ns][page._id];
       if (nbp) {
         for (var i = 0; i < nbp.length; ++i) {
-          int_event(nbp[i], "read_res", page);
+          int_event_defer(nbp[i], "read_res", page);
         }
       }
     }
@@ -150,25 +150,6 @@ service :vm do
     delete vm_bp_to_nmap[bp];
   }
 
-  on "read_sync", %{
-    <% raise "No pagers given in options for vm" unless @options[:pagers] %>
-
-    var cres = vm_cache[params.ns][params.key]; 
-    if (cres != undefined) {
-      int_event(bp, "read_res", {key: params.key, value: cres});
-      return;
-    }
-
-    <% @options[:pagers].each do |p| %>
-      if (params.ns === "<%= p[:namespace] %>") {
-        var res = <%= p[:name] %>_read_sync(params.ns, bp, params.key);
-      }
-    <% end %>
-    vm_read_sync_called = true;
-
-    int_event(bp, "read_sync_res", res);
-  }
-
   on "write", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
@@ -219,7 +200,12 @@ service :vm do
 
     //If cache exists, then signal controller *now* while we wait for the pager
     if (cache_entry) {
-      int_event(bp, "read_res", cache_entry);
+      //If sync flag is set, then send the data *now*
+      if (params.sync) {
+        int_event(bp, "read_res", cache_entry);
+      } else {
+        int_event_defer(bp, "read_res", cache_entry);
+      }
     }
 
     //Send a request now for disk read for sync

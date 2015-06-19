@@ -1,1 +1,1 @@
-service_instance :test, :my_service
+service_instance :my_service, :test

@@ -61,12 +61,13 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller, :name, :on_entry_src, :ons
+    attr_accessor :controller, :name, :ons
 
     def initialize controller, name, ctx, &block
       @controller = controller
       @name = name
       @ctx = ctx
+      @_on_entry_src = ""
       @ons = [] #Event handlers
 
       self.instance_eval(&block)
@@ -74,7 +75,11 @@ module Flok
 
     def on_entry js_src
       #returns a string
-      @on_entry_src = macro(js_src)
+      @_on_entry_src = macro(js_src)
+    end
+
+    def on_entry_src
+      return @_on_entry_src
     end
 
     def on name, js_src
