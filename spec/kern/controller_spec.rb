@@ -497,7 +497,7 @@ RSpec.describe "kern:controller_spec" do
     expect(raise_res_context).to eq({"secret" => "#{secret}", "hello" => "world"})
   end
 
- #Can signal a spot from a parent controller
+  #Can signal a spot from a parent controller
   it "Can signal a spot sub-controller and trigger an event" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/lower_event.rb')
@@ -517,4 +517,207 @@ RSpec.describe "kern:controller_spec" do
 
     expect(lower_request_called_with).to eq({"secret" => "#{secret}"})
   end
+
+  it "Does run the global on_entry function when it is present upon entering the first action" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    expect(ctx.eval("global_on_entry_called")).to eq(true)
+  end
+
+  it "Does run the global on_entry function only on the first action and not subsequent actions" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry2.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      global_on_entry_called_count = 0;
+
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "test", {}]);
+    }
+
+    expect(ctx.eval("global_on_entry_called_count")).to eq(1)
+  end
+
+  it "Does allow macros in the global on_entry function" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry3.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      global_on_entry_called_count = 0;
+
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "test", {}]);
+    }
+
+    base = ctx.eval("base")
+    expect(ctx.eval("global_on_entry_called_count")).to eq(1)
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [base, "test", {}])
+  end
+
+  it "Does allow context in the global on_entry function" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry4.rb')
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      global_on_entry_called_count = 0;
+
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      int_dispatch([]);
+    }
+
+    base = ctx.eval("base")
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [base, "context", {"base" => base, "secret" => "foo"}])
+  end
+
+  it "Does allow interval (every) events" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/interval.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(1)
+    expect(ctx.eval("every_05_called_count")).to eq(0)
+    expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(2)
+    expect(ctx.eval("every_05_called_count")).to eq(1)
+    expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(3)
+    expect(ctx.eval("every_05_called_count")).to eq(1)
+    expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(4)
+    expect(ctx.eval("every_05_called_count")).to eq(2)
+    expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(5)
+    expect(ctx.eval("every_05_called_count")).to eq(2)
+    expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(6)
+    expect(ctx.eval("every_05_called_count")).to eq(3)
+    expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(7)
+    expect(ctx.eval("every_05_called_count")).to eq(3)
+    expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    @driver.int "int_timer"
+    expect(ctx.eval("every_025_called_count")).to eq(8)
+    expect(ctx.eval("every_05_called_count")).to eq(4)
+    expect(ctx.eval("every_1_called_count")).to eq(2)
+
+    #Ignore up to, block must pass as well; if_event would otherwise include action
+    @driver.ignore_up_to("if_event", 0) do |args|
+      args[1] == "025_message"
+    end
+
+    #Now we expect our if_event messages
+    8.times do
+      @driver.ignore_up_to("if_event")
+      @driver.mexpect "if_event", [base, "025_message", {}]
+    end
+  end
+
+  #See 0000 docs/known_problems.md
+  #it "Does not call intervals of other actions; and still works when switching back actions" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/interval2.rb')
+
+    ##Run the embed function
+    #ctx.eval %{
+      #//Call embed on main root view
+      #base = _embed("my_controller", 0, {}, null);
+    #}
+
+    #base = ctx.eval("base")
+
+    ##In first action, only 025 is enabled
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(1)
+    #expect(ctx.eval("every_05_called_count")).to eq(0)
+    #expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(2)
+    #expect(ctx.eval("every_05_called_count")).to eq(0)
+    #expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    ##Switch actions, only 05 and 01 are enabled
+    #ctx.eval %{ int_dispatch([base, "int_event", base, "next", {}]); }
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(2)
+    #expect(ctx.eval("every_05_called_count")).to eq(0)
+    #expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(2)
+    #expect(ctx.eval("every_05_called_count")).to eq(1)
+    #expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(2)
+    #expect(ctx.eval("every_05_called_count")).to eq(1)
+    #expect(ctx.eval("every_1_called_count")).to eq(0)
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(2)
+    #expect(ctx.eval("every_05_called_count")).to eq(2)
+    #expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    ##Now switch back to first action again, only 025 is enabled
+    #ctx.eval %{ int_dispatch([base, "int_event", base, "back", {}]); }
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(3)
+    #expect(ctx.eval("every_05_called_count")).to eq(2)
+    #expect(ctx.eval("every_1_called_count")).to eq(1)
+
+    #@driver.int "int_timer"
+    #expect(ctx.eval("every_025_called_count")).to eq(4)
+    #expect(ctx.eval("every_05_called_count")).to eq(2)
+    #expect(ctx.eval("every_1_called_count")).to eq(1)
+  #end
 end

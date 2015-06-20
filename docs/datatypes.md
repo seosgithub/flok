@@ -12,7 +12,9 @@ ctable_entry {
   actions,       //A dictionary [String:action_info] that corresponds to a dictionary of action_info object's based on the action's name.
   spots,         //An array fo spot names for this controller
   name,          //The name of the controller, useful for certain lookup operations, this is also the ctable key
-  __init__,      //A function that is called when this controller is created. Signals service connection
+  __init__,      //A function that is called when this controller is created. Signals service connection and the controller on_entry bits.
+  Additionally, all interval timers are configured here based on their unique names. Actions that are not active will not receive these events (they
+  will be ignored).
   __dealloc__    //A function that is called when this controller is destroyed via parent controller switching actions in Goto. Signals services d/c
 }
 ```
@@ -23,7 +25,8 @@ dictate what happends when events come in, etc.
 ```javascript
 action_info {
   on_entry      //A function that is called when this action is initialized.
-  handlers      //A dictionary [String:f(context, info)] of event handlers for events that occur
+  handlers      //A dictionary [String:f(base)] of event handlers for events that occur. Timer events are given a unique name and stored here like
+  `3toht_5_sec`
 }
 ```
 

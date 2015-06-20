@@ -1,5 +1,7 @@
 #Compile a controller ruby file into a javascript string
 
+require 'active_support'
+require 'active_support/core_ext/numeric'
 require 'erb'
 module Flok
   module UserCompiler
@@ -60,41 +62,8 @@ module Flok
     attr_accessor :controller_name, :action_name, :name
   end
 
-  class UserCompilerAction
-    attr_accessor :controller, :name, :ons
-
-    def initialize controller, name, ctx, &block
-      @controller = controller
-      @name = name
-      @ctx = ctx
-      @_on_entry_src = ""
-      @ons = [] #Event handlers
-
-      self.instance_eval(&block)
-    end
-
-    def on_entry js_src
-      #returns a string
-      @_on_entry_src = macro(js_src)
-    end
-
-    def on_entry_src
-      return @_on_entry_src
-    end
-
-    def on name, js_src
-      @ons << {:name => name, :src => macro(js_src)}
-    end
-
-    def macro js_src
-      lines = js_src.split("\n").map do |line|
-        
-      end
-
-      return lines.join("\n")
-    end
-
-    def macro text
+  module UserCompilerMacro
+    def _macro text
       out = StringIO.new
 
       text.split("\n").each do |l|
@@ -189,7 +158,8 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
-            //Remove all views
+            //Remove all views, we don't have to recurse because removal of a view
+            //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
@@ -386,6 +356,44 @@ module Flok
       return out.string
     end
 
+  end
+
+  class UserCompilerAction
+    attr_accessor :controller, :name, :ons, :every_handlers
+    include UserCompilerMacro
+
+    def initialize controller, name, ctx, &block
+      @controller = controller
+      @name = name
+      @ctx = ctx
+      @_on_entry_src = ""
+      @ons = [] #Event handlers
+      @every_handlers = []
+
+      self.instance_eval(&block)
+    end
+
+    def on_entry js_src
+      #returns a string
+      @_on_entry_src = _macro(js_src)
+    end
+
+    def on_entry_src
+      return @_on_entry_src
+    end
+
+    def on name, js_src
+      @ons << {:name => name, :src => _macro(js_src)}
+    end
+
+    def every seconds, str
+      @every_handlers << {
+        :name => "#{seconds}_sec_#{SecureRandom.hex[0..6]}",
+        :ticks => seconds*4,
+        :src => _macro(str)
+      }
+    end
+
     #You can def things in controller and use them as macros inside actions
     #But these defs. live in the UserCompilerController instance and we need
     #to delegate these calls to the controller that are not available in the action
@@ -400,7 +408,9 @@ module Flok
   end
 
   class UserCompilerController
-    attr_accessor :name, :spots, :macros, :_services
+    include UserCompilerMacro
+
+    attr_accessor :name, :spots, :macros, :_services, :_on_entry
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
@@ -414,6 +424,10 @@ module Flok
     #Create an action macro
     def macro name, &block
       @macros[name] = block
+    end
+
+    def on_entry str
+      @_on_entry = _macro(str)
     end
 
     #Names of spots

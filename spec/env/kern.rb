@@ -121,7 +121,7 @@ shared_context "kern" do
     #There may be a lot going on and you're only interested in a part.
     #If priority is nil, it won't matter what the priority is, useful for checking exceptions
     #for non-existant messages
-    def ignore_up_to msg_name, priority=nil
+    def ignore_up_to msg_name, priority=nil, &block
       @did_get = []
 
       loop do
@@ -148,6 +148,10 @@ shared_context "kern" do
         if name == msg_name
           if priority
             raise "Found the message #{msg_name.inspect} while calling ignore_up_to... but it's the wrong priority: #{@cp}, should be #{priority}" if @cp != priority
+          end
+
+          if block
+            next unless block.call(args)
           end
 
           #Unshift everything in reverse order, we are only peeking here...

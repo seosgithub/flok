@@ -87,4 +87,12 @@ RSpec.describe "User compiler" do
     expect(spot_names).to include "world"
     expect(spot_names).to include "main" #Should be added by default
   end
+
+  it "Can compile a controller with an action containing a timer and set the appropriate every_handlers key" do
+    ctx = compile "controller0timer"
+
+    function_names = JSON.parse(ctx.eval "JSON.stringify(Object.keys(ctable.my_controller.actions.my_action.handlers))")
+    expect(function_names).to include("hello")
+    expect(function_names.detect{|e| e =~ /_sec_/}).not_to eq(nil)
+  end
 end

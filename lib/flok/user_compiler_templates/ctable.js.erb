@@ -5,8 +5,27 @@ ctable = {
           <% c._services.each do |s| %>
               <%= s %>_on_connect(__base__);
           <% end %>
+
+          //Register this controller for every single interval timer *now*
+
+          //Controller information, includes action, etc. (controller_info)
+          var __info__ = tel_deref(__base__);
+
+          //The 'context' which is user-defined
+          var context = __info__.context;
+
+          //Call global on entry
+          <%= c._on_entry %>
         },
         __dealloc__: function(__base__) {
+          var __info__ = tel_deref(__base__);
+
+          for (var i = 0; i < __info__.embeds.length; ++i) {
+            for (var x = 0; x < __info__.embeds[i].length; ++x) {
+              tel_deref(__info__.embeds[i][x]).cte.__dealloc__(__info__.embeds[i][x]);
+            }
+          }
+
           <% c._services.each do |s| %>
               <%= s %>_on_disconnect(__base__);
           <% end %>
@@ -23,6 +42,15 @@ ctable = {
 
                   //The 'context' which is user-defined
                   var context = __info__.context;
+
+                  //Create a telepointer for the callout queue to respond to this action's interval timers
+                  var interval_bp = tel_reg(__base__);
+                  reg_evt(interval_bp, controller_event_callback2);
+
+                  <% a.every_handlers.each do |e| %>
+                    reg_interval(interval_bp, "<%= e[:name] %>", <%= e[:ticks] %>);
+                  <% end %>
+
                   <%= a.on_entry_src.strip %>
                 },
                 handlers: {
@@ -34,7 +62,15 @@ ctable = {
                       <%= e[:src] %>
                     },
                   <% end %>
-                }
+                  <% a.every_handlers.each do |e| %>
+                    "<%= e[:name] %>": function(__base__, ename, info) {
+                      var __info__ = tel_deref(__base__);
+                      var context = __info__.context;
+
+                      <%= e[:src] %>
+                    },
+                  <% end %>
+                },
               },
           <% end %>
         },
