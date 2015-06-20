@@ -720,4 +720,32 @@ RSpec.describe "kern:controller_spec" do
     #expect(ctx.eval("every_05_called_count")).to eq(2)
     #expect(ctx.eval("every_1_called_count")).to eq(1)
   #end
+
+  it "Does not fire interval after leaving a controller" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/interval3.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+    }
+
+    base = ctx.eval("base")
+
+    @driver.int "int_timer"
+    expect(ctx.eval("timer_called")).to eq(1)
+    @driver.int "int_timer"
+    expect(ctx.eval("timer_called")).to eq(2)
+
+    #Switch controllers via Goto
+    ctx.eval %{ int_dispatch([base, "int_event", base, "next", {}]); }
+
+    #Now we expect our if_event messages
+    4.times do
+      @driver.int "int_timer"
+    end
+
+    expect(ctx.eval("timer_called")).to eq(2)
+  end
 end

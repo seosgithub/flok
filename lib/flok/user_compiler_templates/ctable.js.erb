@@ -7,6 +7,12 @@ ctable = {
           <% end %>
 
           //Register this controller for every single interval timer *now*
+          <% actions_for_controller(c.name).each do |a| %>
+            <% a.every_handlers.each do |e| %>
+              reg_interval(__base__, "<%= e[:name] %>", <%= e[:ticks] %>);
+            <% end %>
+          <% end %>
+
 
           //Controller information, includes action, etc. (controller_info)
           var __info__ = tel_deref(__base__);
@@ -20,6 +26,7 @@ ctable = {
         __dealloc__: function(__base__) {
           var __info__ = tel_deref(__base__);
 
+          //Recursively call dealloc
           for (var i = 0; i < __info__.embeds.length; ++i) {
             for (var x = 0; x < __info__.embeds[i].length; ++x) {
               tel_deref(__info__.embeds[i][x]).cte.__dealloc__(__info__.embeds[i][x]);
@@ -29,6 +36,9 @@ ctable = {
           <% c._services.each do |s| %>
               <%= s %>_on_disconnect(__base__);
           <% end %>
+
+          dereg_evt(__base__);
+          tel_del(__base__);
         },
         name: '<%= c.name %>',
         root_view: '<%= c.name %>',
@@ -42,14 +52,6 @@ ctable = {
 
                   //The 'context' which is user-defined
                   var context = __info__.context;
-
-                  //Create a telepointer for the callout queue to respond to this action's interval timers
-                  var interval_bp = tel_reg(__base__);
-                  reg_evt(interval_bp, controller_event_callback2);
-
-                  <% a.every_handlers.each do |e| %>
-                    reg_interval(interval_bp, "<%= e[:name] %>", <%= e[:ticks] %>);
-                  <% end %>
 
                   <%= a.on_entry_src.strip %>
                 },
