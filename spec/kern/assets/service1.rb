@@ -1,6 +1,9 @@
 service :my_service do
-  on_wakeup %{
+  global %{
     every_ticks = 0;
+  }
+
+  on_wakeup %{
     on_wakeup_called = true; 
   }
 

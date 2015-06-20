@@ -140,7 +140,7 @@ RSpec.describe "kern:service_controller_spec" do
       int_dispatch([3, "int_event", base, "next", {}]);
     }
 
-    100.times do
+    103.times do
       @driver.int "int_timer"
     end
 
@@ -150,11 +150,23 @@ RSpec.describe "kern:service_controller_spec" do
       int_dispatch([3, "int_event", base, "next", {}]);
     }
 
+    #Should fire 25 times, but not the 26th
+    103.times do
+      @driver.int "int_timer"
+    end
+
+    #Switch back into the action
+    ctx.eval %{
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
     100.times do
       @driver.int "int_timer"
     end
 
-    expect(ctx.eval("every_ticks")).to eq(25)
+    expect(ctx.eval("every_ticks")).to eq(50)
   end
 
   it "Does have all the right variables after sending a custom event to the service and a timer event has fired" do

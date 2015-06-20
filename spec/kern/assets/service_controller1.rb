@@ -23,6 +23,17 @@ controller :my_controller do
 end
 
 controller :my_other_controller do
+  spots "content"
+  services :spec
+
+  action :my_action do
+    on_entry %{
+      Embed("my_other2_controller", "content", {});
+    }
+  end
+end
+
+controller :my_other2_controller do
   services :spec
 
   action :my_action do

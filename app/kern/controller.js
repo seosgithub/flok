@@ -122,3 +122,12 @@ function controller_event_callback(ep, event_name, info) {
     }
   }
 }
+
+//Called when an event is received
+function controller_event_callback2(_ep, event_name, info) {
+  //Grab the controller instance
+  var ep = tel_deref(_ep);
+
+  controller_event_callback(ep, event_name, info);
+}
+

@@ -1,5 +1,7 @@
 #Compile a controller ruby file into a javascript string
 
+require 'active_support'
+require 'active_support/core_ext/numeric'
 require 'erb'
 module Flok
   module UserCompiler
@@ -156,7 +158,8 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
-            //Remove all views
+            //Remove all views, we don't have to recurse because removal of a view
+            //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
@@ -356,7 +359,7 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller, :name, :ons
+    attr_accessor :controller, :name, :ons, :every_handlers
     include UserCompilerMacro
 
     def initialize controller, name, ctx, &block
@@ -365,6 +368,7 @@ module Flok
       @ctx = ctx
       @_on_entry_src = ""
       @ons = [] #Event handlers
+      @every_handlers = []
 
       self.instance_eval(&block)
     end
@@ -380,6 +384,14 @@ module Flok
 
     def on name, js_src
       @ons << {:name => name, :src => _macro(js_src)}
+    end
+
+    def every seconds, str
+      @every_handlers << {
+        :name => "#{seconds}_sec_#{SecureRandom.hex[0..6]}",
+        :ticks => seconds*4,
+        :src => _macro(str)
+      }
     end
 
     #You can def things in controller and use them as macros inside actions
