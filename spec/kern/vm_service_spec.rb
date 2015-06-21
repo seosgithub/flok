@@ -34,7 +34,7 @@ RSpec.describe "kern:vm_service" do
     expect(vm_notify_map).to eq(res)
   end
 
-  it "vm_rehash_page can calculate the hash correctly" do
+  it "vm_rehash_page can calculate the hash correctly for arrays" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
@@ -42,6 +42,7 @@ RSpec.describe "kern:vm_service" do
       //Manually construct a page
       var page = {
         _head: null,
+        _type: "array",
         _next: null,
         _id: "hello",
         entries: [
@@ -61,6 +62,7 @@ RSpec.describe "kern:vm_service" do
     #Expect the same hash
     expect(page).to eq({
       "_head" => nil,
+      "_type" => "array",
       "_next" => nil,
       "_id" => "hello",
       "entries" => [
@@ -69,6 +71,55 @@ RSpec.describe "kern:vm_service" do
       "_hash" => hash.to_s
     })
   end
+
+  it "vm_rehash_page can calculate the hash correctly for hashes" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
+
+    #Run the check
+    res = ctx.eval %{
+      //Manually construct a page
+      var page = {
+        _head: null,
+        "_type": "hash",
+        _next: null,
+        _id: "hello",
+        entries: {
+          "my_key": {_sig: "a"},
+          "my_key2": {_sig: "b"},
+          "my_key3": {_sig: "c"},
+        }
+      }
+
+      vm_rehash_page(page);
+    }
+
+    #Calculate hash ourselves
+    hash = crc32("hello")
+
+    #XOR the _sigs for the hash calculations
+    a = crc32("a", 0)
+    b = crc32("b", 0)
+    c = crc32("c", 0)
+    hash = crc32((a + b + c).to_s, hash)
+
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+
+    #Expect the same hash
+    expect(page).to eq({
+      "_head" => nil,
+      "_next" => nil,
+      "_type" => "hash",
+      "_id" => "hello",
+      "entries" => {
+        "my_key" => {"_sig" => "a"},
+        "my_key2" => {"_sig" => "b"},
+        "my_key3" => {"_sig" => "c"},
+      },
+      "_hash" => hash.to_s
+    })
+  end
+
 
   it "vm_rehash_page can calculate the hash correctly with head and next" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 

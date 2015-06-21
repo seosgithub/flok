@@ -63,8 +63,7 @@ The `_hash` value of a page is calculated in the following way:
       * `z = crc32(z, entriesN._sig)` where N goes through all entries in order.
     * For `_type == 'hash'`
       * `R = crc32(0, entries[key]._sig)` is calcuated for each entry; R is an array.
-      * `q = XOR(r0, r1, r2, ...)` is computed (Where R is the array we just calcuated)
-      * `z = crc32(z, q)`
+      * `z = crc32(z, r0+r1+r2+...)` where `r0, r1, ...` are the elements of the array R we just calculated. This makes order not important.
 
 If a key is null, then the crc step is skipped for that key.  e.g. if `_head` was null, then `z = crc32(0, _head)` would be skipped
 
