@@ -7,7 +7,7 @@ controller :my_controller do
         hello: "world"
       }
 
-      page = NewPage("test");
+      page = NewPage("array", "test");
 
       SetPageHead(page, "head");
       SetPageNext(page, "next");
