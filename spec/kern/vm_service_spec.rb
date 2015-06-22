@@ -121,13 +121,14 @@ RSpec.describe "kern:vm_service" do
   end
 
 
-  it "vm_rehash_page can calculate the hash correctly with head and next" do
+  it "vm_rehash_page can calculate the hash correctly with head and next for an array" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
     res = ctx.eval %{
       //Manually construct a page
       var page = {
+        _type: "array",
         _head: "a",
         _next: "b",
         _id: "hello",
@@ -149,6 +150,7 @@ RSpec.describe "kern:vm_service" do
     #Expect the same hash
     expect(page).to eq({
       "_head" => "a",
+      "_type" => "array",
       "_next" => "b",
       "_id" => "hello",
       "entries" => [
@@ -167,6 +169,7 @@ RSpec.describe "kern:vm_service" do
       page = {
         _head: "a",
         _next: "b",
+        _type: "array",
         _id: "hello",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
@@ -241,6 +244,7 @@ RSpec.describe "kern:vm_service" do
         _head: "a",
         _next: "b",
         _id: "my_key",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]
@@ -718,6 +722,7 @@ RSpec.describe "kern:vm_service" do
         _head: "a",
         _next: "b",
         _id: "hello",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]

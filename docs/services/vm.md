@@ -192,7 +192,8 @@ If you're creating a new page, please use these macros as well; just switch out 
     * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. 
       * For arrays, this generates the `_sig` and `_id` for you.
       * For hashes, this generates the `_sig` for you.
-    * `EntryMutable(page, eindex)` - Returns a mutable entry at a specific index which you can then modify.
+    * `EntryMutable(page, eindex)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
+        use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
     * `SetPageNext(page, id)` - Sets the `_next` id for the page
     * `SetPageHead(page, id)` - Sets the `_head` id for the page
 

@@ -226,21 +226,33 @@ module Flok
 
           #For CopyPage(original_page), page_var is original_page
           #This only supports variable names at this time
-          exp.match /\((.*)\);?/
+          exp.match /\((.*?),(.*?)\);?/
+          exp.match /\((.*)\)/ if $1 == nil
+
 
           #Get the id value the user wants, but we have to be careful
           #because if nothing is passed, then we need to set it to null
-          id_var = $1.strip
-          if id_var == ""
-            id_var = "null"
-          end
+          type_var = $1
+          id_var = $2
+
+          type_var = type_var.gsub(/"/, "").strip
+          id_var = (id_var || "null").strip
+
+          raise "NewPage was not given a type" if type_var == ""
+          raise "NewPage type is not valid #{type_var.inspect}" unless ["array", "hash"].include? type_var
+
+          type_var_to_entries = {
+            "array" => "[]",
+            "hash" => "{}",
+          }
 
           out << %{
             #{lvar} {
               _head: null,
               _next: null,
-              entries: [],
+              entries: #{type_var_to_entries[type_var]},
               _id: #{id_var},
+              _type: "#{type_var}",
             }
           }
         elsif l =~ /CopyPage/
@@ -254,18 +266,29 @@ module Flok
           page_var = $1
 
           out << %{
+            
             var __page__ = {
               _head: #{page_var}._head,
               _next: #{page_var}._next,
               _id: #{page_var}._id,
-              entries: [],
+              _type: #{page_var}._type,
             }
 
             //This is a shallow clone, but we own this array
             //When a mutable entry needs to be created, an entry will be cloned
             //and swappend out
-            for (var i = 0; i < #{page_var}.entries.length; ++i) {
-              __page__.entries.push(#{page_var}.entries[i]);
+            if (#{page_var}._type === "array") {
+              __page__.entries = [];
+              for (var i = 0; i < #{page_var}.entries.length; ++i) {
+                __page__.entries.push(#{page_var}.entries[i]);
+              }
+            } else if (#{page_var}._type === "hash") {
+              __page__.entries = {};
+              var keys = Object.keys(#{page_var}.entries);
+              for (var i = 0; i < keys.length; ++i) {
+                var key = keys[i];
+                __page__.entries[key] = #{page_var}.entries[key];
+              }
             }
 
             #{lvar} __page__;
@@ -282,7 +305,11 @@ module Flok
           index_var = $2
 
           out << %{
-            #{page_var}.entries.splice(#{index_var}, 1);
+            if (#{page_var}._type === "array") {
+              #{page_var}.entries.splice(#{index_var}, 1);
+            } else if (#{page_var}._type === "hash") {
+              delete #{page_var}.entries[#{index_var}];
+            }
           }
 
         elsif l =~ /EntryInsert/
@@ -297,10 +324,21 @@ module Flok
           index_var = $2
           entry_var = $3
 
+          page_var.strip!
+          index_var.strip!
+          entry_var.strip!
+
           out << %{
-            #{entry_var}._id = gen_id();
-            #{entry_var}._sig = gen_id();
-            #{page_var}.entries.splice(#{index_var}, 0, #{entry_var});
+
+            if (#{page_var}._type === "array") {
+              #{entry_var}._id = gen_id();
+              #{entry_var}._sig = gen_id();
+              #{page_var}.entries.splice(#{index_var}, 0, #{entry_var});
+            } else if (#{page_var}._type === "hash") {
+              #{entry_var}._sig = gen_id();
+              #{page_var}.entries[#{index_var}] = #{entry_var};
+            }
+
           }
 
         elsif l =~ /SetPageNext/
@@ -344,9 +382,28 @@ module Flok
           page_var = $1
           index_var = $2
 
+
           out << %{
-            //Duplicate entry
-            #{page_var}.entries.splice(#{index_var}, 1, JSON.parse(JSON.stringify(#{page_var}.entries[#{index_var}])));
+            if (#{page_var}._type === "array") {
+              //Duplicate entry
+              #{page_var}.entries.splice(#{index_var}, 1, JSON.parse(JSON.stringify(#{page_var}.entries[#{index_var}])));
+
+              //Here's our new entry
+              var ne = #{page_var}.entries[#{index_var}];
+              ne._sig = gen_id();
+
+              #{lvar} #{page_var}.entries[#{index_var}];
+            } else if (#{page_var}._type === "hash") {
+              //Duplicate entry
+              #{page_var}.entries[#{index_var}] = JSON.parse(JSON.stringify(#{page_var}.entries[#{index_var}]));
+
+              //Here's our new entry
+              var ne = #{page_var}.entries[#{index_var}];
+              ne._sig = gen_id();
+
+              #{lvar} #{page_var}.entries[#{index_var}];
+
+            }
           }
         else
           out.puts l

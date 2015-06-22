@@ -5,18 +5,18 @@ controller :controller do
         _head: "head",
         _next: "next",
         _id: "id",
-        _type: "array",
-        entries: [
-          {_id: "id1", _sig: "sig1"},
-          {_id: "id2", _sig: "sig2"},
-        ],
+        _type: "hash",
+        entries: {
+          "id1": {_sig: "sig1"},
+          "id2": {_sig: "sig2"},
+        },
         _hash: "hash",
       };
 
       //Now we make a new copy
       page = CopyPage(original_page);
-      var a = EntryMutable(page, 0);
-      var b = EntryMutable(page, 1);
+      var a = EntryMutable(page, "id1");
+      var b = EntryMutable(page, "id2");
 
       a.hello = "world";
       b.hello = "world";
@@ -27,7 +27,7 @@ controller :controller do
       //are references. When you call entrymutable, you are making a copy and replacing that
       //entry in the array so that page.entries[0] is actually owned by page and is no longer apart
       //of original_page
-      original_page.entries[0].foo = "bar";
+      original_page.entries["id1"].foo = "bar";
     }
   end
 end
