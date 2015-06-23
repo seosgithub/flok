@@ -34,7 +34,7 @@ RSpec.describe "kern:vm_service" do
     expect(vm_notify_map).to eq(res)
   end
 
-  it "vm_rehash_page can calculate the hash correctly" do
+  it "vm_rehash_page can calculate the hash correctly for arrays" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
@@ -42,6 +42,7 @@ RSpec.describe "kern:vm_service" do
       //Manually construct a page
       var page = {
         _head: null,
+        _type: "array",
         _next: null,
         _id: "hello",
         entries: [
@@ -61,6 +62,7 @@ RSpec.describe "kern:vm_service" do
     #Expect the same hash
     expect(page).to eq({
       "_head" => nil,
+      "_type" => "array",
       "_next" => nil,
       "_id" => "hello",
       "entries" => [
@@ -70,13 +72,63 @@ RSpec.describe "kern:vm_service" do
     })
   end
 
-  it "vm_rehash_page can calculate the hash correctly with head and next" do
+  it "vm_rehash_page can calculate the hash correctly for hashes" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 
     #Run the check
     res = ctx.eval %{
       //Manually construct a page
       var page = {
+        _head: null,
+        "_type": "hash",
+        _next: null,
+        _id: "hello",
+        entries: {
+          "my_key": {_sig: "a"},
+          "my_key2": {_sig: "b"},
+          "my_key3": {_sig: "c"},
+        }
+      }
+
+      vm_rehash_page(page);
+    }
+
+    #Calculate hash ourselves
+    hash = crc32("hello")
+
+    #XOR the _sigs for the hash calculations
+    a = crc32("a", 0)
+    b = crc32("b", 0)
+    c = crc32("c", 0)
+    hash = crc32((a + b + c).to_s, hash)
+
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+
+    #Expect the same hash
+    expect(page).to eq({
+      "_head" => nil,
+      "_next" => nil,
+      "_type" => "hash",
+      "_id" => "hello",
+      "entries" => {
+        "my_key" => {"_sig" => "a"},
+        "my_key2" => {"_sig" => "b"},
+        "my_key3" => {"_sig" => "c"},
+      },
+      "_hash" => hash.to_s
+    })
+  end
+
+
+  it "vm_rehash_page can calculate the hash correctly with head and next for an array" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
+
+    #Run the check
+    res = ctx.eval %{
+      //Manually construct a page
+      var page = {
+        _type: "array",
         _head: "a",
         _next: "b",
         _id: "hello",
@@ -98,6 +150,7 @@ RSpec.describe "kern:vm_service" do
     #Expect the same hash
     expect(page).to eq({
       "_head" => "a",
+      "_type" => "array",
       "_next" => "b",
       "_id" => "hello",
       "entries" => [
@@ -116,6 +169,7 @@ RSpec.describe "kern:vm_service" do
       page = {
         _head: "a",
         _next: "b",
+        _type: "array",
         _id: "hello",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
@@ -190,6 +244,7 @@ RSpec.describe "kern:vm_service" do
         _head: "a",
         _next: "b",
         _id: "my_key",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]
@@ -667,6 +722,7 @@ RSpec.describe "kern:vm_service" do
         _head: "a",
         _next: "b",
         _id: "hello",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]
@@ -871,7 +927,63 @@ RSpec.describe "kern:vm_service" do
     })
   end
 
-  it "Responds twice to watch with a missing cache but where the disk has a copy and then the pager responds" do
+  #it "Responds twice to watch with a missing cache but where the disk has a copy and then the pager responds" do
+    #ctx = flok_new_user File.read('./spec/kern/assets/vm/controller20.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    #ctx.eval %{
+      #base = _embed("my_controller", 1, {}, null);
+
+      #//Manually construct a page
+      #page = {
+        #_head: null,
+        #_next: null,
+        #_id: "hello",
+        #entries: [
+          #{_id: "hello2", _sig: "nohteunth"},
+        #]
+      #}
+
+      #//Manually construct another page that would normally be written
+      #//by a 'pager' to the cache
+      #page2 = {
+        #_head: null,
+        #_next: null,
+        #_id: "hello",
+        #entries: [
+          #{_id: "hello2", _sig: "nohteunth"},
+          #{_id: "hello3", _sig: "athoeuntz"}
+        #]
+      #}
+
+      #//Recalculate hashes
+      #vm_rehash_page(page);
+      #vm_rehash_page(page2);
+
+      #//Drain queue
+      #int_dispatch([]);
+    #}
+
+    ##Copies of JS pages in ruby dictionary format
+    #page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+    #page2 = JSON.parse(ctx.eval("JSON.stringify(page2)"))
+
+    ##At this point, flok should have attempted to grab a page to fill
+    ##the *now* blank cache. We are going to send it the first page.
+    #@driver.ignore_up_to "if_per_get", 2
+    #@driver.get "if_per_get", 2
+    #@driver.int "int_per_get_res", ["vm", "spec", page]
+
+    ##Now, we pretend that a pager has written to the cache because it has
+    ##received data back
+    #ctx.eval(%{vm_cache_write("spec", page2)})
+
+    #res = JSON.parse(ctx.eval("JSON.stringify(read_res)"))
+    #expect(res).to eq([
+      #page, page2
+    #])
+ #end
+
+ it "Responds once to watch with a missing cache but where the pager responds before the disk for array" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller20.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
@@ -882,6 +994,7 @@ RSpec.describe "kern:vm_service" do
         _head: null,
         _next: null,
         _id: "hello",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]
@@ -893,6 +1006,7 @@ RSpec.describe "kern:vm_service" do
         _head: null,
         _next: null,
         _id: "hello",
+        _type: "array",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
           {_id: "hello3", _sig: "athoeuntz"}
@@ -915,19 +1029,22 @@ RSpec.describe "kern:vm_service" do
     #the *now* blank cache. We are going to send it the first page.
     @driver.ignore_up_to "if_per_get", 2
     @driver.get "if_per_get", 2
-    @driver.int "int_per_get_res", ["vm", "spec", page]
 
     #Now, we pretend that a pager has written to the cache because it has
     #received data back
     ctx.eval(%{vm_cache_write("spec", page2)})
 
+    #And then we let the cache from disk reply, which should be ignored
+    #because the cache is already there from the pager
+    @driver.int "int_per_get_res", ["vm", "spec", page]
+
     res = JSON.parse(ctx.eval("JSON.stringify(read_res)"))
     expect(res).to eq([
-      page, page2
+      page2
     ])
- end
+  end
 
- it "Responds once to watch with a missing cache but where the pager responds before the disk" do
+ it "Responds once to watch with a missing cache but where the pager responds before the disk for hash" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller20.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
@@ -938,6 +1055,7 @@ RSpec.describe "kern:vm_service" do
         _head: null,
         _next: null,
         _id: "hello",
+        _type: "hash",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
         ]
@@ -949,6 +1067,7 @@ RSpec.describe "kern:vm_service" do
         _head: null,
         _next: null,
         _id: "hello",
+        _type: "hash",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
           {_id: "hello3", _sig: "athoeuntz"}

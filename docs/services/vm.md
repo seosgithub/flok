@@ -8,10 +8,13 @@ Each pager belongs to a *namespace*; page faults hit a namespace and then the pa
 Fun aside; Because of the hashing schemantics; this paging system solves the age old problem of ... how do you show that data has changed *now* when to be assured that you have perferctly synchronized data with the server?;... you need to do a 3-way handshake with the updates.  You could have a network server pager that supports writes but dosen't forward those to the network. That way, you can locally modify the page and then if the modifications were guessed correctly, the server would not even send back a page modification update! (Locally, the page would have been propogated as well).  In the meantime, after modifying the local page, you would send a real network request to the server which would in turn update it's own paging system but at that point, the server would check in with you about your pages, but miraculously, because you gussed the updated page correctly, no modifications will need to be made. You could even purposefully put a 'not_synced' key in and actually show the user when the page was correctly synchronized.
 
 ##Pages
-Each page is a dictionary containing a list of entries.
+Each page is either of a `array` type or `hash` type.
+
+###Array type
 ```ruby
 page_example = {
   _head: <<uuid STR or NULL>>,
+  _type: "array",
   _next: <<uuid STR or NULL>,
   _id: <<uuid STR>,
   entries: [
@@ -22,10 +25,29 @@ page_example = {
 }
 ```
 
+###Hash type
+```ruby
+page_example = {
+  _head: <<uuid STR or NULL>>,
+  _type: "hash",
+  _next: <<uuid STR or NULL>,
+  _id: <<uuid STR>
+  entries: {
+    "my_id0" => {_sig: <<random_signature for inserts and modifies STR>>},
+    ...
+  },
+  _hash: <<CRC32 >
+}
+```
+
   * `_head (string or null)` - An optional pointer that indicates a *head* page. The head pages are special pages that contain 0 elements in the entries array, no `_head` key, and `_next` points to the *head* of the list. A head page might be used to pull down the latest news where the head will tell you whether or not there is anything left for you to receive.
   * `_next (string or null)` - The next element on this list. If `_next` is non-existant, then this page is the endpoint of the list.
   * `_id (string)` - The name of this page. Even if every key changed, the `_id` will not change. This is supposed to indicate, semantically, that this page still *means* the same thing.  For example, imagine a page.  If all entries were to be **removed** from this page and new entries were **inserted** on this page, then it would be semantically sound to say that the entries were **changed**.
-  * `entries (array of hashes)` - An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` based on their creation or edit time from the unix epoch milliseconds.
+  * `entries`
+    * `_type == 'array'`
+      * An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` which should be a generated hash value that changes when the entry changes.
+    * `_type == 'hash'`
+      * A dictionary of dictionaries. Entries have a `_sig` which should be a generated hash value that changes when the entry changes.
   * `_hash (string)` - All entry `_id's`, `_next`, the page `_id`, and `head` are hashed togeather. Any changes to this page will cause this `_hash` to change which makes it a useful way to check if a page is modified and needs to be updated. The hash function is an ordered CRC32 function run in the following order.  See [Calculating Page Hash](#calculating_page_hash).
 
 ------
@@ -36,7 +58,12 @@ The `_hash` value of a page is calculated in the following way:
   1. `z = crc32(z, _head) if _head`
   2. `z = crc32(z, _next) if _next`
   3. `z = crc32(z, _id)`
-  4. `z = crc32(z, entriesN._sig)` where N goes through all entries in order.
+  4. `_type` dependent
+    * For `_type == 'array'` 
+      * `z = crc32(z, entriesN._sig)` where N goes through all entries in order.
+    * For `_type == 'hash'`
+      * `R = crc32(0, entries[key]._sig)` is calcuated for each entry; R is an array.
+      * `z = crc32(z, r0+r1+r2+...)` where `r0, r1, ...` are the elements of the array R we just calculated. This makes order not important.
 
 If a key is null, then the crc step is skipped for that key.  e.g. if `_head` was null, then `z = crc32(0, _head)` would be skipped
 
@@ -153,18 +180,22 @@ will not receive the notifications of the page modifications. Once using these m
 
 Aside, modifying a page goes against the semantics of the vm system; you're thinking of it wrong if you think that's ok. The VM system lets the pager decide what the semantics of a `write` actually means. That may mean it does not directly modify the page; maybe it sends the write request to a server which then validates the request, and then the response on the watched page that was modified will then update your controller.
 
-If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`. 
+If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`.
 
 ####Per entry
-  * `NewPage(id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.
-      `_id` is generated if it is not passed.
+  * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements. type can either be `array` or `hash`. `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.
-  * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry)
-  * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. (Internally this inserts the entry with a unique `_sig` and creates a unique `_id`)
-  * `EntryMutable(page, eindex)` - Returns a mutable entry at a specific index which you can then modify.
-  * `SetPageNext(page, id)` - Sets the `_next` id for the page
-  * `SetPageHead(page, id)` - Sets the `_head` id for the page
+      
+  * For both `array` and `hashes`, the following functions work (albeit different semantics). For array types, the `eindex` is an integer in the array, For hash types, the `eindex` is a key inside the dictionary.
+    * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry).
+    * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. 
+      * For arrays, this generates the `_sig` and `_id` for you.
+      * For hashes, this generates the `_sig` for you.
+    * `EntryMutable(page, eindex)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
+        use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
+    * `SetPageNext(page, id)` - Sets the `_next` id for the page
+    * `SetPageHead(page, id)` - Sets the `_head` id for the page
 
 Here is an example of a page being modified inside a controller after a `read_res`
 ```js

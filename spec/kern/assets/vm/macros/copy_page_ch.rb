@@ -5,10 +5,11 @@ controller :controller do
         _head: "head",
         _next: "next",
         _id: "id",
-        _type: "array",
-        entries: [
-          {_id: "id", _sig: "sig"},
-        ],
+        _type: "hash",
+        entries: {
+          "id0": {_sig: "sig1"},
+          "id1": {_sig: "sig2"},
+        },
         _hash: "hash",
       };
 
