@@ -12,7 +12,7 @@ controller :my_controller do
       }
 
 
-      page = NewPage("test");
+      page = NewPage("array", "test");
       SetPageHead(page, "head");
       SetPageNext(page, "next");
       EntryInsert(page, 0, entry);
