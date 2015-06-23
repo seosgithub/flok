@@ -130,7 +130,8 @@ if (page is not resident in memory && not_synchronous) {
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `id` - Watching the page that contains this in the `_id` field
-    * `sync (optional)` - If set to `true` then the disk read and cache read will be performed synchronously. Additionally, all future cache reads / updates will be performed synchronously.
+    * `sync (optional)` - If set to `true` then the cache read will be performed synchronously; however, the disk read will still be performed
+        asynchronously. Additionally, all future cache reads / updates will be performed synchronously.
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
     * Returns an immutable page in params

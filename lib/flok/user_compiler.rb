@@ -475,6 +475,9 @@ module Flok
       @macros = {}
       @_services = []
 
+      #Some macros expect controller instance
+      @controller = self
+
       self.instance_eval(&block)
     end
 

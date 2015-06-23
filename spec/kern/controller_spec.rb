@@ -596,6 +596,25 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [base, "context", {"base" => base, "secret" => "foo"}])
   end
 
+  it "Does allow service macros in the global on_entry function" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry5.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+
+    #Run the embed function
+    secret = SecureRandom.hex
+    ctx.eval %{
+      global_on_entry_called_count = 0;
+
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      int_dispatch([]);
+    }
+
+    expect(ctx.eval("read_res_called")).to eq(true)
+  end
+
+
   it "Does allow interval (every) events" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/interval.rb')

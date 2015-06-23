@@ -13,7 +13,7 @@ RSpec.describe "User compiler" do
     js_res = compiler.compile(js_src(fn))
     ctx = V8::Context.new
     ctx.eval js_res
-    ctx
+    return ctx, js_res
   end
 
   #Get the source for a file in  ./user_compiler/*.rb
@@ -29,37 +29,44 @@ RSpec.describe "User compiler" do
 
   it "Can compile a controller and give up the root 
   iew" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     root_view = ctx.eval "ctable.my_controller.root_view"
     expect(root_view).to eq("my_controller")
   end
 
   it "Can compile a controller and contain a list of actions" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     actions = ctx.eval "Object.keys(ctable.my_controller.actions).length"
     expect(actions).to eq(1)
   end
 
   it "Can compile a controller and contain an __init__ function" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     actions = ctx.eval "ctable.my_controller.__init__"
     expect(actions).not_to eq(nil)
   end
 
   it "Can compile a controller with an action that contains an on_entry" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
     expect(on_entry).not_to eq(nil)
   end
 
   it "Can compile a controller with an action that does not contains an on_entry" do
-    ctx = compile "controller0b"
+    ctx, js_src = compile "controller0b"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
     expect(on_entry).not_to eq(nil)
   end
 
+  it "Can compile a controller with a global on_entry" do
+    ctx, js_src = compile "controller0bg"
+    on_entry = ctx.eval "ctable.my_controller.on_entry"
+    expect(js_src).to include("global_on_entry")
+  end
+
+
   it "on_entry controller has more code than non on_entry controller" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
 
     ctx2 = compile "controller0b"
@@ -69,19 +76,19 @@ RSpec.describe "User compiler" do
 
 
   it "Can compile a controller with an action that contains the name" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.name"
     expect(on_entry).to eq("my_controller")
   end
 
   it "Can compile a controller with an action that contains an event that responds to hello" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     hello_event_function = ctx.eval "ctable.my_controller.actions.my_action.handlers.hello"
     expect(hello_event_function).not_to eq(nil)
   end
 
   it "Can compile a controller with spot names" do
-    ctx = compile "controller0"
+    ctx, js_src = compile "controller0"
     spot_names = JSON.parse(ctx.eval "JSON.stringify(ctable.my_controller.spots)")
     expect(spot_names).to include "hello"
     expect(spot_names).to include "world"
@@ -89,7 +96,7 @@ RSpec.describe "User compiler" do
   end
 
   it "Can compile a controller with an action containing a timer and set the appropriate every_handlers key" do
-    ctx = compile "controller0timer"
+    ctx, js_src = compile "controller0timer"
 
     function_names = JSON.parse(ctx.eval "JSON.stringify(Object.keys(ctable.my_controller.actions.my_action.handlers))")
     expect(function_names).to include("hello")
