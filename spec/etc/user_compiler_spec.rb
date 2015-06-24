@@ -69,7 +69,7 @@ RSpec.describe "User compiler" do
     ctx, js_src = compile "controller0"
     on_entry = ctx.eval "ctable.my_controller.actions.my_action.on_entry"
 
-    ctx2 = compile "controller0b"
+    ctx2, js_src = compile "controller0b"
     on_entry2 = ctx2.eval "ctable.my_controller.actions.my_action.on_entry"
     expect(on_entry2.to_s.length).to be < on_entry.to_s.length
   end
