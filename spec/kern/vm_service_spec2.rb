@@ -36,4 +36,34 @@ RSpec.describe "kern:vm_service" do
       "options" => {"foo" => "bar"}
     })
   end
+
+  it "Can create a controller with a watch containing diff in params and that ends up in vm_diff_controllers" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_diff.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    vm_diff_bps = ctx.dump("vm_diff_bps")
+    expect(vm_diff_bps).to eq({ctx.eval("base").to_s => true})
+  end
+
+  it "Can create a controller with a watch containing diff that receives a modify entry event when an entry is modified" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_diff2.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "modify", {}]);
+      int_dispatch([]);
+    }
+
+    #The read_res should have not updated the second time because of diff
+    read_res_page = ctx.dump("_read_res_page")
+    expect(read_res_page["entries"][0]["value"]).to eq(4)
+
+    entry_modified_params = ctx.dump("entry_modified_params")
+  end
 end

@@ -13,6 +13,10 @@ service :vm do
       <% end %>
     };
 
+    //A map of connections that is set to bp => true for every
+    //controller that has given 'diff' option in watch
+    vm_diff_bps = {};
+
     vm_bp_to_nmap = {};
 
     //Notification listeners, converts ns+key to an array of base pointers
@@ -30,11 +34,25 @@ service :vm do
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
 
-      //Try to lookup view controller(s) to notify
+      //Try to lookup listeners to notify
       var nbp = vm_notify_map[ns][page._id];
       if (nbp) {
         for (var i = 0; i < nbp.length; ++i) {
-          int_event_defer(nbp[i], "read_res", page);
+          var bp = nbp[i];
+
+          //If the receiver requested a diff mode in watch...
+          if (vm_diff_bps[bp]) {
+            var diff = vm_diff(old, page);
+            while (diff.length > 0) {
+              var e = diff.pop();
+              var _type = e[0];
+              if (_type === "modify") {
+                int_event_defer(bp, "entry_modified", {page_id: page._id, entry: e});
+              }
+            }
+          } else {
+            int_event_defer(bp, "read_res", page);
+          }
         }
       }
     }
@@ -235,6 +253,11 @@ service :vm do
     //Cache entry
     var cache_entry = vm_cache[params.ns][params.id];
 
+    //Diff?
+    if (params.diff === true) {
+      vm_diff_bps[bp] = true;
+    }
+
     //Ensure map exists
     ////////////////////////////////////////////////
     var b = vm_notify_map[params.ns][params.id];
@@ -315,6 +338,7 @@ service :vm do
     vm_notify_map[params.ns][params.id].splice(midx, 1);
 
     delete vm_bp_to_nmap[bp][params.ns][params.id];
+    delete vm_diff_bps[bp];
 
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {
