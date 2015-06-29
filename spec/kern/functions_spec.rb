@@ -41,4 +41,5 @@ RSpec.describe "kern:functions_spec" do
     expect(res).not_to eq(res2)
     expect(res3).not_to eq(res)
   end
+
 end

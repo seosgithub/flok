@@ -39,6 +39,52 @@ service :vm do
       }
     }
 
+    function vm_diff(old_page, new_page) {
+      //All diff messages end up here
+      var diff_log = [];
+
+      var entry_diff = {};
+      //Old entrys first
+      for (var i = 0; i < old_page.entries.length; ++i) {
+        var old_entry = old_page.entries[i];
+        var _id = old_entry._id;
+        var _sig = old_entry._sig;
+
+        entry_diff[_id] = _sig;
+      }
+
+      //New entrys
+      for (var i = 0; i < new_page.entries.length; ++i) {
+        var new_entry = new_page.entries[i];
+        var _id = new_entry._id;
+        var _sig = new_entry._sig;
+
+        //Modify:
+        //  Existed in old entry and the signature is different
+        var old_sig = entry_diff[_id];
+        if (old_sig) {
+          if (old_sig != _sig) {
+            diff_log.push(["modify", new_entry]);
+          }
+
+          delete entry_diff[_id];
+        }
+
+        //Inserted, old_sig didn't exist
+        else {
+          diff_log.push(["insert", new_entry]);
+        }
+      }
+
+      //Remaining have been deleted
+      var old_ids = Object.keys(entry_diff);
+      while (old_ids.length > 0) {
+          diff_log.push(["delete", old_ids.pop()]);
+      }
+
+      return diff_log;
+    }
+
     function vm_rehash_page(page) {
       var z = 0;
 
