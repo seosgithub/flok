@@ -6,6 +6,7 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
+    vm_transaction_in_progress = false;
 
     vm_dirty = {
       <% @options[:pagers].each do |p| %>
@@ -26,8 +27,58 @@ service :vm do
       <% end %>
     };
 
+    //When you need to make writes from an external source like a server that may
+    //not be fully in-sync and sometimes integrates changelists. cl_id is optional.
+    //If no cl_id is specified, (changelist id), then the page will be written and
+    //then changes will just be replayed. If cl_id is specified, the changelist
+    //will remove the top most (fault if the id does not match), and then replay the
+    //changelist.
+    /*
+    function vm_cache_write_sync(ns, page, cl_id) {
+      //If hash matches, don't do anything
+      var old = vm_cache[ns][page._id];
+      if (old && old._hash == page._hash) { return; }
+
+      //Changes were integrated
+      if (cl_id) {
+        //We have to have a cached version
+        if (!old) { raise "Tried to integrate changes with id: " + cl_id + " but there was no cached page that could have had a changelist"};
+
+        //The cached version should have a change list
+        if (!old._chead) { raise "Tried to integrate changes with id: " + cl_id + " but there was no changelist present" };
+
+        var chead = old._chead;
+        var ctail = old._ctail;
+
+        //Ensure Ids match
+        var old_cl_id = chead._id;
+        if (cl_id != old_cl_id) {
+          raise "Integrating changes, but the head changelist id was " + old_cl_id + "while the attempted integration was " + cl_id;
+        }
+
+        //Increment head
+        old._chead = old._chead._next;
+
+        //If head is now null, the tail no longer exists
+        if (!chead) {
+          ctail = null;
+        }
+      }
+
+      //Set pages change list pointers
+      page._chead = old._chead;
+      page._ctail = old._ctail;
+
+      //Now replay the diff
+
+      //We're ok to write the page
+      vm_cache_write(ns, page);
+    }
+    */
+
     //Cache
     function vm_cache_write(ns, page) {
+      //If hash matches, don't write
       var old = vm_cache[ns][page._id];
       if (old && old._hash == page._hash) { return; }
 
@@ -43,16 +94,93 @@ service :vm do
           //If the receiver requested a diff mode in watch...
           if (vm_diff_bps[bp]) {
             var diff = vm_diff(old, page);
+
+            //Still send read_res
+            if (vm_transaction_in_progress) {
+              vm_transaction_queue.push([bp, "read_res_update", page]);
+            } else {
+              int_event_defer(bp, "read_res_update", page);
+            }
+
             while (diff.length > 0) {
               var e = diff.pop();
               var _type = e[0];
               if (_type === "modify") {
-                int_event_defer(bp, "entry_modified", {page_id: page._id, entry: e});
+                if (vm_transaction_in_progress) {
+                  vm_transaction_queue.push([bp, "entry_modified", {page_id: page._id, entry: e[1]}]);
+                } else {
+                  int_event_defer(bp, "entry_modified", {page_id: page._id, entry: e[1]});
+                }
+              } else if (_type === "insert") {
+                if (vm_transaction_in_progress) {
+                  var delete_map_info = vm_transaction_delete_map[e[1]._id];
+                  if (delete_map_info) {
+                    var was_deleted_index = delete_map_info[1];
+                  }
+                  //Checking if it was deleted in another page, this means it was moved...
+                  if (delete_map_info) {
+                    //Remove deletion from the transaction queue
+                    vm_transaction_queue.splice(was_deleted_index, 1);
+
+                    //Insert a move *to* this page
+                    vm_transaction_queue.push([bp, "entry_moved", {from_page: delete_map_info[0], to_page: page._id, entry: e[1]}]);
+                  } else {
+                    vm_transaction_queue.push([bp, "entry_inserted", {page_id: page._id, entry: e[1]}]);
+                    vm_transaction_insert_map[e[1]] = vm_transaction_queue.length-1;
+                  }
+                } else {
+                  int_event_defer(bp, "entry_inserted", {page_id: page._id, entry: e[1]});
+                }
+              } else if (_type === "delete") {
+                if (vm_transaction_in_progress) {
+                  vm_transaction_queue.push([bp, "entry_deleted", {page_id: page._id, entry_id: e[1]}]);
+                  vm_transaction_delete_map[e[1]] = [page._id, vm_transaction_queue.length-1];
+                } else {
+                  int_event_defer(bp, "entry_deleted", {page_id: page._id, entry_id: e[1]});
+                }
               }
             }
           } else {
             int_event_defer(bp, "read_res", page);
           }
+        }
+      }
+    }
+
+    //Transactions are meant for cache writes, multiple pages can be written in a transaction
+    //Which can allow things like differential watching to detect moves across page boundaries.
+    function vm_transaction_begin() {
+      vm_transaction_in_progress = true;
+      vm_transaction_queue = [];
+      vm_transaction_insert_map = {};
+      vm_transaction_delete_map = {};
+    }
+
+    function vm_transaction_end() {
+      vm_transaction_in_progress = false;
+
+      for (var i = 0; i < vm_transaction_queue.length; ++i) {
+        var e = vm_transaction_queue[i];
+        int_event_defer(e[0], e[1], e[2]);
+      }
+    }
+
+    function vm_page_replay(page, diff) {
+      for (var i = 0; i < diff.length; ++i) {
+        var e = diff[i];
+        var type = e[0];
+
+        //Insert it at the beginning
+        if (type === "insert") {
+          page.entries.splice(0, 1, e[1]);
+        } else if (type === "modify") {
+          var idx = -1;
+          for (var i = 0; i < page.entries.length; ++i) {
+            if (page.entries[i]._id == e[1]._id) { idx = i; break; };
+          }
+
+          if (idx === -1) { throw "Couldn't find element with matching id" };
+          page.entries[idx] = e[1];
         }
       }
     }

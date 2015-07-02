@@ -68,4 +68,43 @@ RSpec.describe "kern:vm_diff" do
       ["insert", {"value" => "b", "_sig" => "sig", "_id" => "1"}]
     ])
   end
+
+ it "can use vm_page_replay to replay 1 insert" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    #One insert (Backwards delete)
+    res = ctx.eval %{
+      var diff = diff_them_reverse(dmod0)
+      vm_page_replay(dmod0[1], diff);
+    }
+
+    replayed_page = ctx.dump("dmod0[0]")
+    original_page = ctx.dump("dmod0[1]")
+
+    expect(original_page).to eq(replayed_page)
+  end
+
+ it "can use vm_page_replay to replay 1 modify" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    #One insert (Backwards delete)
+    res = ctx.eval %{
+      var diff = diff_them(mod0)
+      vm_page_replay(mod0[0], diff);
+    }
+
+    replayed_page = ctx.dump("mod0[0]")
+    original_page = ctx.dump("mod0[1]")
+
+    expect(original_page).to eq(replayed_page)
+  end
+
 end
