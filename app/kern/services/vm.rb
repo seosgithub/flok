@@ -1,5 +1,6 @@
 service :vm do
   global %{
+  _vm_page_replay = true;
     //Cache contains a blank hash for each namespace
     vm_cache = {
       <% @options[:pagers].each do |p| %>
@@ -27,54 +28,65 @@ service :vm do
       <% end %>
     };
 
-    //When you need to make writes from an external source like a server that may
-    //not be fully in-sync and sometimes integrates changelists. cl_id is optional.
-    //If no cl_id is specified, (changelist id), then the page will be written and
-    //then changes will just be replayed. If cl_id is specified, the changelist
-    //will remove the top most (fault if the id does not match), and then replay the
-    //changelist.
-    /*
-    function vm_cache_write_sync(ns, page, cl_id) {
-      //If hash matches, don't do anything
+    function vm_cache_write_unsynced(ns, page) {
+      //If hash matches, don't write
       var old = vm_cache[ns][page._id];
       if (old && old._hash == page._hash) { return; }
 
-      //Changes were integrated
-      if (cl_id) {
-        //We have to have a cached version
-        if (!old) { raise "Tried to integrate changes with id: " + cl_id + " but there was no cached page that could have had a changelist"};
-
-        //The cached version should have a change list
-        if (!old._chead) { raise "Tried to integrate changes with id: " + cl_id + " but there was no changelist present" };
-
-        var chead = old._chead;
-        var ctail = old._ctail;
-
-        //Ensure Ids match
-        var old_cl_id = chead._id;
-        if (cl_id != old_cl_id) {
-          raise "Integrating changes, but the head changelist id was " + old_cl_id + "while the attempted integration was " + cl_id;
-        }
-
-        //Increment head
-        old._chead = old._chead._next;
-
-        //If head is now null, the tail no longer exists
-        if (!chead) {
-          ctail = null;
-        }
+      //No older page, no diff
+      if (!old) {
+        return vm_cache_write(ns, page);
       }
 
-      //Set pages change list pointers
-      page._chead = old._chead;
-      page._ctail = old._ctail;
+      //Calculate diff
+      var diff = vm_diff(old, page);
 
-      //Now replay the diff
+      //Create a new page
+      var cl_page = {
+        _head: null,
+        _next: null,
+        _id: gen_id(),
+        _type: "hash",
+        entries: {
+          "diff": {value: diff, _sig: gen_id()}
+        }
+      };
 
-      //We're ok to write the page
+      //Add to page if there was no change list
+      if (!old._cl_head) {
+        page._cl_head = cl_page._id;
+        page._cl_tail = cl_page._id;
+      } else {
+        throw "Not supported";
+      }
+
+      vm_cache_write(ns, cl_page);
+      vm_cache_write(ns, page);
+
+      console.log("Wrote diff page in", cl_page);
+      console.log("Wrote diff page in", page);
+    }
+
+    function vm_cache_write_sync(ns, page, integrated) {
+      console.log("write sync");
+      //If hash matches, don't write
+      var old = vm_cache[ns][page._id];
+      if (old && old._hash == page._hash) { return; }
+      console.log("passed hash");
+
+      page._cl_head = old._cl_head;
+      page._cl_tail  = old._cl_tail;
+      console.log("before replay", page);
+
+      var cl_head_page = vm_cache[ns][page._cl_head];
+      if (_vm_page_replay === true) {
+        vm_page_replay(page, cl_head_page.entries.diff.value);
+      }
+      console.log("Diff", cl_head_page);
+      console.log("after replay", page);
+
       vm_cache_write(ns, page);
     }
-    */
 
     //Cache
     function vm_cache_write(ns, page) {
@@ -172,8 +184,10 @@ service :vm do
 
         //Insert it at the beginning
         if (type === "insert") {
+        console.log("vm replay insert");
           page.entries.splice(0, 1, e[1]);
         } else if (type === "modify") {
+        console.log("vm replay modify");
           var idx = -1;
           for (var i = 0; i < page.entries.length; ++i) {
             if (page.entries[i]._id == e[1]._id) { idx = i; break; };
