@@ -1,4 +1,4 @@
-#Anything and everything to do with view controllers (not directly UI) above the driver level
+#The vm service
 
 Dir.chdir File.join File.dirname(__FILE__), '../../'
 require './spec/env/kern.rb'

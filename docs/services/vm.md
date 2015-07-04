@@ -71,6 +71,64 @@ Assuming a crc function of `crc32(seed, string)`
 
 ------
 
+##Schemas
+
+###Special page schemas:
+The majority of pages are what ever the user wants them to be (as far as the content inside entries goes). There are, however, some special types of
+pages:
+
+####`vm_changelist_node` for `_cl_head` and `_cl_tail`
+```ruby
+vm_changelist_node = {
+  _head: null,
+  _type: "hash",
+  _next: <<uuid STR of next node or null>>,
+  _id: <<uuid STRI>>
+  entries: {
+    "diff" => <<vm_diff schema>>
+  },
+  _hash: <<CRC32>>
+}
+```
+
+###Other data-types
+
+####`vm_diff`
+```ruby
+vm_diff = [
+  <<vm_diff_entry>>,
+  <<vm_diff_entry>>,
+  ...
+]
+```
+
+####`vm_diff_entry`
+Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types are:
+```ruby
+#Entry Insertion
+#eindex - The index of the insertion.  The `_id` string for hash pages, and index in integer for array pages.
+#ehash - A hash that contains the entry.
+["+", eindex, ehash]
+
+#Entry Deletion
+#eid - The id of the entry that was deleted.
+["-", eid]
+
+#Entry Modification
+#eindex - The index of the insertion.  The `_id` string for hash pages, and index in integer for array pages.
+#ehash - A hash that contains the new entry to replace the old entry.
+["M", eindex, ehash]
+
+#Entry Move (This only applies to array types, page moves are a different matter all togeather)
+#efrom_index - The index, an integer, that the entry was located at.
+#eto_index - The index, an integer, that the entry is now located at.
+[">", efrom_index, eto_index]
+
+#Head or next pointer changed
+["HEAD_M", new_head_id]
+["NEXT_M", new_next_id]
+```
+
 ##Configuration
 The paging service may be configured in your `./config/services.rb`. You must set an array of pagers where each pager is responsible for a particular
 namespace. See [VM Pagers](./vm/pagers.md) for more info.
@@ -168,12 +226,29 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.
 
 ##Helper Methods
-###Pager specific
-  * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
 
-###Page modification
-  * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
+###Functional
+####Page modification (assuming inputs are modifiable)
+  * **Generic Page**
+    * `vm_create_page(type, id)` - Create a new page, type may be `array` or `hash`. **this does not write anything to memory. It has no side effects except returning a hash**. If
+        id is not given, it is automatically generated.
+    * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it
+  * **Diff helpers**
+    * `vm_diff(old_page, new_page)` - Returns an array of type `vm_diff` w.r.t to the old page.  E.g. if A appears in `new_page`, but not `old_page`
+        then it is an insertion.
+    * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
+  * **Change List helpers**
+    * `vm_cl_push(page, cl)` - Adds the given `vm_changelist_node`'s `_id` to a pages changelist list via `_cl_head` or `_cl_tail` . If `_cl_head` or `_cl_tail` does not exist, or is null, then both `_cl_head` and
+        `_cl_tail` are initialized to the `id` of the changelist. Else, the tail node is modified to next to the new changelist node and the new
+        `_cl_tail` points to this page.
+    * `vm_cl_pop(page)` - Returns the changelist pointed to by `_cl_head` if it exists. The page is modified in this operation. If no changelist
+        exists, then this function returns null. Both `_cl_head` and `_cl_tail` are cleared if there is no longer any changelists left.
+    * `vm_cl_create(diff)` - Returns a new page that follows the `cl_changelist_node` schema.
+
+###Non functional
+####Pager specific
+  * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
 
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers
