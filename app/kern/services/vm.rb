@@ -111,6 +111,25 @@ service :vm do
     <% if @debug %>
       vm_write_list = [];
     <% end %>
+
+    //Generic Page Helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function vm_create_page(type, id) {
+      var page = {
+        _id: id,
+        _head: null,
+        _next: null,
+        _hash: null,
+        _type: type,
+      };
+
+      if (type === "array") { page.entries = []; }
+      else if (type === "hash") { page.entries = {}; }
+      else { throw "The type given in vm_create_page: '" + type + "' should be either 'array' or 'hash'"}
+
+      return page;
+    }
+    ///////////////////////////////////////////////////////////////////////////
   }
 
   on_wakeup %{

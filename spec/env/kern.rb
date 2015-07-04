@@ -27,6 +27,25 @@ shared_context "kern" do
 
       return JSON.parse(json_res)
     end
+
+    #Will return everything put into the 'dump' dictionary (pre-defined for your convenience)
+    def evald str
+      self.eval "dump = {}"
+      self.eval str
+      _dump = self.dump("dump")
+
+      return DumpHelper.new(_dump)
+    end
+  end
+
+  class DumpHelper
+    def initialize dump
+      @dump = dump
+    end
+
+    def [](index)
+      return @dump[index]
+    end
   end
 
   #Execute flok binary with a command
