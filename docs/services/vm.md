@@ -115,9 +115,9 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 ["-", eid]
 
 #Entry Modification
-#eindex - The index of the insertion.  The `_id` string for hash pages, and index in integer for array pages.
+#eid - The id of the entry that was modified.
 #ehash - A hash that contains the new entry to replace the old entry.
-["M", eindex, ehash]
+["M", eid, ehash]
 
 #Entry Move (This only applies to array types, page moves are a different matter all togeather)
 #efrom_index - The index, an integer, that the entry was located at.

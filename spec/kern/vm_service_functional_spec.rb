@@ -172,32 +172,46 @@ RSpec.describe "kern:vm_service_functional" do
 
   #vm_diff
   ###########################################################################
-  it "can use vm_diff for array with modified entry" do
+  it "can use vm_diff with modified entry" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
 
     #Run the checks
     ctx.eval pages_src
 
+    #Array
     expect(ctx.dump("diff_them(mod0)")).to eq([
-      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "0"}]
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
     ])
     expect(ctx.dump("diff_them(mod1)")).to eq([
-      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "1"}]
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
     expect(ctx.dump("diff_them(mod2)")).to eq([
-      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "0"}],
-      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "1"}]
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
+    ])
+
+    #Hash
+    expect(ctx.dump("diff_them(hmod0)")).to eq([
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new"}]
+    ])
+    expect(ctx.dump("diff_them(hmod1)")).to eq([
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new"}]
+    ])
+    expect(ctx.dump("diff_them(hmod2)")).to eq([
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new"}],
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new"}]
     ])
   end
 
-  it "can use vm_diff for array with deleted entry" do
+  it "can use vm_diff with deleted entry" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
 
     #Run the checks
     ctx.eval pages_src
 
+    #Array
     expect(ctx.dump("diff_them(dmod0)")).to eq([
       ["-", "id0"]
     ])
@@ -207,16 +221,28 @@ RSpec.describe "kern:vm_service_functional" do
     expect(ctx.dump("diff_them(dmod2)")).to eq([
       ["-", "id1"], ["-", "id0"]
     ])
+
+    #Hash
+    expect(ctx.dump("diff_them(hdmod0)")).to eq([
+      ["-", "id0"]
+    ])
+    expect(ctx.dump("diff_them(hdmod1)")).to eq([
+      ["-", "id1"]
+    ])
+    expect(ctx.dump("diff_them(hdmod2)")).to eq([
+      ["-", "id1"], ["-", "id0"]
+    ])
   end
 
   #Inserted is just opposite of deleted, so we flip them
-  it "can use vm_diff for array with inserted entry" do
+  it "can use vm_diff with inserted entry" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
 
     #Run the checks
     ctx.eval pages_src
 
+    #Array
     expect(ctx.dump("diff_them_reverse(dmod0)")).to eq([
       ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}]
     ])
@@ -227,6 +253,19 @@ RSpec.describe "kern:vm_service_functional" do
       ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}],
       ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
     ])
+
+    #Hash
+    expect(ctx.dump("diff_them_reverse(hdmod0)")).to eq([
+      ["+", "id0", {"value" => "a", "_sig" => "sig0"}]
+    ])
+    expect(ctx.dump("diff_them_reverse(hdmod1)")).to eq([
+      ["+", "id1", {"value" => "b", "_sig" => "sig1"}]
+    ])
+    expect(ctx.dump("diff_them_reverse(hdmod2)")).to eq([
+      ["+", "id0", {"value" => "a", "_sig" => "sig0"}],
+      ["+", "id1", {"value" => "b", "_sig" => "sig1"}]
+    ])
+
   end
   ###########################################################################
 

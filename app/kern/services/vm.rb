@@ -137,38 +137,88 @@ service :vm do
       //All diff messages end up here
       var diff_log = [];
       var entry_diff = {};
-      //Old entrys first
-      for (var i = 0; i < old_page.entries.length; ++i) {
-        var old_entry = old_page.entries[i];
-        var _id = old_entry._id;
-        var _sig = old_entry._sig;
-        entry_diff[_id] = _sig;
-      }
-      //New entrys
-      for (var i = 0; i < new_page.entries.length; ++i) {
-        var new_entry = new_page.entries[i];
-        var _id = new_entry._id;
-        var _sig = new_entry._sig;
-        //Modify:
-        //  Existed in old entry and the signature is different
-        var old_sig = entry_diff[_id];
-        if (old_sig) {
-          if (old_sig != _sig) {
-            diff_log.push(["M", i, new_entry]);
-          }
-          delete entry_diff[_id];
-        }
-        //Inserted, old_sig didn't exist
-        else {
-          diff_log.push(["+", i, new_entry]);
-        }
-      }
 
-      //Remaining have been deleted
-      var old_ids = Object.keys(entry_diff);
-      while (old_ids.length > 0) {
-          diff_log.push(["-", old_ids.pop()]);
+      //Array type
+      ///////////////////
+      if (old_page._type === "array") {
+        //Old entrys first
+        for (var i = 0; i < old_page.entries.length; ++i) {
+          var old_entry = old_page.entries[i];
+          var _id = old_entry._id;
+          var _sig = old_entry._sig;
+          entry_diff[_id] = _sig;
+        }
+
+        //New entrys
+        for (var i = 0; i < new_page.entries.length; ++i) {
+          var new_entry = new_page.entries[i];
+          var _id = new_entry._id;
+          var _sig = new_entry._sig;
+          //Modify:
+          //  Existed in old entry and the signature is different
+          var old_sig = entry_diff[_id];
+          if (old_sig) {
+            if (old_sig != _sig) {
+              diff_log.push(["M", _id, new_entry]);
+            }
+            delete entry_diff[_id];
+          }
+          //Inserted, old_sig didn't exist
+          else {
+            diff_log.push(["+", i, new_entry]);
+          }
+        }
+
+        //Remaining have been deleted
+        var old_ids = Object.keys(entry_diff);
+        while (old_ids.length > 0) {
+            diff_log.push(["-", old_ids.pop()]);
+        }
+      ///////////////////
+
+      //Hash type
+      ///////////////////
+      } else if (old_page._type === "hash"){
+        var old_entry_keys = Object.keys(old_page.entries);
+        var new_entry_keys = Object.keys(new_page.entries);
+
+        //Old entrys first
+        for (var i = 0; i < old_entry_keys.length; ++i) {
+          var old_entry = old_page.entries[old_entry_keys[i]];
+          var _id = old_entry_keys[i];
+          var _sig = old_entry._sig;
+          entry_diff[_id] = _sig;
+        }
+
+        //New entrys
+        for (var i = 0; i < new_entry_keys.length; ++i) {
+          var new_entry = new_page.entries[new_entry_keys[i]];
+          var _id = new_entry_keys[i];
+          var _sig = new_entry._sig;
+          //Modify:
+          //  Existed in old entry and the signature is different
+          var old_sig = entry_diff[_id];
+          if (old_sig) {
+            if (old_sig != _sig) {
+              diff_log.push(["M", _id, new_entry]);
+            }
+            delete entry_diff[_id];
+          }
+          //Inserted, old_sig didn't exist
+          else {
+            diff_log.push(["+", _id, new_entry]);
+          }
+        }
+
+        //Remaining have been deleted
+        var old_ids = Object.keys(entry_diff);
+        while (old_ids.length > 0) {
+            diff_log.push(["-", old_ids.pop()]);
+        }
+      } else {
+        throw "vm_diff got entries in old_page that was not an array or hash type. Type was: " + old_page._type;
       }
+      ///////////////////
       return diff_log;
     }
 
