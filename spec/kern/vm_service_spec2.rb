@@ -36,4 +36,17 @@ RSpec.describe "kern:vm_service" do
       "options" => {"foo" => "bar"}
     })
   end
+
+  it "Can create a controller with a watch containing diff in params and that ends up in vm_diff_controllers" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller_diff.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    vm_diff_bps = ctx.dump("vm_diff_bps")
+    expect(vm_diff_bps).to eq({ctx.eval("base").to_s => true})
+  end
 end

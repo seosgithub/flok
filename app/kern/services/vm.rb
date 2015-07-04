@@ -1,17 +1,23 @@
 service :vm do
   global %{
+  _vm_page_replay = true;
     //Cache contains a blank hash for each namespace
     vm_cache = {
       <% @options[:pagers].each do |p| %>
         <%= p[:namespace] %>: {},
       <% end %>
     };
+    vm_transaction_in_progress = false;
 
     vm_dirty = {
       <% @options[:pagers].each do |p| %>
         <%= p[:namespace] %>: {},
       <% end %>
     };
+
+    //A map of connections that is set to bp => true for every
+    //controller that has given 'diff' option in watch
+    vm_diff_bps = {};
 
     vm_bp_to_nmap = {};
 
@@ -22,21 +28,221 @@ service :vm do
       <% end %>
     };
 
+    function vm_cache_write_unsynced(ns, page) {
+      //If hash matches, don't write
+      var old = vm_cache[ns][page._id];
+      if (old && old._hash == page._hash) { return; }
+
+      //No older page, no diff
+      if (!old) {
+        return vm_cache_write(ns, page);
+      }
+
+      //Calculate diff
+      var diff = vm_diff(old, page);
+
+      //Create a new page
+      var cl_page = {
+        _head: null,
+        _next: null,
+        _id: gen_id(),
+        _type: "hash",
+        entries: {
+          "diff": {value: diff, _sig: gen_id()}
+        }
+      };
+
+      //Add to page if there was no change list
+      if (!old._cl_head) {
+        page._cl_head = cl_page._id;
+        page._cl_tail = cl_page._id;
+      } else {
+        throw "Not supported";
+      }
+
+      vm_cache_write(ns, cl_page);
+      vm_cache_write(ns, page);
+
+      console.log("Wrote diff page in", cl_page);
+      console.log("Wrote diff page in", page);
+    }
+
+    function vm_cache_write_sync(ns, page, integrated) {
+      console.log("write sync");
+      //If hash matches, don't write
+      var old = vm_cache[ns][page._id];
+      if (old && old._hash == page._hash) { return; }
+      console.log("passed hash");
+
+      page._cl_head = old._cl_head;
+      page._cl_tail  = old._cl_tail;
+      console.log("before replay", page);
+
+      var cl_head_page = vm_cache[ns][page._cl_head];
+      if (_vm_page_replay === true) {
+        vm_page_replay(page, cl_head_page.entries.diff.value);
+      }
+      console.log("Diff", cl_head_page);
+      console.log("after replay", page);
+
+      vm_cache_write(ns, page);
+    }
+
     //Cache
     function vm_cache_write(ns, page) {
+      //If hash matches, don't write
       var old = vm_cache[ns][page._id];
       if (old && old._hash == page._hash) { return; }
 
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
 
-      //Try to lookup view controller(s) to notify
+      //Try to lookup listeners to notify
       var nbp = vm_notify_map[ns][page._id];
       if (nbp) {
         for (var i = 0; i < nbp.length; ++i) {
-          int_event_defer(nbp[i], "read_res", page);
+          var bp = nbp[i];
+
+          //If the receiver requested a diff mode in watch...
+          if (vm_diff_bps[bp]) {
+            var diff = vm_diff(old, page);
+
+            //Still send read_res
+            if (vm_transaction_in_progress) {
+              vm_transaction_queue.push([bp, "read_res_update", page]);
+            } else {
+              int_event_defer(bp, "read_res_update", page);
+            }
+
+            while (diff.length > 0) {
+              var e = diff.pop();
+              var _type = e[0];
+              if (_type === "modify") {
+                if (vm_transaction_in_progress) {
+                  vm_transaction_queue.push([bp, "entry_modified", {page_id: page._id, entry: e[1]}]);
+                } else {
+                  int_event_defer(bp, "entry_modified", {page_id: page._id, entry: e[1]});
+                }
+              } else if (_type === "insert") {
+                if (vm_transaction_in_progress) {
+                  var delete_map_info = vm_transaction_delete_map[e[1]._id];
+                  if (delete_map_info) {
+                    var was_deleted_index = delete_map_info[1];
+                  }
+                  //Checking if it was deleted in another page, this means it was moved...
+                  if (delete_map_info) {
+                    //Remove deletion from the transaction queue
+                    vm_transaction_queue.splice(was_deleted_index, 1);
+
+                    //Insert a move *to* this page
+                    vm_transaction_queue.push([bp, "entry_moved", {from_page: delete_map_info[0], to_page: page._id, entry: e[1]}]);
+                  } else {
+                    vm_transaction_queue.push([bp, "entry_inserted", {page_id: page._id, entry: e[1]}]);
+                    vm_transaction_insert_map[e[1]] = vm_transaction_queue.length-1;
+                  }
+                } else {
+                  int_event_defer(bp, "entry_inserted", {page_id: page._id, entry: e[1]});
+                }
+              } else if (_type === "delete") {
+                if (vm_transaction_in_progress) {
+                  vm_transaction_queue.push([bp, "entry_deleted", {page_id: page._id, entry_id: e[1]}]);
+                  vm_transaction_delete_map[e[1]] = [page._id, vm_transaction_queue.length-1];
+                } else {
+                  int_event_defer(bp, "entry_deleted", {page_id: page._id, entry_id: e[1]});
+                }
+              }
+            }
+          } else {
+            int_event_defer(bp, "read_res", page);
+          }
         }
       }
+    }
+
+    //Transactions are meant for cache writes, multiple pages can be written in a transaction
+    //Which can allow things like differential watching to detect moves across page boundaries.
+    function vm_transaction_begin() {
+      vm_transaction_in_progress = true;
+      vm_transaction_queue = [];
+      vm_transaction_insert_map = {};
+      vm_transaction_delete_map = {};
+    }
+
+    function vm_transaction_end() {
+      vm_transaction_in_progress = false;
+
+      for (var i = 0; i < vm_transaction_queue.length; ++i) {
+        var e = vm_transaction_queue[i];
+        int_event_defer(e[0], e[1], e[2]);
+      }
+    }
+
+    function vm_page_replay(page, diff) {
+      for (var i = 0; i < diff.length; ++i) {
+        var e = diff[i];
+        var type = e[0];
+
+        //Insert it at the beginning
+        if (type === "insert") {
+        console.log("vm replay insert");
+          page.entries.splice(0, 1, e[1]);
+        } else if (type === "modify") {
+        console.log("vm replay modify");
+          var idx = -1;
+          for (var i = 0; i < page.entries.length; ++i) {
+            if (page.entries[i]._id == e[1]._id) { idx = i; break; };
+          }
+
+          if (idx === -1) { throw "Couldn't find element with matching id" };
+          page.entries[idx] = e[1];
+        }
+      }
+    }
+
+    function vm_diff(old_page, new_page) {
+      //All diff messages end up here
+      var diff_log = [];
+
+      var entry_diff = {};
+      //Old entrys first
+      for (var i = 0; i < old_page.entries.length; ++i) {
+        var old_entry = old_page.entries[i];
+        var _id = old_entry._id;
+        var _sig = old_entry._sig;
+
+        entry_diff[_id] = _sig;
+      }
+
+      //New entrys
+      for (var i = 0; i < new_page.entries.length; ++i) {
+        var new_entry = new_page.entries[i];
+        var _id = new_entry._id;
+        var _sig = new_entry._sig;
+
+        //Modify:
+        //  Existed in old entry and the signature is different
+        var old_sig = entry_diff[_id];
+        if (old_sig) {
+          if (old_sig != _sig) {
+            diff_log.push(["modify", new_entry]);
+          }
+
+          delete entry_diff[_id];
+        }
+
+        //Inserted, old_sig didn't exist
+        else {
+          diff_log.push(["insert", new_entry]);
+        }
+      }
+
+      //Remaining have been deleted
+      var old_ids = Object.keys(entry_diff);
+      while (old_ids.length > 0) {
+          diff_log.push(["delete", old_ids.pop()]);
+      }
+
+      return diff_log;
     }
 
     function vm_rehash_page(page) {
@@ -189,6 +395,11 @@ service :vm do
     //Cache entry
     var cache_entry = vm_cache[params.ns][params.id];
 
+    //Diff?
+    if (params.diff === true) {
+      vm_diff_bps[bp] = true;
+    }
+
     //Ensure map exists
     ////////////////////////////////////////////////
     var b = vm_notify_map[params.ns][params.id];
@@ -269,6 +480,7 @@ service :vm do
     vm_notify_map[params.ns][params.id].splice(midx, 1);
 
     delete vm_bp_to_nmap[bp][params.ns][params.id];
+    delete vm_diff_bps[bp];
 
     <% @options[:pagers].each do |p| %>
       if (params.ns === "<%= p[:namespace] %>") {

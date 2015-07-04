@@ -175,6 +175,9 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it
 
+###Functional Helpers
+  * `vm_calc_diff(old_page, new_page)` - Calculate the diff between two pages.  See vm_diff section on this page
+
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers
 will not receive the notifications of the page modifications. Once using these modifications, you must make a request for `write`. You should not use the information you updated to update your controller right away; you should wait for a `read_res` back because you `watched` the page you just updated. This will normally be performed right away if it's something like the memory pager.
@@ -183,7 +186,7 @@ Aside, modifying a page goes against the semantics of the vm system; you're thin
 
 If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`.
 
-####Per entry
+####Controller Per entry
   * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements. type can either be `array` or `hash`. `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.
@@ -226,6 +229,14 @@ on "read_res", %{
 
 ##Pagers
 See [Pagers](./vm/pagers.md) for information for pager responsibilities and how to implement them.
+
+##`vm_diff` Format
+vm_diff is an array of changes like a `git` changelist. The following changes are supported
+  * `["entry_insert", "index", "value"]` - An entry was inserted with the given value at an index
+  * `["entry_del", "index"]` - An entry was deleted with the given index
+
+###Used by:
+  * `vm_calc_diff`
 
 ##Spec helpers
 The variable `vm_did_wakeup` is set to true in the wakeup part of the vm service.
