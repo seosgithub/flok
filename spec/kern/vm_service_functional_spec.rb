@@ -169,4 +169,116 @@ RSpec.describe "kern:vm_service_functional" do
     })
   end
   ###########################################################################
+
+  #vm_diff
+  ###########################################################################
+  it "can use vm_diff for array with modified entry" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    expect(ctx.dump("diff_them(mod0)")).to eq([
+      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "0"}]
+    ])
+    expect(ctx.dump("diff_them(mod1)")).to eq([
+      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "1"}]
+    ])
+    expect(ctx.dump("diff_them(mod2)")).to eq([
+      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "0"}],
+      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "1"}]
+    ])
+  end
+
+  it "can use vm_diff for array with deleted entry" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    expect(ctx.dump("diff_them(dmod0)")).to eq([
+      ["-", "id0"]
+    ])
+    expect(ctx.dump("diff_them(dmod1)")).to eq([
+      ["-", "id1"]
+    ])
+    expect(ctx.dump("diff_them(dmod2)")).to eq([
+      ["-", "id1"], ["-", "id0"]
+    ])
+  end
+
+  #Inserted is just opposite of deleted, so we flip them
+  it "can use vm_diff for array with inserted entry" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    expect(ctx.dump("diff_them_reverse(dmod0)")).to eq([
+      ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}]
+    ])
+    expect(ctx.dump("diff_them_reverse(dmod1)")).to eq([
+      ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
+    ])
+    expect(ctx.dump("diff_them_reverse(dmod2)")).to eq([
+      ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}],
+      ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
+    ])
+  end
+  ###########################################################################
+
+  #vm_diff_replay
+  ###########################################################################
+  it "can use vm_diff_replay to replay insert" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    res = ctx.eval %{
+      //Insert one at beginning (revese delete)
+      var diff = diff_them_reverse(dmod0)
+      vm_diff_replay(dmod0[1], diff);
+
+      //Insert one at index 1
+      diff = diff_them_reverse(dmod1)
+      vm_diff_replay(dmod1[1], diff);
+    }
+
+    replayed_page0 = ctx.dump("dmod0[0]")
+    original_page0 = ctx.dump("dmod0[1]")
+
+    replayed_page1 = ctx.dump("dmod1[0]")
+    original_page1 = ctx.dump("dmod1[1]")
+
+    diff = ctx.dump("diff")
+    puts diff.inspect
+
+    #expect(original_page0).to eq(replayed_page0)
+    expect(original_page1).to eq(replayed_page1)
+  end
+
+  it "can use vm_diff_replay to replay 1 modify" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    #One insert (Backwards delete)
+    res = ctx.eval %{
+      var diff = diff_them(mod0)
+      vm_diff_replay(mod0[0], diff);
+    }
+
+    replayed_page = ctx.dump("mod0[0]")
+    original_page = ctx.dump("mod0[1]")
+
+    expect(original_page).to eq(replayed_page)
+  end
+  ###########################################################################
 end
