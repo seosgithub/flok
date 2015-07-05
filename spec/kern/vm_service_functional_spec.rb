@@ -192,17 +192,6 @@ RSpec.describe "kern:vm_service_functional" do
       diff = diff_them_reverse(dmod1)
       vm_diff_replay(dmod1[1], diff);
       /////////////////////////////////////////////
-
-      //Hash
-      /////////////////////////////////////////////
-      //Insert one at beginning (revese delete)
-      var hdiff = diff_them_reverse(hdmod0)
-      vm_diff_replay(hdmod0[1], hdiff);
-
-      //Insert one at index 1
-      hdiff = diff_them_reverse(hdmod1)
-      vm_diff_replay(hdmod1[1], hdiff);
-      /////////////////////////////////////////////
     }
 
     #Array
@@ -211,17 +200,8 @@ RSpec.describe "kern:vm_service_functional" do
     replayed_page1 = ctx.dump("dmod1[0]")
     original_page1 = ctx.dump("dmod1[1]")
 
-    #Hash
-    hreplayed_page0 = ctx.dump("hdmod0[0]")
-    horiginal_page0 = ctx.dump("hdmod0[1]")
-    hreplayed_page1 = ctx.dump("hdmod1[0]")
-    horiginal_page1 = ctx.dump("hdmod1[1]")
-
     expect(original_page0).to eq(replayed_page0)
     expect(original_page1).to eq(replayed_page1)
-
-    expect(horiginal_page0).to eq(hreplayed_page0)
-    expect(horiginal_page1).to eq(hreplayed_page1)
   end
 
   it "can use vm_diff_replay to replay modify" do
@@ -236,22 +216,13 @@ RSpec.describe "kern:vm_service_functional" do
       //Array
       var diff = diff_them(mod0)
       vm_diff_replay(mod0[0], diff);
-
-      //Hash
-      var hdiff = diff_them(hmod0)
-      vm_diff_replay(hmod0[0], hdiff);
     }
 
     #Array
     replayed_page = ctx.dump("mod0[0]")
     original_page = ctx.dump("mod0[1]")
 
-    #Hash
-    hreplayed_page = ctx.dump("hmod0[0]")
-    horiginal_page = ctx.dump("hmod0[1]")
-
     expect(original_page).to eq(replayed_page)
-    expect(horiginal_page).to eq(hreplayed_page)
   end
   ###########################################################################
 end

@@ -162,46 +162,24 @@ service :vm do
     }
 
     function vm_diff_replay(page, diff) {
-      if (page._type === "array") {
-        for (var i = 0; i < diff.length; ++i) {
-          var e = diff[i];
+      for (var i = 0; i < diff.length; ++i) {
+        var e = diff[i];
 
-          //vm_diff type
-          var type = e[0];
-          if (type === "+") {
-            var eindex = e[1];
-            var entry = e[2];
+        //vm_diff type
+        var type = e[0];
+        if (type === "+") {
+          var eindex = e[1];
+          var entry = e[2];
 
-            //Insertion
-            page.entries.splice(eindex, 0, entry);
-          } else if (type === "M") {
-            var eindex = e[1];
-            var entry = e[2];
+          //Insertion
+          page.entries.splice(eindex, 0, entry);
+        } else if (type === "M") {
+          var eindex = e[1];
+          var entry = e[2];
 
-            //Take out old, put in new
-            page.entries.splice(eindex, 1, entry);
-          }
+          //Take out old, put in new
+          page.entries.splice(eindex, 1, entry);
         }
-      } else if (page._type === "hash") {
-        for (var i = 0; i < diff.length; ++i) {
-          var e = diff[i];
-
-          //vm_diff type
-          var type = e[0];
-          if (type === "+") {
-            var eindex = e[1];
-            var entry = e[2];
-
-            page.entries[eindex] = entry;
-          } else if (type === "M") {
-            var eindex = e[1];
-            var entry = e[2];
-
-            page.entries[eindex] = entry;
-          }
-        }
-      } else {
-        throw "vm_diff_replay encountered a page that was neither an array or hash: " + page._type;
       }
     } 
     ///////////////////////////////////////////////////////////////////////////
