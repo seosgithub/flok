@@ -121,7 +121,6 @@ RSpec.describe "kern:vm_service_functional" do
     #Run the checks
     ctx.eval pages_src
 
-    #Array
     expect(ctx.dump("diff_them(mod0)")).to eq([
       ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
     ])
@@ -132,18 +131,6 @@ RSpec.describe "kern:vm_service_functional" do
       ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
       ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
-
-    #Hash
-    expect(ctx.dump("diff_them(hmod0)")).to eq([
-      ["M", "id0", {"value" => "b", "_sig" => "sig_new"}]
-    ])
-    expect(ctx.dump("diff_them(hmod1)")).to eq([
-      ["M", "id1", {"value" => "c", "_sig" => "sig_new"}]
-    ])
-    expect(ctx.dump("diff_them(hmod2)")).to eq([
-      ["M", "id0", {"value" => "b", "_sig" => "sig_new"}],
-      ["M", "id1", {"value" => "c", "_sig" => "sig_new"}]
-    ])
   end
 
   it "can use vm_diff with deleted entry" do
@@ -153,7 +140,6 @@ RSpec.describe "kern:vm_service_functional" do
     #Run the checks
     ctx.eval pages_src
 
-    #Array
     expect(ctx.dump("diff_them(dmod0)")).to eq([
       ["-", "id0"]
     ])
@@ -161,17 +147,6 @@ RSpec.describe "kern:vm_service_functional" do
       ["-", "id1"]
     ])
     expect(ctx.dump("diff_them(dmod2)")).to eq([
-      ["-", "id1"], ["-", "id0"]
-    ])
-
-    #Hash
-    expect(ctx.dump("diff_them(hdmod0)")).to eq([
-      ["-", "id0"]
-    ])
-    expect(ctx.dump("diff_them(hdmod1)")).to eq([
-      ["-", "id1"]
-    ])
-    expect(ctx.dump("diff_them(hdmod2)")).to eq([
       ["-", "id1"], ["-", "id0"]
     ])
   end
@@ -184,7 +159,6 @@ RSpec.describe "kern:vm_service_functional" do
     #Run the checks
     ctx.eval pages_src
 
-    #Array
     expect(ctx.dump("diff_them_reverse(dmod0)")).to eq([
       ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}]
     ])
@@ -195,19 +169,6 @@ RSpec.describe "kern:vm_service_functional" do
       ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}],
       ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
     ])
-
-    #Hash
-    expect(ctx.dump("diff_them_reverse(hdmod0)")).to eq([
-      ["+", "id0", {"value" => "a", "_sig" => "sig0"}]
-    ])
-    expect(ctx.dump("diff_them_reverse(hdmod1)")).to eq([
-      ["+", "id1", {"value" => "b", "_sig" => "sig1"}]
-    ])
-    expect(ctx.dump("diff_them_reverse(hdmod2)")).to eq([
-      ["+", "id0", {"value" => "a", "_sig" => "sig0"}],
-      ["+", "id1", {"value" => "b", "_sig" => "sig1"}]
-    ])
-
   end
   ###########################################################################
 
