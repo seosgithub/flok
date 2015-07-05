@@ -233,8 +233,14 @@ service :vm do
             var eindex = e[1];
             var entry = e[2];
 
-            page.entries.splice(eindex, 1, entry);
+            //Insertion
+            page.entries.splice(eindex, 0, entry);
           } else if (type === "M") {
+            var eindex = e[1];
+            var entry = e[2];
+
+            //Take out old, put in new
+            page.entries.splice(eindex, 1, entry);
           }
         }
       } else if (page._type === "hash") {
@@ -244,6 +250,11 @@ service :vm do
           //vm_diff type
           var type = e[0];
           if (type === "+") {
+            var eindex = e[1];
+            var entry = e[2];
+
+            page.entries[eindex] = entry;
+          } else if (type === "M") {
             var eindex = e[1];
             var entry = e[2];
 

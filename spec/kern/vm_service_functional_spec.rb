@@ -319,7 +319,6 @@ RSpec.describe "kern:vm_service_functional" do
 
     expect(horiginal_page0).to eq(hreplayed_page0)
     expect(horiginal_page1).to eq(hreplayed_page1)
-
   end
 
   it "can use vm_diff_replay to replay modify" do
@@ -331,14 +330,25 @@ RSpec.describe "kern:vm_service_functional" do
 
     #One insert (Backwards delete)
     ctx.eval %{
+      //Array
       var diff = diff_them(mod0)
       vm_diff_replay(mod0[0], diff);
+
+      //Hash
+      var hdiff = diff_them(hmod0)
+      vm_diff_replay(hmod0[0], hdiff);
     }
 
+    #Array
     replayed_page = ctx.dump("mod0[0]")
     original_page = ctx.dump("mod0[1]")
 
+    #Hash
+    hreplayed_page = ctx.dump("hmod0[0]")
+    horiginal_page = ctx.dump("hmod0[1]")
+
     expect(original_page).to eq(replayed_page)
+    expect(horiginal_page).to eq(hreplayed_page)
   end
   ###########################################################################
 end

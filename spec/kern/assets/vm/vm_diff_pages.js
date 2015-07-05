@@ -67,7 +67,8 @@ hmod0[1].entries["id0"]._sig = 'sig_new';
 //Changing one element when two are present (array)
 mod1 = gen_pages("array", null, null, [
     {"value": 'a'},
-    {"value": 'b'}
+    {"value": 'b'},
+    {"value": 'd'}
 ]);
 mod1[1].entries[1].value = 'c';
 mod1[1].entries[1]._sig = 'sig_new';
@@ -113,7 +114,8 @@ dmod0[1].entries.splice(0, 1);
 //Deleting one element when two are present
 dmod1 = gen_pages("array", null, null, [
     {"value": 'a'},
-    {"value": 'b'}
+    {"value": 'b'},
+    {"value": 'c'}
 ]);
 dmod1[1].entries.splice(1, 1);
 
