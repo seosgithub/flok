@@ -49,26 +49,11 @@ service :vm do
       z = crc32(z, page._id)
 
       //Hash differently based on type
-      if (page._type === "array") {
-        var e = page.entries;
-        for (var i = 0; i < e.length; ++i) {
-          z = crc32(z, e[i]._sig);
-        }
-      } else if (page._type === "hash") {
-        var keys = Object.keys(page.entries);
-        var e = page.entries;
-        var q = 0;
-        for (var i = 0; i < keys.length; ++i) {
-          var _sig = e[keys[i]]._sig;
-          var r = crc32(0, _sig);
-          q = q + r;
-        }
-        q = +q;
-        z = crc32(z, q.toString());
-      } <% if @debug %> else {
-        throw "vm_rehash_page got an unspported type: "+page._type;
+      var e = page.entries;
+      for (var i = 0; i < e.length; ++i) {
+        z = crc32(z, e[i]._sig);
       }
-      <% end %>
+
       page._hash = z.toString();
     }
 
