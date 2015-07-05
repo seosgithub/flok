@@ -181,14 +181,14 @@ RSpec.describe "kern:vm_service_functional" do
 
     #Array
     expect(ctx.dump("diff_them(mod0)")).to eq([
-      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
+      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
     ])
     expect(ctx.dump("diff_them(mod1)")).to eq([
-      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
+      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
     expect(ctx.dump("diff_them(mod2)")).to eq([
-      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
-      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
+      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
+      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
 
     #Hash
@@ -278,7 +278,7 @@ RSpec.describe "kern:vm_service_functional" do
     #Run the checks
     ctx.eval pages_src
 
-    res = ctx.eval %{
+    ctx.eval %{
       //Array
       /////////////////////////////////////////////
       //Insert one at beginning (revese delete)
@@ -322,7 +322,7 @@ RSpec.describe "kern:vm_service_functional" do
 
   end
 
-  it "can use vm_diff_replay to replay 1 modify" do
+  it "can use vm_diff_replay to replay modify" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
 
@@ -330,7 +330,7 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     #One insert (Backwards delete)
-    res = ctx.eval %{
+    ctx.eval %{
       var diff = diff_them(mod0)
       vm_diff_replay(mod0[0], diff);
     }

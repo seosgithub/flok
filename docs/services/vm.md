@@ -115,7 +115,7 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 ["-", eid]
 
 #Entry Modification
-#eid - The id of the entry that was modified.
+#eindex - The index of the entry, array it is numerical, for hashes it is the key
 #ehash - A hash that contains the new entry to replace the old entry.
 ["M", eid, ehash]
 

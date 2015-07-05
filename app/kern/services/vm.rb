@@ -159,7 +159,7 @@ service :vm do
           var old_sig = entry_diff[_id];
           if (old_sig) {
             if (old_sig != _sig) {
-              diff_log.push(["M", _id, new_entry]);
+              diff_log.push(["M", i, new_entry]);
             }
             delete entry_diff[_id];
           }
@@ -200,7 +200,7 @@ service :vm do
           var old_sig = entry_diff[_id];
           if (old_sig) {
             if (old_sig != _sig) {
-              diff_log.push(["M", _id, new_entry]);
+              diff_log.push(["M", new_entry_keys[i], new_entry]);
             }
             delete entry_diff[_id];
           }
@@ -234,6 +234,7 @@ service :vm do
             var entry = e[2];
 
             page.entries.splice(eindex, 1, entry);
+          } else if (type === "M") {
           }
         }
       } else if (page._type === "hash") {
