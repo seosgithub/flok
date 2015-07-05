@@ -150,13 +150,13 @@ service :vm do
         var old_sig = entry_diff[_id];
         if (old_sig) {
           if (old_sig != _sig) {
-            diff_log.push(["M", i, new_entry]);
+            diff_log.push(["M", _id, new_entry]);
           }
           delete entry_diff[_id];
         }
         //Inserted, old_sig didn't exist
         else {
-          diff_log.push(["+", i, new_entry]);
+          diff_log.push(["+", _id, new_entry]);
         }
       }
 

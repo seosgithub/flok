@@ -153,14 +153,14 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     expect(ctx.dump("diff_them(mod0)")).to eq([
-      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}]
     ])
     expect(ctx.dump("diff_them(mod1)")).to eq([
-      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
     expect(ctx.dump("diff_them(mod2)")).to eq([
-      ["M", 0, {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
-      ["M", 1, {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
+      ["M", "id0", {"value" => "b", "_sig" => "sig_new", "_id" => "id0"}],
+      ["M", "id1", {"value" => "c", "_sig" => "sig_new", "_id" => "id1"}]
     ])
   end
 
@@ -191,14 +191,14 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     expect(ctx.dump("diff_them_reverse(dmod0)")).to eq([
-      ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}]
+      ["+", "id0", {"value" => "a", "_sig" => "sig", "_id" => "id0"}]
     ])
     expect(ctx.dump("diff_them_reverse(dmod1)")).to eq([
-      ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
+      ["+", "id1", {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
     ])
     expect(ctx.dump("diff_them_reverse(dmod2)")).to eq([
-      ["+", 0, {"value" => "a", "_sig" => "sig", "_id" => "id0"}],
-      ["+", 1, {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
+      ["+", "id0", {"value" => "a", "_sig" => "sig", "_id" => "id0"}],
+      ["+", "id1", {"value" => "b", "_sig" => "sig", "_id" => "id1"}]
     ])
   end
   ###########################################################################
