@@ -112,6 +112,37 @@ RSpec.describe "kern:vm_service_functional" do
   end
   ###########################################################################
 
+  #vm_reindex_page
+  ###########################################################################
+  it "vm_reindex_page can calculate the __index correctly" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
+
+    #Run the check
+    res = ctx.eval %{
+      //Manually construct a page
+      var page = {
+        _head: null,
+        _next: null,
+        _id: "hello",
+        entries: [
+          {_id: "hello2", _sig: "nohteunth"},
+          {_id: "hello3", _sig: "nohteunth2"},
+        ]
+      }
+
+      vm_reindex_page(page);
+    }
+
+    #Expect the same hash
+    page = ctx.dump("page")
+    expect(page.keys).to include("__index")
+    expect(page["__index"]).to eq({
+      "hello2" => 0,
+      "hello3" => 1
+    })
+  end
+  ###########################################################################
+
   #vm_diff
   ###########################################################################
   it "can use vm_diff with modified entry" do

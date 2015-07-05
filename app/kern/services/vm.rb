@@ -39,23 +39,6 @@ service :vm do
       }
     }
 
-    function vm_rehash_page(page) {
-      var z = 0;
-
-      //head and next are optional
-      if (page._head) { var z = crc32(0, page._head) }
-      if (page._next) { z = crc32(z, page._next) }
-
-      z = crc32(z, page._id)
-
-      //Hash differently based on type
-      var e = page.entries;
-      for (var i = 0; i < e.length; ++i) {
-        z = crc32(z, e[i]._sig);
-      }
-
-      page._hash = z.toString();
-    }
 
     function vm_pageout() {
       <% @options[:pagers].each do |p| %>
@@ -114,6 +97,31 @@ service :vm do
       };
 
       return page;
+    }
+
+    function vm_rehash_page(page) {
+      var z = 0;
+
+      //head and next are optional
+      if (page._head) { var z = crc32(0, page._head) }
+      if (page._next) { z = crc32(z, page._next) }
+
+      z = crc32(z, page._id)
+
+      //Hash differently based on type
+      var e = page.entries;
+      for (var i = 0; i < e.length; ++i) {
+        z = crc32(z, e[i]._sig);
+      }
+
+      page._hash = z.toString();
+    }
+
+    function vm_reindex_page(page) {
+      page.__index = {};
+      for (var i = 0; i < page.entries.length; ++i) {
+        page.__index[page.entries[i]._id] = i;
+      }
     }
     ///////////////////////////////////////////////////////////////////////////
 
