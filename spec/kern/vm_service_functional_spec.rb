@@ -279,6 +279,8 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     res = ctx.eval %{
+      //Array
+      /////////////////////////////////////////////
       //Insert one at beginning (revese delete)
       var diff = diff_them_reverse(dmod0)
       vm_diff_replay(dmod0[1], diff);
@@ -286,19 +288,38 @@ RSpec.describe "kern:vm_service_functional" do
       //Insert one at index 1
       diff = diff_them_reverse(dmod1)
       vm_diff_replay(dmod1[1], diff);
+      /////////////////////////////////////////////
+
+      //Hash
+      /////////////////////////////////////////////
+      //Insert one at beginning (revese delete)
+      var hdiff = diff_them_reverse(hdmod0)
+      vm_diff_replay(hdmod0[1], hdiff);
+
+      //Insert one at index 1
+      hdiff = diff_them_reverse(hdmod1)
+      vm_diff_replay(hdmod1[1], hdiff);
+      /////////////////////////////////////////////
     }
 
+    #Array
     replayed_page0 = ctx.dump("dmod0[0]")
     original_page0 = ctx.dump("dmod0[1]")
-
     replayed_page1 = ctx.dump("dmod1[0]")
     original_page1 = ctx.dump("dmod1[1]")
 
-    diff = ctx.dump("diff")
-    puts diff.inspect
+    #Hash
+    hreplayed_page0 = ctx.dump("hdmod0[0]")
+    horiginal_page0 = ctx.dump("hdmod0[1]")
+    hreplayed_page1 = ctx.dump("hdmod1[0]")
+    horiginal_page1 = ctx.dump("hdmod1[1]")
 
-    #expect(original_page0).to eq(replayed_page0)
+    expect(original_page0).to eq(replayed_page0)
     expect(original_page1).to eq(replayed_page1)
+
+    expect(horiginal_page0).to eq(hreplayed_page0)
+    expect(horiginal_page1).to eq(hreplayed_page1)
+
   end
 
   it "can use vm_diff_replay to replay 1 modify" do

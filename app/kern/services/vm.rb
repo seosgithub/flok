@@ -223,21 +223,34 @@ service :vm do
     }
 
     function vm_diff_replay(page, diff) {
-      for (var i = 0; i < diff.length; ++i) {
-        var e = diff[i];
-        var type = e[0];
+      if (page._type === "array") {
+        for (var i = 0; i < diff.length; ++i) {
+          var e = diff[i];
 
-        //Insert it at the beginning
-        if (type === "insert") {
-          page.entries.splice(0, 1, e[1]);
-        } else if (type === "modify") {
-          var idx = -1;
-          for (var i = 0; i < page.entries.length; ++i) {
-            if (page.entries[i]._id == e[1]._id) { idx = i; break; };
+          //vm_diff type
+          var type = e[0];
+          if (type === "+") {
+            var eindex = e[1];
+            var entry = e[2];
+
+            page.entries.splice(eindex, 1, entry);
           }
-          if (idx === -1) { throw "vm_diff_replay: Couldn't find element with matching id" };
-          page.entries[idx] = e[1];
         }
+      } else if (page._type === "hash") {
+        for (var i = 0; i < diff.length; ++i) {
+          var e = diff[i];
+
+          //vm_diff type
+          var type = e[0];
+          if (type === "+") {
+            var eindex = e[1];
+            var entry = e[2];
+
+            page.entries[eindex] = entry;
+          }
+        }
+      } else {
+        throw "vm_diff_replay encountered a page that was neither an array or hash: " + page._type;
       }
     } 
     ///////////////////////////////////////////////////////////////////////////
