@@ -212,8 +212,8 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
 ###Functional
 ####Page modification (assuming inputs are modifiable)
   * **Generic Page**
-    * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**. If
-        id is not given, it is automatically generated.
+    * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**.
+    * `vm_create_page()` -  Same as vm_create_page, but generates an id fore you.
     * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it
     * `vm_reindex_page(page)` - Recalculates the `__index` field of the page. If `__index` does not exist, it is added.

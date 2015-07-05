@@ -114,18 +114,19 @@ service :vm do
 
     //Generic Page Helpers
     ///////////////////////////////////////////////////////////////////////////
-    function vm_create_page(type, id) {
+    function vm_create_page(id) {
+      if (id === undefined) {
+        id = gen_id();
+      }
+
       var page = {
         _id: id,
         _head: null,
         _next: null,
         _hash: null,
-        _type: type,
+        entries: [],
+        __index: {},
       };
-
-      if (type === "array") { page.entries = []; }
-      else if (type === "hash") { page.entries = {}; }
-      else { throw "The type given in vm_create_page: '" + type + "' should be either 'array' or 'hash'"}
 
       return page;
     }

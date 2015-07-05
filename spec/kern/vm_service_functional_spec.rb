@@ -19,27 +19,21 @@ RSpec.describe "kern:vm_service_functional" do
   it "Can can use vm_create_page" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     dump = ctx.evald %{
-      dump.new_array_page = vm_create_page("array", "my_id");
-      dump.new_hash_page = vm_create_page("hash", "my_id");
+      dump.new_page = vm_create_page("my_id")
+      dump.new_anon_page = vm_create_page();
     }
 
-    expect(dump["new_array_page"]).to eq({
+    expect(dump["new_page"]).to eq({
       "_head" => nil,
-      "_type" => "array",
       "_next" => nil,
       "_id" => "my_id",
       "entries" => [],
+      "__index" => {},
       "_hash" => nil,
     })
 
-    expect(dump["new_hash_page"]).to eq({
-      "_head" => nil,
-      "_type" => "hash",
-      "_next" => nil,
-      "_id" => "my_id",
-      "entries" => {},
-      "_hash" => nil,
-    })
+    expect(dump["new_anon_page"]["_id"]).not_to eq nil
+    expect(dump["new_anon_page"]["entries"]).to eq []
   end
 
   #vm_rehash_page
