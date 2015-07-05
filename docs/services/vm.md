@@ -8,35 +8,20 @@ Each pager belongs to a *namespace*; page faults hit a namespace and then the pa
 Fun aside; Because of the hashing schemantics; this paging system solves the age old problem of ... how do you show that data has changed *now* when to be assured that you have perferctly synchronized data with the server?;... you need to do a 3-way handshake with the updates.  You could have a network server pager that supports writes but dosen't forward those to the network. That way, you can locally modify the page and then if the modifications were guessed correctly, the server would not even send back a page modification update! (Locally, the page would have been propogated as well).  In the meantime, after modifying the local page, you would send a real network request to the server which would in turn update it's own paging system but at that point, the server would check in with you about your pages, but miraculously, because you gussed the updated page correctly, no modifications will need to be made. You could even purposefully put a 'not_synced' key in and actually show the user when the page was correctly synchronized.
 
 ##Pages
-Each page is either of a `array` type or `hash` type.
-
-###Array type
+###Example
 ```ruby
 page_example = {
   _head: <<uuid STR or NULL>>,
-  _type: "array",
   _next: <<uuid STR or NULL>,
   _id: <<uuid STR>,
   entries: [
     {_id: <<uuid STR>>, _sig: <<random_signature for inserts and modifies STR>>},
     ...
   ],
-  _hash: <<CRC32 >
-}
-```
-
-###Hash type
-```ruby
-page_example = {
-  _head: <<uuid STR or NULL>>,
-  _type: "hash",
-  _next: <<uuid STR or NULL>,
-  _id: <<uuid STR>
-  entries: {
-    "my_id0" => {_sig: <<random_signature for inserts and modifies STR>>},
-    ...
-  },
-  _hash: <<CRC32 >
+  _hash: <<CRC32>>,
+  __index: {
+    entry_id: entry_index,
+  }
 }
 ```
 
@@ -44,10 +29,8 @@ page_example = {
   * `_next (string or null)` - The next element on this list. If `_next` is non-existant, then this page is the endpoint of the list.
   * `_id (string)` - The name of this page. Even if every key changed, the `_id` will not change. This is supposed to indicate, semantically, that this page still *means* the same thing.  For example, imagine a page.  If all entries were to be **removed** from this page and new entries were **inserted** on this page, then it would be semantically sound to say that the entries were **changed**.
   * `entries`
-    * `_type == 'array'`
-      * An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` which should be a generated hash value that changes when the entry changes.
-    * `_type == 'hash'`
-      * A dictionary of dictionaries. Entries have a `_sig` which should be a generated hash value that changes when the entry changes.
+    * An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` which should be a generated hash value that changes when the entry changes.
+  * `__index` - A dictionary mapping entry `_id` into an index of the `entries` array.
   * `_hash (string)` - All entry `_id's`, `_next`, the page `_id`, and `head` are hashed togeather. Any changes to this page will cause this `_hash` to change which makes it a useful way to check if a page is modified and needs to be updated. The hash function is an ordered CRC32 function run in the following order.  See [Calculating Page Hash](#calculating_page_hash).
 
 ------
@@ -81,13 +64,13 @@ pages:
 ```ruby
 vm_changelist_node = {
   _head: null,
-  _type: "hash",
   _next: <<uuid STR of next node or null>>,
   _id: <<uuid STRI>>
-  entries: {
-    "diff" => <<vm_diff schema>>
-  },
-  _hash: <<CRC32>>
+  entries: [
+    <<vm_diff schema>>
+  ],
+  _hash: <<CRC32>>,
+  index: { "diff" => 0 }
 }
 ```
 
@@ -106,7 +89,7 @@ vm_diff = [
 Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types are:
 ```ruby
 #Entry Insertion
-#eindex - The index of the insertion.  The `_id` string for hash pages, and index in integer for array pages.
+#eindex - The index of the insertion.
 #ehash - A hash that contains the entry.
 ["+", eindex, ehash]
 
@@ -115,11 +98,10 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 ["-", eid]
 
 #Entry Modification
-#eindex - The index of the entry, array it is numerical, for hashes it is the key
 #ehash - A hash that contains the new entry to replace the old entry.
 ["M", eid, ehash]
 
-#Entry Move (This only applies to array types, page moves are a different matter all togeather)
+#Entry Move
 #efrom_index - The index, an integer, that the entry was located at.
 #eto_index - The index, an integer, that the entry is now located at.
 [">", efrom_index, eto_index]
@@ -230,10 +212,11 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
 ###Functional
 ####Page modification (assuming inputs are modifiable)
   * **Generic Page**
-    * `vm_create_page(type, id)` - Create a new page, type may be `array` or `hash`. **this does not write anything to memory. It has no side effects except returning a hash**. If
+    * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**. If
         id is not given, it is automatically generated.
     * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it
+    * `vm_reindex_page(page)` - Recalculates the `__index` field of the page. If `__index` does not exist, it is added.
   * **Diff helpers**
     * `vm_diff(old_page, new_page)` - Returns an array of type `vm_diff` w.r.t to the old page.  E.g. if A appears in `new_page`, but not `old_page`
         then it is an insertion.
@@ -259,19 +242,17 @@ Aside, modifying a page goes against the semantics of the vm system; you're thin
 If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`.
 
 ####Per entry
-  * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements. type can either be `array` or `hash`. `_id` is generated if it is not passed.
+  * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.  `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.
-      
-  * For both `array` and `hashes`, the following functions work (albeit different semantics). For array types, the `eindex` is an integer in the array, For hash types, the `eindex` is a key inside the dictionary.
-    * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry).
-    * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. 
-      * For arrays, this generates the `_sig` and `_id` for you.
-      * For hashes, this generates the `_sig` for you.
-    * `EntryMutable(page, eindex)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
-        use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
-    * `SetPageNext(page, id)` - Sets the `_next` id for the page
-    * `SetPageHead(page, id)` - Sets the `_head` id for the page
+  * `EntryDel(page, eid)` - Remove a single entry from a page. (Internally this deletes the array entry).
+  * `EntryInsertAtIndex(page, eindex, entry)` - Insert an entry at a specific index. This generates the `_sig` and `_id` for you.
+  * `EntryInsertAtId(page, eid, entry)` - Insert an entry with a particular `_id`. This generates `_sig` for you. It will be put at the end of the
+      array
+  * `EntryMutable(page, eid)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
+      use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
+  * `SetPageNext(page, id)` - Sets the `_next` id for the page
+  * `SetPageHead(page, id)` - Sets the `_head` id for the page
 
 Here is an example of a page being modified inside a controller after a `read_res`
 ```js
