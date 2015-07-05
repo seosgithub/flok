@@ -213,7 +213,6 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     ctx.eval %{
-      //Array
       /////////////////////////////////////////////
       //Insert one at beginning (revese delete)
       var diff = diff_them_reverse(dmod0)
@@ -244,7 +243,6 @@ RSpec.describe "kern:vm_service_functional" do
 
     #One insert (Backwards delete)
     ctx.eval %{
-      //Array
       var diff = diff_them(mod0)
       vm_diff_replay(mod0[0], diff);
     }
@@ -254,6 +252,30 @@ RSpec.describe "kern:vm_service_functional" do
     original_page = ctx.dump("mod0[1]")
 
     expect(original_page).to eq(replayed_page)
+  end
+  ###########################################################################
+
+  #vm_cl
+  ###########################################################################
+  it "can use vm_cl_create to create a changelist node" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      res = vm_cl_create([]);
+    }
+
+    res = ctx.dump("res")
+
+    #Not nil
+    expect(res).not_to eq(nil)
+
+    #Contains all the right keys
+    expect(res.keys.sort).to eq %W{_head _next _id entries _hash __index}.sort
+    expect(res["entries"][0]["diff"]).not_to eq(nil)
   end
   ###########################################################################
 end

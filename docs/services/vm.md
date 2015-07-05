@@ -61,16 +61,17 @@ The majority of pages are what ever the user wants them to be (as far as the con
 pages:
 
 ####`vm_changelist_node` for `_cl_head` and `_cl_tail`
+The first entry, `entries[0]` is the diff entry.
 ```ruby
 vm_changelist_node = {
   _head: null,
   _next: <<uuid STR of next node or null>>,
   _id: <<uuid STRI>>
   entries: [
-    <<vm_diff schema>>
+    {"_id" => "<<random uuid>>", "_sig" => "<<random uuid>>", "_diff" => <vm_diff_schema>},
   ],
   _hash: <<CRC32>>,
-  index: { "diff" => 0 }
+  __index: { "<<gen _id>>" => 0 }
 }
 ```
 
@@ -78,7 +79,7 @@ vm_changelist_node = {
 
 ####`vm_diff`
 ```ruby
-vm_diff = [
+vm_diff_schema = [
   <<vm_diff_entry>>,
   <<vm_diff_entry>>,
   ...
@@ -222,12 +223,12 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
         then it is an insertion.
     * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
   * **Change List helpers**
+    * `vm_cl_create(diff)` - Returns a new page that follows the `cl_changelist_node` schema. This page must still be saved to the cache.
     * `vm_cl_push(page, cl)` - Adds the given `vm_changelist_node`'s `_id` to a pages changelist list via `_cl_head` or `_cl_tail` . If `_cl_head` or `_cl_tail` does not exist, or is null, then both `_cl_head` and
         `_cl_tail` are initialized to the `id` of the changelist. Else, the tail node is modified to next to the new changelist node and the new
         `_cl_tail` points to this page.
     * `vm_cl_pop(page)` - Returns the changelist pointed to by `_cl_head` if it exists. The page is modified in this operation. If no changelist
         exists, then this function returns null. Both `_cl_head` and `_cl_tail` are cleared if there is no longer any changelists left.
-    * `vm_cl_create(diff)` - Returns a new page that follows the `cl_changelist_node` schema.
 
 ###Non functional
 ####Pager specific
