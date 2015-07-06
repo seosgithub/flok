@@ -254,4 +254,82 @@ RSpec.describe "kern:vm_service_functional" do
     expect(original_page).to eq(replayed_page)
   end
   ###########################################################################
+
+  #vm commit helpers
+  ###########################################################################
+  it "can use vm_base to base on a base[unbased, no-changes]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      vm_base(base_unbased_nochanges, page);
+      vm_diff_replay(base_unbased_nochanges, page.__changes)
+    }
+
+    page = ctx.dump("page")
+    base_unbased_nochanges = ctx.dump("base_unbased_nochanges")
+    expect(page["__base"]).to eq(nil)
+    expect(page["__changes"]).not_to eq(nil)
+    expect(page["__changes_id"]).not_to eq(nil)
+
+    #Replaying the diff ontop of base_unbased_change should yield the original page with it's additional entry
+    expect(base_unbased_nochanges["entries"]).to eq(page["entries"])
+  end
+
+  it "can use vm_base to base on a base[unbased, changes]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      vm_base(base_unbased_changes, page);
+    }
+
+    page = ctx.dump("page")
+    base_unbased_changes = ctx.dump("base_unbased_changes")
+    expect(page["__base"]).not_to eq(nil)
+    expect(page["__changes"]).not_to eq(nil)
+    expect(page["__changes_id"]).not_to eq(nil)
+
+    ctx.eval %{
+      vm_diff_replay(base_unbased_changes, page.__changes)
+    }
+
+    base_unbased_changes = ctx.dump("base_unbased_changes")
+    expect(base_unbased_changes["entries"]).to eq(page["entries"])
+  end
+
+  it "can use vm_base to base on a base[based, changes]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      vm_base(base_based_changes, page);
+    }
+
+    #`page` will be updated so that it's `base` points to `base.__base`, and `__changes` and `__changes_id` will be
+    #set based on `base.__base`. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
+
+    page = ctx.dump("page")
+    base_based_changes = ctx.dump("base_based_changes")
+    expect(page["__base"]).to eq(base_based_changes["__base"])
+    expect(page["__changes"]).not_to eq(nil)
+    expect(page["__changes_id"]).not_to eq(nil)
+
+    ctx.eval %{
+      vm_diff_replay(base_based_changes.__base, page.__changes)
+    }
+
+    base_based_changes_base = ctx.dump("base_based_changes.__base")
+    expect(base_based_changes_base["entries"]).to eq(page["entries"])
+  end
+  ###########################################################################
 end

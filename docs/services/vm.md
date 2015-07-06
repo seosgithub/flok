@@ -212,10 +212,15 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
         then it is an insertion.
     * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
   * **Commit helpers**
-    * `vm_base(base, page)` - If the given `base` is *based*, then the `page.__base` is set to `base.__base` and then calculate changes in `__changes`
-        .and `__changes_id` is set. If the given `base` is not based, then the `base` should be already synchronized, and therefore, we must calculate changes on the `page` from `base` and store those
-        changes in `page.__changes` and generate a `__changes_id`. It is not necessary to keep the `base` any longer. Future calls to `vm_base` will
-        end up creating another page and assigning our new `page` into it's `__base`.
+    * `vm_base(base, page)` - Set the `__base` field, `__changes` and `__changes_id` if necessary. `page` never has `__changes`, `__changes_id`, or
+        `__base` set. `base` optionally has `__changes`, `__changes_id`, and `__base` set.  The possible contexts of this function, `base[based] ===
+        base.__base` and `base[changes] === base.__changes &| base.__changes_id` are: 
+          1. `base[unbased, no-changes]` - `page` will be updated so that it contains `__changes` from `base => page` and `__changes_id` will be set.
+          2. `base[unbased, changes]` - `page` will be updated so that it contains `__changes` from `base => page` and `__changes_id` will be set.
+          Additionally, `page.__base` will point to `base`.
+          3. `base[based, changes]` - `page` will be updated so that it's `base` points to `base.__base`, and `__changes` and `__changes_id` will be
+          set based on `base.__base`. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
+          4. `base[based, no-changes]` - This condition should never come up; `base.__base` will be pruned when changes are completed.
     * `vm_rebase(base, page)` - Assumes that `page` current has a `__base` set and the `base` has no `__base`.
       1. Replays the `page.__base.__changes` ontop of `base`.
       2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
