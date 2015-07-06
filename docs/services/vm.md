@@ -54,28 +54,7 @@ Assuming a crc function of `crc32(seed, string)`
 
 ------
 
-##Schemas
-
-###Special page schemas:
-The majority of pages are what ever the user wants them to be (as far as the content inside entries goes). There are, however, some special types of
-pages:
-
-####`vm_changelist_node` for `_cl_head` and `_cl_tail`
-The first entry, `entries[0]` is the diff entry.
-```ruby
-vm_changelist_node = {
-  _head: null,
-  _next: <<uuid STR of next node or null>>,
-  _id: <<uuid STRI>>
-  entries: [
-    {"_id" => "<<random uuid>>", "_sig" => "<<random uuid>>", "_diff" => <vm_diff_schema>},
-  ],
-  _hash: <<CRC32>>,
-  __index: { "<<gen _id>>" => 0 }
-}
-```
-
-###Other data-types
+##Schemas & Data-Types
 
 ####`vm_diff`
 ```ruby
@@ -111,6 +90,16 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 ["HEAD_M", new_head_id]
 ["NEXT_M", new_next_id]
 ```
+
+###`Based page`
+A based page contains the additional keys of `__base` and `__changes`, and these keys are not `null`. Optionally, it may contain the keys
+`__base_sync` (which is also not null).
+  * `__base` - A copy of the fully synchronized page (fully embedded)
+  * `__changes` - An `vm_diff` array of changes from either `__base`, or if not `null` and not `undefined`, the `__base_sync` page.
+  * `__base_sync` - An optional key, serves the same purpose as `__base`, but when synchronizing, the `__base_sync` is used for `__changes` as
+      `__base_sync` holds a full copy of the currently in sync page.
+
+Pages that are being synhronized are known as a `based in-sync page`.
 
 ##Configuration
 The paging service may be configured in your `./config/services.rb`. You must set an array of pagers where each pager is responsible for a particular
@@ -222,13 +211,22 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
     * `vm_diff(old_page, new_page)` - Returns an array of type `vm_diff` w.r.t to the old page.  E.g. if A appears in `new_page`, but not `old_page`
         then it is an insertion.
     * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
-  * **Change List helpers**
-    * `vm_cl_create(diff)` - Returns a new page that follows the `cl_changelist_node` schema. This page must still be saved to the cache.
-    * `vm_cl_push(page, cl)` - Adds the given `vm_changelist_node`'s `_id` to a pages changelist list via `_cl_head` or `_cl_tail` . If `_cl_head` or `_cl_tail` does not exist, or is null, then both `_cl_head` and
-        `_cl_tail` are initialized to the `id` of the changelist. Else, the tail node is modified to next to the new changelist node and the new
-        `_cl_tail` points to this page.
-    * `vm_cl_pop(page)` - Returns the changelist pointed to by `_cl_head` if it exists. The page is modified in this operation. If no changelist
-        exists, then this function returns null. Both `_cl_head` and `_cl_tail` are cleared if there is no longer any changelists left.
+  * **Commit helpers**
+    * `vm_base(base, page)` - If the given `base` is *based*, then the `page.__base` is set to `base.__base` and then calculate changes in `__changes`
+        .and `__changes_id` is set. If the given `base` is not based, then the `base` should be already synchronized, and therefore, we must calculate changes on the `page` from `base` and store those
+        changes in `page.__changes` and generate a `__changes_id`. It is not necessary to keep the `base` any longer. Future calls to `vm_base` will
+        end up creating another page and assigning our new `page` into it's `__base`.
+    * `vm_rebase(base, page)` - Assumes that `page` current has a `__base` set and the `base` has no `__base`.
+      1. Replays the `page.__base.__changes` ontop of `base`.
+      2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
+      3. Replays the `page.__changes` ontop of the newly replayed `page.__base`.
+      4. Recalculates the changes of `page.__changes`
+    * `vm_base_synced(page, changes_id)` - When a synchronization is complete, you should call this function on a page. That page **must** have a
+        `__base`, if you are trying to sync an `unbased` page, then you're doing it wrong. There are two things that can happend here:
+        1. If the `page.changes` is a blank array, then we can collapse everything down into a single page without `__changes`, `__changes_id` or
+        `__base`
+        2. If the `page.changes` is not a blank array, then we must copy the `page` and set the old version of the page via `vm_base(page,
+        copy_page)`. The new page will have no changes.
 
 ###Non functional
 ####Pager specific
