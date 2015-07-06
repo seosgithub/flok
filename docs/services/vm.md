@@ -221,10 +221,10 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
           3. `base[based, changes]` - `page` will be updated so that it's `base` points to `base.__base`, and `__changes` and `__changes_id` will be
           set based on `base.__base`. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
           4. `base[based, no-changes]` - This condition should never come up; `base.__base` will be pruned when changes are completed.
-    * `vm_rebase(base, page)` - Assumes that `page` current has a `__base` set and the `base` has no `__base`.
+    * `vm_rebase(base, page)` - Assumes that `page[based, changes], page.__base[unbased, changes]` and `base[unbased, no-changes]`. We are merging `base` into `page.__base`.
       1. Replays the `page.__base.__changes` ontop of `base`.
       2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
-      3. Replays the `page.__changes` ontop of the newly replayed `page.__base`.
+      3. Replays the `page.__changes` ontop of the newly replayed `page.__base` into  `page`.
       4. Recalculates the changes of `page.__changes`
     * `vm_base_synced(page, changes_id)` - When a synchronization is complete, you should call this function on a page. That page **must** have a
         `__base`, if you are trying to sync an `unbased` page, then you're doing it wrong. There are two things that can happend here:

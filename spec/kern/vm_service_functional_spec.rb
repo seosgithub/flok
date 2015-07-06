@@ -331,5 +331,42 @@ RSpec.describe "kern:vm_service_functional" do
     base_based_changes_base = ctx.dump("base_based_changes.__base")
     expect(base_based_changes_base["entries"]).to eq(page["entries"])
   end
+
+  it "can use vm_rebase" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      vm_rebase(base_unbased_nochanges_one_entry, page_based_changes);
+    }
+
+    page_based_changes = ctx.dump("page_based_changes")
+    base_unbased_nochanges_one_entry = ctx.dump("base_unbased_nochanges_one_entry")
+
+    #1. Replays the `page.__base.__changes` ontop of `base`.
+    expect(base_unbased_nochanges_one_entry["entries"].length).to eq(1)
+    expect(base_unbased_nochanges_one_entry["entries"][0]["value"]).to eq("4")
+
+    #2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
+    expect(base_unbased_nochanges_one_entry["__changes"]).to eq(page_based_changes["__base"]["__changes"])
+    expect(base_unbased_nochanges_one_entry["__changes_id"]).to eq(page_based_changes["__base"]["__changes_id"])
+    expect(page_based_changes["__base"]).to eq(base_unbased_nochanges_one_entry)
+
+    #3. Replays the `page.__changes` ontop of the newly replayed `page.__base` into page.
+    expect(page_based_changes["entries"]).to eq([])
+
+    #4. Recalculates the changes of `page.__changes`
+
+    #ctx.eval %{
+      #vm_diff_replay(base_based_changes.__base, page.__changes)
+    #}
+
+    #base_based_changes_base = ctx.dump("base_based_changes.__base")
+    #expect(base_based_changes_base["entries"]).to eq(page["entries"])
+  end
+
   ###########################################################################
 end
