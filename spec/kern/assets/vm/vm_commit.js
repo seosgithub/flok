@@ -24,7 +24,10 @@ var unbased_nochanges = gen_page(null, null, [
 ]);
 
 //[unbased, changes]
-var unbased_changes = gen_page(null, null, []);
+var unbased_changes = gen_page(null, null, [
+    {"value": "6"},
+    {"value": "8"},
+]);
 var a1 = gen_page(null, null, [
     {"value": "4"}
 ]);

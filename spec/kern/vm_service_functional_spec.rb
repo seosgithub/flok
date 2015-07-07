@@ -341,5 +341,75 @@ RSpec.describe "kern:vm_service_functional" do
     expect(newer["entries"]).to  eq(older["__base"]["entries"])
   end
 
+  it "can use vm_rebase for newer: [unbased, nochanges]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      newer = unbased_nochanges;
+      older = page;
+      vm_rebase(newer, older);
+    }
+
+    #older should not have been modified
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(older["__changes_id"]).to eq(nil)
+    expect(older["__base"]).to eq(nil)
+    expect(older["__changes"]).to eq(nil)
+  end
+
+  it "can use vm_rebase for newer: [unbased, changes]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      newer = unbased_changes;
+      older = page;
+      vm_rebase(newer, older);
+    }
+
+    #Older should take __changes & __changes_id from newer.
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(older["__changes_id"]).to eq(newer["__changes_id"])
+    expect(older["__changes"]).to eq(newer["__changes"])
+
+    #Before & After diff (Each value is indexed so that its id lines up, therefore modification
+    #for first element takes place, and insertion for second when going from a1 => unbased_changes
+    expect(older["entries"]).not_to eq(newer["entries"])
+    expect(older["entries"].map{|e| e["value"]}).to include("8")
+    expect(older["entries"].map{|e| e["value"]}).to include("6")
+  end
   ###########################################################################
+
+  it "can use vm_rebase for newer: [based, changes]" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    ctx.eval %{
+      newer = unbased_changes;
+      older = page;
+      vm_rebase(newer, older);
+    }
+
+    #Older should take __changes & __changes_id from newer.
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(older["__changes_id"]).to eq(newer["__changes_id"])
+    expect(older["__changes"]).to eq(newer["__changes"])
+
+    #Before & After diff (Each value is indexed so that its id lines up, therefore modification
+    #for first element takes place, and insertion for second when going from a1 => unbased_changes
+    expect(older["entries"]).not_to eq(newer["entries"])
+    expect(older["entries"].map{|e| e["value"]}).to include("8")
+    expect(older["entries"].map{|e| e["value"]}).to include("6")
+  end
+
 end

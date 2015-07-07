@@ -210,16 +210,13 @@ service :vm do
       }
     }
 
-    function vm_rebase(base, page) {
-      //1. Replays the `page.__base.__changes` ontop of `base`.
-      vm_diff_replay(base, page.__base.__changes);
+    function vm_rebase(newer, older) {
+      if (newer.__changes) {
+        older.__changes = newer.__changes;
+        older.__changes_id = newer.__changes_id;
 
-      //2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
-      base.__changes = page.__base.__changes;
-      base.__changes_id = page.__base.__changes_id;
-
-      //3. Replays the `page.__changes` ontop of the newly replayed `page.__base` into page.
-      //4. Recalculates the changes of `page.__changes`
+        vm_diff_replay(older, older.__changes);
+      }
     }
     ///////////////////////////////////////////////////////////////////////////
   }
