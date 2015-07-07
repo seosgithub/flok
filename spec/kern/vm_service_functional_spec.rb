@@ -304,7 +304,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(base_unbased_changes["entries"]).to eq(page["entries"])
   end
 
-  it "can use vm_base to base on a base[based, changes]" do
+  it "can use vm_base to base on a base[based (__base has changes), changes]" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
@@ -315,14 +315,16 @@ RSpec.describe "kern:vm_service_functional" do
       vm_base(base_based_changes, page);
     }
 
-    #`page` will be updated so that it's `base` points to `base.__base`, and `__changes` and `__changes_id` will be
-    #set based on `base.__base`. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
+    #`page` will be updated so that it's `base` points to `base.__base`, and `__changes` and will be calculated and
+    #set based on `base.__base` and `__changes` will be generated. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
 
     page = ctx.dump("page")
     base_based_changes = ctx.dump("base_based_changes")
     expect(page["__base"]).to eq(base_based_changes["__base"])
     expect(page["__changes"]).not_to eq(nil)
     expect(page["__changes_id"]).not_to eq(nil)
+    expect(page["__changes_id"]).not_to eq(base_based_changes["__base"]["__changes_id"])
+    expect(page["__changes_id"]).not_to eq(base_based_changes["__changes_id"])
 
     ctx.eval %{
       vm_diff_replay(base_based_changes.__base, page.__changes)

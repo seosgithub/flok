@@ -212,27 +212,24 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
         then it is an insertion.
     * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
   * **Commit helpers**
-    * `vm_base(base, page)` - Set the `__base` field, `__changes` and `__changes_id` if necessary. `page` never has `__changes`, `__changes_id`, or
-        `__base` set. `base` optionally has `__changes`, `__changes_id`, and `__base` set.  The possible contexts of this function, `base[based] ===
-        base.__base` and `base[changes] === base.__changes &| base.__changes_id` are: 
-          1. `base[unbased, no-changes]` - `page` will be updated so that it contains `__changes` from `base => page` and `__changes_id` will be set.
-          2. `base[unbased, changes]` - `page` will be updated so that it contains `__changes` from `base => page` and `__changes_id` will be set.
-          Additionally, `page.__base` will point to `base`.
-          3. `base[based, changes]` - `page` will be updated so that it's `base` points to `base.__base`, and `__changes` and `__changes_id` will be
-          set based on `base.__base`. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
-          4. `base[based, no-changes]` - This condition should never come up; `base.__base` will be pruned when changes are completed.
-    * `vm_rebase(base, page)` - Assumes that `page[based, changes], page.__base[unbased, changes]` and `base[unbased, no-changes]`. We are merging `base` into `page.__base`.
-      1. Replays the `page.__base.__changes` ontop of `base`.
-      2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
-      3. Replays the `page.__changes` ontop of the newly replayed `page.__base` into  `page`.
-      4. Recalculates the changes of `page.__changes`
-    * `vm_base_synced(page, changes_id)` - When a synchronization is complete, you should call this function on a page. That page **must** have a
-        `__base`, if you are trying to sync an `unbased` page, then you're doing it wrong. There are two things that can happend here:
-        1. If the `page.changes` is a blank array, then we can collapse everything down into a single page without `__changes`, `__changes_id` or
-        `__base`
-        2. If the `page.changes` is not a blank array, then we must copy the `page` and set the old version of the page via `vm_base(page,
-        copy_page)`. The new page will have no changes.
-
+    * `vm_commit(older, newer)` - Modifications will be done to `newer`. It is assumed that `newer` is neither based nor changed. This is typical of a
+        new page creation. It is assumed that `older` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased, changes], changes]`.
+        You would use this when a page is being written over a page that already exists.
+          1. `older: [unbased, nochanges]` - `newer.__changes` will equal `vm_diff(older, newer)` and `newer.__changes_id` will be generated.
+          2. `older: [unbased, changes]` - `newer.__base` will point to `older`. `newer.__changes` will equal `vm_diff(older, newer)` and
+          `newer__changes_id` will be generated.
+          3. `older: [based[unbased, changes], changes]]` - `newer.__base` will point to `older.__base`. Then `newer.__changes` will equal
+          `vm_diff(older.__base, newer)` and `newer.__changes_id` will be generated.
+    * `vm_rebase(newer, older)` - Modifications are done to `older`. It is assumed that `older` is not based nor changed. This is typical of a
+        synchronized page from a server. It is assumed that `newer` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased,
+        changes], changes]`.
+          1. `newer: [unbased, nochanges]` - No changes as `newer` does not contain any changes, therefore, `older` is the *truth*.
+          2. `newer: [unbased, changes]` - `older` takes `newer.__changes` and `newer.__changes_id`. `older` then replays `older.__changes` on itself.
+          3. `newer: [based[unbased, changes], changes]]`
+            1. `older` takes `newer.__base.__changes` and `newer.__base.__changes_id`. `older` then replays `older.__changes` onto itself.
+            2. `older` clones itself, let that clone be called `oldest`. `older.__base` is set to `oldest`.
+            3. `older` replays `newer.__changes` onto itself.
+            4. `older` then calculates `__changes` based off `oldest`.
 ###Non functional
 ####Pager specific
   * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
