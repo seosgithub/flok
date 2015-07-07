@@ -194,30 +194,19 @@ service :vm do
 
     //Commit helpers
     ///////////////////////////////////////////////////////////////////////////
-    function vm_base(base, page) {
-      //Condition base[unbased, no-changes]
-      if (!base.__base && !base.__changes) {
-        page.__changes = vm_diff(base, page);
-        page.__changes_id = gen_id();
-      } 
+    function vm_commit(older, newer) {
+      newer.__changes_id = gen_id();
 
-      //base[unbased, changes]
-      else if (!base.__base && base.__changes) {
-        page.__changes = vm_diff(base, page);
-        page.__changes_id = gen_id();
-        page.__base = base;
+      if (older.__changes && !older.__base) {
+        newer.__base = older;
+      } else if (older.__changes) {
+        newer.__base = older.__base;
       }
 
-      //base[based, changes]
-      else if (base.__base && base.__changes) {
-        page.__base = base.__base;
-        page.__changes = vm_diff(page.__base, page);
-        page.__changes_id = gen_id();
-      }
-
-      //base[based, no-changes]
-      else {
-        throw "vm_base received a base that contained a __base but no __changes. This should be an impossible condition: " + JSON.stringify(base);
+      if (older.__base) {
+        newer.__changes = vm_diff(older.__base, newer);
+      } else {
+        newer.__changes = vm_diff(older, newer);
       }
     }
 

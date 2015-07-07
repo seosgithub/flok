@@ -257,7 +257,7 @@ RSpec.describe "kern:vm_service_functional" do
 
   #vm commit helpers
   ###########################################################################
-  it "can use vm_base to base on a base[unbased, no-changes]" do
+  it "can use vm_commit for older: [unbased, nochanges]" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
@@ -265,21 +265,25 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     ctx.eval %{
-      vm_base(base_unbased_nochanges, page);
-      vm_diff_replay(base_unbased_nochanges, page.__changes)
+      older = unbased_nochanges;
+      newer = page;
+      vm_commit(older, newer);
     }
 
-    page = ctx.dump("page")
-    base_unbased_nochanges = ctx.dump("base_unbased_nochanges")
-    expect(page["__base"]).to eq(nil)
-    expect(page["__changes"]).not_to eq(nil)
-    expect(page["__changes_id"]).not_to eq(nil)
+    #Check changes_id
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["__changes_id"]).not_to eq(nil)
 
-    #Replaying the diff ontop of base_unbased_change should yield the original page with it's additional entry
-    expect(base_unbased_nochanges["entries"]).to eq(page["entries"])
+    #Before & After diff
+    expect(newer["entries"]).not_to eq(older["entries"])
+    ctx.eval %{
+      vm_diff_replay(older, newer.__changes);
+    }
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["entries"]).to eq(older["entries"])
   end
 
-  it "can use vm_base to base on a base[unbased, changes]" do
+  it "can use vm_commit for older: [unbased, changes]" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
@@ -287,24 +291,27 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     ctx.eval %{
-      vm_base(base_unbased_changes, page);
+      older = unbased_changes;
+      newer = page;
+      vm_commit(older, newer);
     }
 
-    page = ctx.dump("page")
-    base_unbased_changes = ctx.dump("base_unbased_changes")
-    expect(page["__base"]).not_to eq(nil)
-    expect(page["__changes"]).not_to eq(nil)
-    expect(page["__changes_id"]).not_to eq(nil)
+    #Check changes_id & __base
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["__changes_id"]).not_to eq(nil)
+    expect(newer["__base"]).not_to eq(nil)
+    expect(newer["__base"]).to eq(older)
 
+    #Before & After diff
+    expect(newer["entries"]).not_to eq(older["entries"])
     ctx.eval %{
-      vm_diff_replay(base_unbased_changes, page.__changes)
+      vm_diff_replay(older, newer.__changes);
     }
-
-    base_unbased_changes = ctx.dump("base_unbased_changes")
-    expect(base_unbased_changes["entries"]).to eq(page["entries"])
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["entries"]).to eq(older["entries"])
   end
 
-  it "can use vm_base to base on a base[based (__base has changes), changes]" do
+  it "can use vm_commit for older: [based[unbased, changes], changes]]" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
@@ -312,62 +319,26 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     ctx.eval %{
-      vm_base(base_based_changes, page);
+      older = based_changes;
+      newer = page;
+      vm_commit(older, newer);
     }
 
-    #`page` will be updated so that it's `base` points to `base.__base`, and `__changes` and will be calculated and
-    #set based on `base.__base` and `__changes` will be generated. Effectively ignoring the `base` because it's unsynced, but the `base.__base` is being synced
+    #Check changes_id & __base
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["__changes_id"]).not_to eq(older["__base"]["__changes_id"])
+    expect(newer["__changes_id"]).not_to eq(older["__changes_id"])
+    expect(newer["__base"]).not_to eq(nil)
+    expect(newer["__base"]).to eq(older["__base"])
 
-    page = ctx.dump("page")
-    base_based_changes = ctx.dump("base_based_changes")
-    expect(page["__base"]).to eq(base_based_changes["__base"])
-    expect(page["__changes"]).not_to eq(nil)
-    expect(page["__changes_id"]).not_to eq(nil)
-    expect(page["__changes_id"]).not_to eq(base_based_changes["__base"]["__changes_id"])
-    expect(page["__changes_id"]).not_to eq(base_based_changes["__changes_id"])
-
+    #Before & After diff
+    expect(newer["entries"]).not_to eq(older["entries"])
     ctx.eval %{
-      vm_diff_replay(base_based_changes.__base, page.__changes)
+      vm_diff_replay(older.__base, newer.__changes);
     }
-
-    base_based_changes_base = ctx.dump("base_based_changes.__base")
-    expect(base_based_changes_base["entries"]).to eq(page["entries"])
-  end
-
-  it "can use vm_rebase" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
-
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      vm_rebase(base_unbased_nochanges_one_entry, page_based_changes);
-    }
-
-    page_based_changes = ctx.dump("page_based_changes")
-    base_unbased_nochanges_one_entry = ctx.dump("base_unbased_nochanges_one_entry")
-
-    #1. Replays the `page.__base.__changes` ontop of `base`.
-    expect(base_unbased_nochanges_one_entry["entries"].length).to eq(1)
-    expect(base_unbased_nochanges_one_entry["entries"][0]["value"]).to eq("4")
-
-    #2. Sets the `base.__changes` to `page.__base.__changes` and `base.__changes_id` to `page.__base.__changes_id` and `page.__base` to `base`.
-    expect(base_unbased_nochanges_one_entry["__changes"]).to eq(page_based_changes["__base"]["__changes"])
-    expect(base_unbased_nochanges_one_entry["__changes_id"]).to eq(page_based_changes["__base"]["__changes_id"])
-    expect(page_based_changes["__base"]).to eq(base_unbased_nochanges_one_entry)
-
-    #3. Replays the `page.__changes` ontop of the newly replayed `page.__base` into page.
-    expect(page_based_changes["entries"]).to eq([])
-
-    #4. Recalculates the changes of `page.__changes`
-
-    #ctx.eval %{
-      #vm_diff_replay(base_based_changes.__base, page.__changes)
-    #}
-
-    #base_based_changes_base = ctx.dump("base_based_changes.__base")
-    #expect(base_based_changes_base["entries"]).to eq(page["entries"])
+    older = ctx.dump("older"); newer = ctx.dump("newer")
+    expect(newer["entries"]).not_to eq(older["entries"])
+    expect(newer["entries"]).to  eq(older["__base"]["entries"])
   end
 
   ###########################################################################
