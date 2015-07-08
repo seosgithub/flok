@@ -43,6 +43,8 @@ mod0 = gen_pages(null, null, [
 ]);
 mod0[1].entries[0].value = 'b';
 mod0[1].entries[0]._sig = 'sig_new';
+vm_reindex_page(mod0[0]);
+vm_reindex_page(mod0[1]);
 
 //Changing one element when two are present
 mod1 = gen_pages(null, null, [
@@ -52,6 +54,8 @@ mod1 = gen_pages(null, null, [
 ]);
 mod1[1].entries[1].value = 'c';
 mod1[1].entries[1]._sig = 'sig_new';
+vm_reindex_page(mod1[0]);
+vm_reindex_page(mod1[1]);
 
 //Changing both elements when two are present
 mod2 = gen_pages(null, null, [
@@ -63,6 +67,8 @@ mod2[1].entries[0]._sig = 'sig_new';
 
 mod2[1].entries[1].value = 'c';
 mod2[1].entries[1]._sig = 'sig_new';
+vm_reindex_page(mod2[0]);
+vm_reindex_page(mod2[1]);
 ///////////////////////////////////////////////////////////////////////////
 
 //Testing deleted entry (backwards insert)////////////////////////////////
@@ -71,6 +77,8 @@ dmod0 = gen_pages(null, null, [
     {"value": 'a'},
 ]);
 dmod0[1].entries.splice(0, 1);
+vm_reindex_page(dmod0[0]);
+vm_reindex_page(dmod0[1]);
 
 //Deleting one element when two are present
 dmod1 = gen_pages(null, null, [
@@ -79,6 +87,8 @@ dmod1 = gen_pages(null, null, [
     {"value": 'c'}
 ]);
 dmod1[1].entries.splice(1, 1);
+vm_reindex_page(dmod1[0]);
+vm_reindex_page(dmod1[1]);
 
 //Deleting both elements when two are present
 dmod2 = gen_pages(null, null, [
@@ -87,4 +97,6 @@ dmod2 = gen_pages(null, null, [
 ]);
 dmod2[1].entries.splice(0, 1);
 dmod2[1].entries.splice(0, 1);
+vm_reindex_page(dmod2[0]);
+vm_reindex_page(dmod2[1]);
 ///////////////////////////////////////////////////////////////////////////

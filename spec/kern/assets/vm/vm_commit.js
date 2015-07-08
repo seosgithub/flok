@@ -22,17 +22,17 @@ function gen_page(head, next, entries) {
 var unbased_nochanges = gen_page(null, null, [
     {"value": "hello"}
 ]);
+vm_reindex_page(unbased_nochanges);
 
 //[unbased, changes]
-var unbased_changes = gen_page(null, null, [
-    {"value": "6"},
-    {"value": "8"},
-]);
+var unbased_changes = gen_page(null, null, []);
 var a1 = gen_page(null, null, [
     {"value": "4"}
 ]);
 unbased_changes.__changes = vm_diff(a1, unbased_changes);
 unbased_changes.__changes_id = "XXXXXXXXXX";
+vm_reindex_page(a1);
+vm_reindex_page(unbased_changes);
 
 //[based, changes] 
 var based_changes = gen_page(null, null, []);
@@ -47,8 +47,11 @@ a2.__changes_id = "XYXYXY";
 based_changes.__changes = vm_diff(a2, based_changes);
 based_changes.__changes_id = "XXXXXX";
 based_changes.__base = a2;
+vm_reindex_page(based_changes);
+vm_reindex_page(a2);
 
 //[unbased, no-changes] page
 page = gen_page(null, null, [
     {"value": "5"}
 ]);
+vm_reindex_page(page);

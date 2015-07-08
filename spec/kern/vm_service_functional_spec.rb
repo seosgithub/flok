@@ -253,6 +253,36 @@ RSpec.describe "kern:vm_service_functional" do
 
     expect(original_page).to eq(replayed_page)
   end
+
+  it "can use vm_diff_replay to replay -" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    pages_src = File.read("./spec/kern/assets/vm/vm_diff_pages.js")
+
+    #Run the checks
+    ctx.eval pages_src
+
+    #One insert (Backwards delete)
+    ctx.eval %{
+      var diff = diff_them(dmod0)
+      vm_diff_replay(dmod0[0], diff);
+      vm_reindex_page(dmod0[0]);
+
+      var diff = diff_them(dmod1)
+      vm_diff_replay(dmod1[0], diff);
+      vm_reindex_page(dmod1[0]);
+    }
+
+    #Array
+    replayed_page0 = ctx.dump("dmod0[0]")
+    original_page0 = ctx.dump("dmod0[1]")
+
+    replayed_page1 = ctx.dump("dmod1[0]")
+    original_page1 = ctx.dump("dmod1[1]")
+
+    expect(original_page0).to eq(replayed_page0)
+    expect(original_page1).to eq(replayed_page1)
+  end
+
   ###########################################################################
 
   #vm commit helpers
@@ -387,7 +417,7 @@ RSpec.describe "kern:vm_service_functional" do
   end
   ###########################################################################
 
-  it "can use vm_rebase for newer: [based, changes]" do
+  it "can use vm_rebase for newer: [based[unbased, changes], changes]]" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
@@ -395,7 +425,7 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
 
     ctx.eval %{
-      newer = unbased_changes;
+      newer = based_changes;
       older = page;
       vm_rebase(newer, older);
     }
@@ -408,8 +438,6 @@ RSpec.describe "kern:vm_service_functional" do
     #Before & After diff (Each value is indexed so that its id lines up, therefore modification
     #for first element takes place, and insertion for second when going from a1 => unbased_changes
     expect(older["entries"]).not_to eq(newer["entries"])
-    expect(older["entries"].map{|e| e["value"]}).to include("8")
-    expect(older["entries"].map{|e| e["value"]}).to include("6")
+    expect(older["entries"].map{|e| e["value"]}).to include("4")
   end
-
 end

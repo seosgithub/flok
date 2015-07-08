@@ -187,6 +187,13 @@ service :vm do
 
           //Take out old, put in new
           page.entries.splice(eindex, 1, entry);
+        } else if (type === "-") {
+          var eid = e[1];
+
+          var index = page.__index[eid];
+
+          //Take out
+          page.entries.splice(index, 1);
         }
       }
     } 
