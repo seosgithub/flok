@@ -263,7 +263,7 @@ RSpec.describe "kern:vm_service_functional" do
   it "can use vm_diff" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
 
-    #vm_commit:0, 1
+    #diff of vm_commit:0, 1
     #| Triangle | Square   | -> | Triangle | Circle   | 
     #| K        |          | -> |          | Q        |
     #from                       to
@@ -569,7 +569,164 @@ RSpec.describe "kern:vm_service_functional" do
       vm_commit(dump.older, dump.newer);
     }
 
-    expect(dump).to eq({})
+    verify_vm_page_entries(dump["newer"], [
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id1", "value" => "Circle"},
+      {"_id" => "id3", "value" => "Q"},
+    ])
+
+    #Changes match
+    verify_vm_diff(dump["newer"]["__changes"], [
+      {type: "M", args: [{"_id" => "id1", "value" => "Circle"}]},
+      {type: "-", args: ["id2"]},
+      {type: "+", args: [2, {"_id" => "id3", "value" => "Q"}]},
+    ])
+
+    #No base but does include changes
+    expect(dump["newer"]["__changes_id"]).not_to eq(nil)
+    expect(dump["newer"]["__base"]).to eq(nil)
+
+    #vm_commit:1 older[nobase, changes]
+    #| Triangle | Circle   | -> | Triangle | Square   | --__changes-- | -----             |
+    #|          | Q        | -> | Z        |          |               | |x| |  Add (+)    |
+    #newer                      older                                 | -----   Triangle  |
+    #                                                                 | | | |             |
+    #                                                                 | -----             |
+    #                                                                 | -----             |
+    #                                                                 | | | | Modify (M)  |
+    #                                                                 | -----     Z       |
+    #                                                                 | |x| |             |
+    #                                                                 | -----             |
+    #                                                                 | -----             |
+    #                                                                 | | | | Remove (-)  |
+    #                                                                 | -----             |
+    #                                                                 | | |x|             |
+    #                                                                 | -----             |
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.newer = triangle_circle_null_q;
+      dump.older = triangle_square_z_null;
+      dump.older.__changes_id = "XXXXX";
+      dump.older.__changes = [
+        ["+", 0, {"_id": "id0", "_sig": "Triangle", "value": "Triangle"}],
+        ["M", {"_id": "id2", "_sig": "Z", "value": "Z"}],
+        ["-", "id3"],
+
+      ]
+      vm_commit(dump.older, dump.newer);
+    }
+
+    verify_vm_page_entries(dump["newer"], [
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id1", "value" => "Circle"},
+      {"_id" => "id3", "value" => "Q"},
+    ])
+
+    #Changes match
+    verify_vm_diff(dump["newer"]["__changes"], [
+      {type: "M", args: [{"_id" => "id1", "value" => "Circle"}]},
+      {type: "-", args: ["id2"]},
+      {type: "+", args: [2, {"_id" => "id3", "value" => "Q"}]},
+    ])
+    expect(dump["newer"]["__changes_id"]).not_to eq(nil)
+
+    #Base with changes
+    verify_vm_page_entries(dump["newer"]["__base"], [
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id1", "value" => "Square"},
+      {"_id" => "id2", "value" => "Z"},
+    ])
+    verify_vm_diff(dump["newer"]["__base"]["__changes"], [
+      {type: "+", args: [0, {"_id" => "id0", "value" => "Triangle"}]},
+      {type: "-", args: ["id3"]},
+      {type: "M", args: [{"_id" => "id2", "value" => "Z"}]},
+    ])
+    expect(dump["newer"]["__base"]["__changes_id"]).not_to eq(nil)
+    expect(dump["newer"]["__base"]["__base"]).o eq(nil)
+
+    #vm_commit:2 older[base[nobase, changes], changes]
+    #| Q        |          | -> | Triangle | Circle   | --__changes-- | -----             |
+    #| Circle   | Square   | -> |          | Q        |               | | |x| Modify (M)  |
+    #newer                      -----------------------               | -----   Circle    |
+    #                           |      __base         |               | | | |             |
+    #                           -----------------------               | -----             |
+    #                           | Triangle | Square   |               | -----             |
+    #                           | Z        |          | --__changes-  | | | | Remove (-)  |
+    #                                                              |  | -----             |
+    #                                                              |  | |x| |             |
+    #                                                              |  | -----             |
+    #                                                              |  | -----             |
+    #                                                              |  | | | | Insert (+)  |
+    #                                                              |  | -----    Q        |
+    #                                                              |  | | |x|             |
+    #                                                              |  | -----             |
+    #                                                              |  --------------------
+    #                                                              |                      
+    #                                                              |- | -----             |                    
+    #                                                                 | |x| |  Add (+)    |                    
+    #                                                                 | -----   Triangle  |                    
+    #                                                                 | | | |             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | | | Modify (M)  |                    
+    #                                                                 | -----     Z       |                    
+    #                                                                 | |x| |             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | | | Remove (-)  |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | |x|             |                    
+    #                                                                 | -----             |                    
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.newer = q_null_circle_square;
+      dump.older = triangle_circle_null_q;
+      dump.older.__changes_id = "XXXXX";
+      dump.older.__changes = [
+        ["M", {"_id": "id0", "_sig": "Circle", "value": "Circle"}],
+        ["-", "id2"],
+        ["+", 2, {"_id": "id3", "_sig": "Q", "value": "Q"}],
+      ]
+
+      //Also, base on older
+      dump.older.__base = triangle_square_z_null;
+      dump.older.__base.__changes = [
+        ["+", 0, {"_id": "id0", "_sig": "Triangle", "value": "Triangle"}],
+        ["M", {"_id": "id2", "_sig": "Z", "value": "Z"}],
+        ["-", "id3"],
+      ]
+      dump.older.__base.__changes_id = "YYYYYYY";
+      vm_commit(dump.older, dump.newer);
+    }
+
+    verify_vm_page_entries(dump["newer"], [
+      {"_id" => "id0", "value" => "Q"},
+      {"_id" => "id2", "value" => "Circle"},
+      {"_id" => "id3", "value" => "Square"},
+    ])
+
+    #Changes match
+    verify_vm_diff(dump["newer"]["__changes"], [
+      {type: "M", args: [{"_id" => "id0", "value" => "Q"}]},
+      {type: "-", args: ["id1"]},
+      {type: "M", args: [{"_id" => "id2", "value" => "Circle"}]},
+      {type: "+", args: [2, {"_id" => "id3", "value" => "Square"}]},
+    ])
+    expect(dump["newer"]["__changes_id"]).not_to eq(nil)
+
+    #Base with changes
+    verify_vm_page_entries(dump["newer"]["__base"], [
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id1", "value" => "Square"},
+      {"_id" => "id2", "value" => "Z"},
+    ])
+    verify_vm_diff(dump["newer"]["__base"]["__changes"], [
+      {type: "+", args: [0, {"_id" => "id0", "value" => "Triangle"}]},
+      {type: "M", args: [{"_id" => "id2", "value" => "Z"}]},
+      {type: "-", args: ["id3"]},
+    ])
+    expect(dump["newer"]["__base"]["__changes_id"]).not_to eq(nil)
+    expect(dump["newer"]["__base"]["__base"]).to  eq(nil)
   end
   ###########################################################################
 
