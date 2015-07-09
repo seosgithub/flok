@@ -79,7 +79,7 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 
 #Entry Modification
 #ehash - A hash that contains the new entry to replace the old entry.
-["M", eid, ehash]
+["M", ehash]
 
 #Entry Move
 #efrom_index - The index, an integer, that the entry was located at.

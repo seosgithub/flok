@@ -1,102 +1,108 @@
-//Will return an array with two equal (but not pointing to the same object) pages like [page_a, page_b]
-//The first page is the original page, the second page you should modify for the tests for comparison.
-//The 'entries' will automatically be put in an array and have an _id and _sig attached to them. The _id field
-//will go from 0, 1, 2, 3, etc. and the _sig will be set to 'sig'.
-function gen_pages(head, next, entries) {
-  for (var i = 0; i < entries.length; ++i) {
-    entries[i]._sig = 'sig';
-    entries[i]._id = "id"+i;
-  }
-
-  page_a = {
-    _head: head,
-    _next: next,
-    _id: "id",
-    _hash: "__not_used__",
-    entries: JSON.parse(JSON.stringify(entries))
-  }
-
-  page_b = {
-    _head: head,
-    _next: next,
-    _id: "id",
-    _hash: "__not_used__",
-    entries: JSON.parse(JSON.stringify(entries))
-  }
-
-  return [page_a, page_b];
+//Page Factor
+//////////////////////////////////////////////////////////////////////////////////////////
+function PageFactory(head, next) {
+  this.head = head;
+  this.next = next;
+  this.entries = [];
 }
 
-//Simple function that passes both pages to vm_diff
-function diff_them(pages) {
-  return vm_diff(pages[0], pages[1]);
+//Add an entry
+PageFactory.prototype.addEntry = function(eid, value) {
+  this.entries.push({_id: eid, _sig: value, value: value});
 }
 
-function diff_them_reverse(pages) {
-  return vm_diff(pages[1], pages[0]);
+//This adds up to four entrys that can be represented as a square:
+//-------------
+//| id0 | id1 |
+//-------------
+//| id2 | id3 |
+//-------------
+//Leaving out parts of the values array will not add those entries, e.g. ["Square", null, null, "Triangle"]
+//--------------------|
+//| Square | null     |
+//--------------------| 
+//| null   | Triangle |
+//--------------------|
+//Where 'Square' is id0 and 'Triangle' is id3
+PageFactory.prototype.addEntryFourSquare = function(values) {
+  if (values.length != 4) {
+    throw "FourSquare requires for values. Make values null if you don't need them"
+  }
+
+  for (var i = 0; i < values.length; ++i) {
+    if (values[i]) {
+      this.addEntry("id"+i, values[i]);
+    }
+  }
 }
 
-//Testing modified entry///////////////////////////////////////////////////
-//Changing one element
-mod0 = gen_pages(null, null, [
-    {"value": 'a'},
-]);
-mod0[1].entries[0].value = 'b';
-mod0[1].entries[0]._sig = 'sig_new';
-vm_reindex_page(mod0[0]);
-vm_reindex_page(mod0[1]);
+//Returns a page
+PageFactory.prototype.compile = function() {
+  var page = vm_create_page("default");
+  page._head = this.head;
+  page._next = this.next;
 
-//Changing one element when two are present
-mod1 = gen_pages(null, null, [
-    {"value": 'a'},
-    {"value": 'b'},
-    {"value": 'd'}
-]);
-mod1[1].entries[1].value = 'c';
-mod1[1].entries[1]._sig = 'sig_new';
-vm_reindex_page(mod1[0]);
-vm_reindex_page(mod1[1]);
+  page.entries = this.entries;
 
-//Changing both elements when two are present
-mod2 = gen_pages(null, null, [
-    {"value": 'a'},
-    {"value": 'b'}
-]);
-mod2[1].entries[0].value = 'b';
-mod2[1].entries[0]._sig = 'sig_new';
+  vm_rehash_page(page);
+  vm_reindex_page(page);
 
-mod2[1].entries[1].value = 'c';
-mod2[1].entries[1]._sig = 'sig_new';
-vm_reindex_page(mod2[0]);
-vm_reindex_page(mod2[1]);
-///////////////////////////////////////////////////////////////////////////
+  return page;
+}
+//////////////////////////////////////////////////////////////////////////////////////////
 
-//Testing deleted entry (backwards insert)////////////////////////////////
-//Deleting one element
-dmod0 = gen_pages(null, null, [
-    {"value": 'a'},
-]);
-dmod0[1].entries.splice(0, 1);
-vm_reindex_page(dmod0[0]);
-vm_reindex_page(dmod0[1]);
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", "Square", "Z", null]);
+triangle_square_z_null = pf.compile();
 
-//Deleting one element when two are present
-dmod1 = gen_pages(null, null, [
-    {"value": 'a'},
-    {"value": 'b'},
-    {"value": 'c'}
-]);
-dmod1[1].entries.splice(1, 1);
-vm_reindex_page(dmod1[0]);
-vm_reindex_page(dmod1[1]);
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", "Circle", null, "Q"]);
+triangle_circle_null_q = pf.compile();
 
-//Deleting both elements when two are present
-dmod2 = gen_pages(null, null, [
-    {"value": 'a'},
-    {"value": 'b'}
-]);
-dmod2[1].entries.splice(0, 1);
-dmod2[1].entries.splice(0, 1);
-vm_reindex_page(dmod2[0]);
-vm_reindex_page(dmod2[1]);
-///////////////////////////////////////////////////////////////////////////
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", "Circle", null, "Q"]);
+triangle_circle_null_q = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Q", null, "Circle", "Square"]);
+q_null_circle_square = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["P", "Circle", null, "Q"]);
+p_circle_null_q = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["P", "Circle", null, null]);
+p_circle_null_null  = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["P", null, null, "Q"]);
+p_null_null_q = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["P", "Square", null, null]);
+p_square_null_null  = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", null, "A", "M"]);
+triangle_null_a_m = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", "Square", null, null]);
+triangle_square_null_null = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquare(["Triangle", "Z", "Q", null]);
+triangle_z_q_null  = pf.compile();
+
+var pf = new PageFactory();
+head_null = pf.compile();
+
+var pf = new PageFactory();
+head_world = pf.compile("world");
+
+var pf = new PageFactory();
+next_null  = pf.compile("world");
+
+var pf = new PageFactory(null, "world");
+next_world = pf.compile("world");

@@ -150,13 +150,13 @@ service :vm do
         var old_sig = entry_diff[_id];
         if (old_sig) {
           if (old_sig != _sig) {
-            diff_log.push(["M", _id, new_entry]);
+            diff_log.push(["M", new_entry]);
           }
           delete entry_diff[_id];
         }
         //Inserted, old_sig didn't exist
         else {
-          diff_log.push(["+", _id, new_entry]);
+          diff_log.push(["+", i, new_entry]);
         }
       }
 
@@ -170,7 +170,8 @@ service :vm do
     }
 
     function vm_diff_replay(page, diff) {
-      for (var i = 0; i < diff.length; ++i) {
+      for (var i = diff.length-1; i >= 0; --i) {
+        vm_reindex_page(page);
         var e = diff[i];
 
         //vm_diff type
@@ -179,21 +180,27 @@ service :vm do
           var eindex = e[1];
           var entry = e[2];
 
-          //Insertion
-          page.entries.splice(eindex, 0, entry);
+          //Ignore insertion if an element already exists with the given id
+          if (page["__index"][entry["_id"]] === undefined) {
+            //Insertion
+            page.entries.splice(eindex, 0, entry);
+          }
         } else if (type === "M") {
-          var eindex = e[1];
-          var entry = e[2];
+          var entry = e[1];
 
           //Take out old, put in new
-          page.entries.splice(eindex, 1, entry);
+          if (page["__index"][entry["_id"]] !== undefined) {
+            page.entries.splice(page["__index"][entry["_id"]], 1, entry);
+          }
         } else if (type === "-") {
           var eid = e[1];
 
           var index = page.__index[eid];
 
           //Take out
-          page.entries.splice(index, 1);
+          if (page["__index"][eid] !== undefined) {
+            page.entries.splice(index, 1);
+          }
         }
       }
     } 
