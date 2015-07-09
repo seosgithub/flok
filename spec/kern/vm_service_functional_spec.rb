@@ -36,6 +36,68 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["new_anon_page"]["entries"]).to eq []
   end
 
+  it "Can can use vm_copy_page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    dump = ctx.evald %{
+      dump.new_page = vm_create_page("Q")
+      dump.no_head_no_next_no_entry = vm_copy_page(dump.new_page);
+
+      //Modify the new_page with a head, next, and entry; then create a copy
+      dump.new_page._head = "Z";
+      dump.new_page._next = "Triangle";
+      dump.new_page.entries.push({"_id": "id0", "_sig": "Square", "value": "Square"});
+      dump.head_z_next_triangle_entry_square = vm_copy_page(dump.new_page);
+
+      //Modify the new_page's entry in-place and make a copy
+      dump.new_page.entries[0]["_sig"] = "Circle";
+      dump.new_page.entries[0]["value"] = "Circle";
+      dump.head_z_next_triangle_entry_circle = vm_copy_page(dump.new_page);
+
+      //Modify the new_page's entry again in-place
+      dump.new_page.entries[0]["_sig"] = "Triangle"
+      dump.new_page.entries[0]["value"] = "Triangle"
+    }
+
+    expect(dump["no_head_no_next_no_entry"]).to eq({
+      "_head" => nil,
+      "_next" => nil,
+      "_id" => "Q",
+      "_hash" => nil,
+      "entries" => [],
+    })
+
+    expect(dump["head_z_next_triangle_entry_square"]).to eq({
+      "_head" => "Z",
+      "_next" => "Triangle",
+      "_id" => "Q",
+      "_hash" => nil,
+      "entries" => [
+        {"_id" => "id0", "_sig" => "Square", "value" => "Square"},
+      ],
+    })
+
+    expect(dump["head_z_next_triangle_entry_circle"]).to eq({
+      "_head" => "Z",
+      "_next" => "Triangle",
+      "_id" => "Q",
+      "_hash" => nil,
+      "entries" => [
+        {"_id" => "id0", "_sig" => "Circle", "value" => "Circle"},
+      ],
+    })
+
+    expect(dump["new_page"]).to eq({
+      "_head" => "Z",
+      "_next" => "Triangle",
+      "_id" => "Q",
+      "_hash" => nil,
+      "entries" => [
+        {"_id" => "id0", "_sig" => "Triangle", "value" => "Triangle"},
+      ],
+      "__index" => {}
+    })
+  end
+
   #vm_rehash_page
   ###########################################################################
   it "vm_rehash_page can calculate the hash correctly" do
@@ -652,7 +714,7 @@ RSpec.describe "kern:vm_service_functional" do
     #                           -----------------------               | -----             |
     #                           | Triangle | Square   |               | -----             |
     #                           | Z        |          | --__changes-  | | | | Remove (-)  |
-    #                                                              |  | -----             |
+    #                           older                              |  | -----             |
     #                                                              |  | |x| |             |
     #                                                              |  | -----             |
     #                                                              |  | -----             |
@@ -728,29 +790,159 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["newer"]["__base"]["__changes_id"]).not_to eq(nil)
     expect(dump["newer"]["__base"]["__base"]).to  eq(nil)
   end
-  ###########################################################################
 
-  it "can use vm_rebase for newer: [based[unbased, changes], changes]]" do
+  it "can use vm_rebase" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      newer = based_changes;
-      older = page;
-      vm_rebase(newer, older);
+    #vm_rebase:0 newer[nobase, nochange]
+    #| Triangle | Circle   | -> | Triangle | Square   | 
+    #|          | Q        | -> | Z        |          |
+    #older                       newer
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.older = triangle_circle_null_q;
+      dump.newer = triangle_square_z_null;
+      vm_rebase(dump.newer, dump.older);
     }
 
-    #Older should take __changes & __changes_id from newer.
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(older["__changes_id"]).to eq(newer["__changes_id"])
-    expect(older["__changes"]).to eq(newer["__changes"])
+    verify_vm_page_entries(dump["older"], [
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id1", "value" => "Circle"},
+      {"_id" => "id3", "value" => "Q"},
+    ])
 
-    #Before & After diff (Each value is indexed so that its id lines up, therefore modification
-    #for first element takes place, and insertion for second when going from a1 => unbased_changes
-    expect(older["entries"]).not_to eq(newer["entries"])
-    expect(older["entries"].map{|e| e["value"]}).to include("4")
+    #No base & No changes
+    expect(dump["older"]["__changes"]).to eq(nil)
+    expect(dump["older"]["__changes_id"]).to eq(nil)
+    expect(dump["older"]["__base"]).to eq(nil)
+
+    #vm_rebase:1 newer[nobase, changes]
+    #| P        | Circle   | -> | Triangle | Square   | --__changes-- | -----             |
+    #|          | Q        | -> | Z        |          |               | | |x|  Add (+)    |
+    #older                      newer                                 | -----   Square    |
+    #                                                                 | | | |             |
+    #                                                                 | -----             |
+    #                                                                 | -----             |
+    #                                                                 | | | | Modify (M)  |
+    #                                                                 | -----     Z       |
+    #                                                                 | |x| |             |
+    #                                                                 | -----             |
+    #                                                                 | -----             |
+    #                                                                 | | | | Remove (-)  |
+    #                                                                 | -----             |
+    #                                                                 | | |x|             |
+    #                                                                 | -----             |
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.older = p_circle_null_q;
+      dump.newer = triangle_square_z_null;
+      dump.newer.__changes = [
+        ["+", 0, {"_id": "id1", "_sig": "Square", "value": "Square"}],
+        ["M", {"_id": "id2", "_sig": "Z", "value": "Z"}],
+        ["-", "id3"],
+      ]
+      dump.newer.__changes_id = "XXXXXXXXXXX";
+      vm_rebase(dump.newer, dump.older);
+    }
+
+    verify_vm_page_entries(dump["older"], [
+      {"_id" => "id0", "value" => "P"},
+      {"_id" => "id1", "value" => "Circle"},
+    ])
+
+    #Changes match
+    verify_vm_diff(dump["older"]["__changes"], [
+      {type: "+", args: [0, {"_id" => "id1", "value" => "Square"}]},
+      {type: "M", args: [{"_id" => "id2", "value" => "Z"}]},
+      {type: "-", args: ["id3"]},
+    ])
+    expect(dump["older"]["__changes_id"]).not_to eq(nil)
+
+    #No base
+    expect(dump["older"]["__base"]).to eq(nil)
+
+    #vm_rebase:2 newer[base[nobase, changes], changes]
+    #| P        | Circle   | -> | Triangle | Square   | --__changes-- | -----             |
+    #|          | Q        | -> | K        |          |               | | |x|    Add (+)  |
+    #older                      -----------------------               | -----   Square    |
+    #                           |      __base         |               | | | |             |
+    #                           -----------------------               | -----             |
+    #                           | Triangle |          |               | -----             |
+    #                           | A        | M        | --__changes-  | | | | Modify (M)  |
+    #                           newer                              |  | -----    Z        |
+    #                                                              |  | |x| |             |
+    #                                                              |  | -----             |
+    #                                                              |  | -----             |
+    #                                                              |  | | | | Remove (-)  |
+    #                                                              |  | -----             |
+    #                                                              |  | | |x|             |
+    #                                                              |  | -----             |
+    #                                                              |  --------------------
+    #                                                              |                      
+    #                                                              |- | -----             |                    
+    #                                                                 | | |x| Remove (-)  |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | | |             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | | | Modify (M)  |                    
+    #                                                                 | -----     A       |                    
+    #                                                                 | |x| |             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | -----             |                    
+    #                                                                 | | | |   Add (+)   |                    
+    #                                                                 | -----     M       |                    
+    #                                                                 | | |x|             |                    
+    #                                                                 | -----             |                    
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.older = p_circle_null_q;
+      dump.newer = triangle_square_z_null;
+      dump.newer.__changes_id = "XXXXX";
+      dump.newer.__changes = [
+        ["+", 0, {"_id": "id1", "_sig": "Square", "value": "Square"}],
+        ["M", {"_id": "id2", "_sig": "Z", "value": "Z"}],
+        ["-", "id3"],
+      ]
+
+      //Also, base on older
+      dump.newer.__base = triangle_null_a_m;
+      dump.newer.__base.__changes = [
+        ["-", "id1"],
+        ["M", {"_id": "id2", "_sig": "A", "value": "A"}],
+        ["+", 2, {"_id": "id3", "_sig": "+", "value": "+"}],
+      ]
+      dump.newer.__base.__changes_id = "YYYYYYY";
+      vm_rebase(dump.newer, dump.older);
+    }
+
+    require 'pry'; binding.pry
+
+    verify_vm_page_entrie(dump["older"], [
+      {"_id" => "id0", "value" => "P"},
+      {"_id" => "id1", "value" => "Square"},
+    ])
+
+    #Changes match
+    verify_vm_diff(dump["older"]["__changes"], [
+      {type: "+", args: [0, {"_id" => "id1", "value" => "Square"}]},
+      {type: "-", args: ["id3"]},
+    ])
+    expect(dump["older"]["__changes_id"]).not_to eq(nil)
+
+    #Base with changes
+    verify_vm_page_entries(dump["older"]["__base"], [
+      {"_id" => "id0", "value" => "P"},
+      {"_id" => "id3", "value" => "Q"},
+    ])
+    verify_vm_diff(dump["older"]["__base"]["__changes"], [
+      {type: "-", args: ["id1"]},
+      {type: "M", args: [{"_id" => "id2", "value" => "A"}]},
+      {type: "+", args: [2, {"_id" => "id3", "value" => "M"}]},
+    ])
+    expect(dump["older"]["__base"]["__changes_id"]).not_to eq(nil)
+    expect(dump["older"]["__base"]["__base"]).to  eq(nil)
+
   end
+  ###########################################################################
 end

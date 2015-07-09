@@ -99,6 +99,18 @@ service :vm do
       return page;
     }
 
+    function vm_copy_page(page) {
+      var page = {
+        _id: page._id,
+        _head: page._head,
+        _next: page._next,
+        _hash: page._hash,
+        entries: JSON.parse(JSON.stringify(page.entries)),
+      };
+
+      return page;
+    }
+
     function vm_rehash_page(page) {
       var z = 0;
 
@@ -237,11 +249,35 @@ service :vm do
     }
 
     function vm_rebase(newer, older) {
-      if (newer.__changes) {
+      if (newer.__changes && !newer.__base) {
+        <% if @debug %>
+          if (newer.__changes_id === undefined) {
+            throw "__changes_id did not exist on newer: " + JSON.stringify(newer) + " but it did have __changes";
+          }
+        <% end %>
         older.__changes = newer.__changes;
         older.__changes_id = newer.__changes_id;
 
         vm_diff_replay(older, older.__changes);
+      } else if (newer.__changes && newer.__base) {
+        <% if @debug %>
+          if (newer.__changes_id === undefined) {
+            throw "__changes_id did not exist on newer: " + JSON.stringify(newer) + " but it did have __changes";
+          }
+        <% end %>
+
+        //Reconstruct the __base by playing newer.__base.__changes ontop of older (which is the base we are rebasing on)
+        //Imagine that you texted a teacher changes, but are unsure whether that teacher has received those changes, meanwhile,
+        //the teacher texts you a new fresh copy of the page. You must now keep track of the changes you texted her (newer.__base.__changes)
+        //while still being able to create a new list of changes for any future changes that you make (as we diff pages to create the changes)
+        //So we reconstruct the newer.__base page  by taking what the teacher gave us, trash the newer.__base page, but replay the changes
+        //that newer.__base.__changes had onto the copy the teacher gave us. E.g. we cross out "Sally" on our list, text teacher that we crossed
+        //out sally. Teacher gave us a new list that has "Bill" Crossed out. We Then take the new list and cross out "Sally" and call that our new
+        //base page.
+        vm_diff_replay(older, newer.__base.__changes);
+
+        //Copy the page, we need to use the copy as a '__base' page because we want the non-copied older page to be the non-base version. (And we
+        //will make it the 'non' base version by again, replaying changes from the 'newer.__changes') after setting the __base to the copy.
       }
     }
     ///////////////////////////////////////////////////////////////////////////
