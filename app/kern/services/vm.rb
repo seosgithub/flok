@@ -292,6 +292,15 @@ service :vm do
         older.__changes_id = gen_id();
       }
     }
+
+    function vm_mark_changes_synced(page, changes_id) {
+      if (page.__base === undefined && changes_id === page.__changes_id) {
+        delete page.__changes;
+        delete page.__changes_id;
+      } else if (page.__base !== undefined && changes_id === page.__base.__changes_id) {
+        delete page.__base;
+      }
+    }
     ///////////////////////////////////////////////////////////////////////////
   }
 

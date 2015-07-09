@@ -231,6 +231,10 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
             2. `older` clones itself, let that clone be called `oldest`. `older.__base` is set to `oldest`.
             3. `older` replays `newer.__changes` onto itself.
             4. `older` then calculates `__changes` based off `oldest`.
+    * `vm_mark_changes_synced(page, changes_id)` - Will reverse the steps of `vm_commit`. If the page has changes but is not based, then the changes are removed if the
+        `__changes_id` of the page matches `changes_id`. If the page is based (implying the base page has changes and the page has changes as all base
+        pages have changes), then if the `changes_id` matches the **base** `__changes_id` , the `__base` is removed from the page. If `changes_id`
+        does not match in either of the cases, then nothing happends. This may happend if a synchronization errousouly comes in.
 ###Non functional
 ####Pager specific
   * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.

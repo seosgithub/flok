@@ -942,5 +942,86 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["older"]["__base"]["__changes_id"]).to  eq("YYYYYYY")
     expect(dump["older"]["__base"]["__base"]).to  eq(nil)
   end
+
+  it "can use vm_mark_changes_synced" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+
+    #Case A
+    #Page with no changes. (Nothing happends)
+    dump = ctx.evald %{
+      dump.page = vm_create_page();
+      vm_mark_changes_synced(dump.page, "changes_id");
+
+      dump.__changes_id_is_undefined = (dump.page.__changes_id === undefined)
+      dump.__changes_is_undefined = (dump.page.__changes === undefined)
+    }
+    expect(dump["__changes_id_is_undefined"]).to eq(true)
+    expect(dump["__changes_is_undefined"]).to eq(true)
+
+    #Case B
+    #Page with changes, but changes_id given to vm_mark_changes_synced does not match (Nothing happends).
+    dump = ctx.evald %{
+      dump.page = vm_create_page();
+      dump.page.__changes_id = "foo";
+      dump.page.__changes = ["A"]
+      vm_mark_changes_synced(dump.page, "bar");
+    }
+    expect(dump["page"]["__changes"]).to eq(["A"])
+    expect(dump["page"]["__changes_id"]).to eq("foo")
+
+    #Case C
+    #Page with changes but no base, and changes_id given to vm_mark_changes_synced does match __changes_id of page.
+    #The __changes and __changes_id of the page will be removed.
+    dump = ctx.evald %{
+      dump.page = vm_create_page();
+      dump.page.__changes_id = "foo";
+      dump.page.__changes = ["A"]
+      vm_mark_changes_synced(dump.page, "foo");
+
+      dump.__changes_id_is_undefined = (dump.page.__changes_id === undefined)
+      dump.__changes_is_undefined = (dump.page.__changes === undefined)
+    }
+    expect(dump["__changes_id_is_undefined"]).to eq(true)
+    expect(dump["__changes_is_undefined"]).to eq(true)
+
+    #Case D
+    #Page with changes and a base[changes, nobase], and changes_id given to vm_mark_changes_synced does not match __base.__changes_id of page.
+    #Nothing happends
+    dump = ctx.evald %{
+      dump.page = vm_create_page();
+      dump.page.__changes_id = "foo";
+      dump.page.__changes = ["A"]
+
+      //Attach base [unbased, changes]
+      dump.page.__base = vm_create_page();
+      dump.page.__base.__changes_id = "bar";
+      dump.page.__base.__changes = ["B"]
+
+      vm_mark_changes_synced(dump.page, "foo");
+    }
+    expect(dump["page"]["__changes"]).to eq(["A"])
+    expect(dump["page"]["__changes_id"]).to eq("foo")
+
+    #Case E
+    #Page with changes and a base[changes, nobase], and changes_id given to vm_mark_changes_synced does match __base.__changes_id of page.
+    #The base will be removed, but the page's __changes and __changes_id will remain.
+    dump = ctx.evald %{
+      dump.page = vm_create_page();
+      dump.page.__changes_id = "foo";
+      dump.page.__changes = ["A"]
+
+      //Attach base [unbased, changes]
+      dump.page.__base = vm_create_page();
+      dump.page.__base.__changes_id = "bar";
+      dump.page.__base.__changes = ["B"]
+
+      vm_mark_changes_synced(dump.page, "bar");
+
+      dump.__base_is_undefined = (dump.page.__base === undefined)
+    }
+    expect(dump["__base_is_undefined"]).to eq(true)
+    expect(dump["page"]["__changes"]).to eq(["A"])
+    expect(dump["page"]["__changes_id"]).to eq("foo")
+  end
   ###########################################################################
 end
