@@ -140,6 +140,14 @@ service :vm do
         entry_diff[_id] = _sig;
       }
 
+      if (old_page._head !== new_page._head) {
+        diff_log.push(["HEAD_M", new_page._head])
+      }
+
+      if (old_page._next !== new_page._next) {
+        diff_log.push(["NEXT_M", new_page._next])
+      }
+
       //New entrys
       for (var i = 0; i < new_page.entries.length; ++i) {
         var new_entry = new_page.entries[i];
@@ -201,6 +209,10 @@ service :vm do
           if (page["__index"][eid] !== undefined) {
             page.entries.splice(index, 1);
           }
+        } else if (type === "HEAD_M") {
+          page._head = e[1];
+        } else if (type === "NEXT_M") {
+          page._next = e[1];
         }
       }
     } 

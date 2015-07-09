@@ -233,7 +233,6 @@ RSpec.describe "kern:vm_service_functional" do
           catch(:matcher_does_not_match) do
             #For all key value pairs in matcher
             matcher.each do |k, v|
-              puts "Trying key #{k} for entry #{entry} should match value #{v}"
               throw :matcher_does_not_match if entry[k] != v
             end
 
@@ -261,7 +260,7 @@ RSpec.describe "kern:vm_service_functional" do
     ctx.eval pages_src
   end
 
-  it "can use vm_diff with modified entry" do
+  it "can use vm_diff" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
 
     #vm_commit:0, 1
@@ -303,7 +302,6 @@ RSpec.describe "kern:vm_service_functional" do
       vm_rehash_page(dump.replay);
       vm_reindex_page(dump.replay);
     }
-    puts dump["diff"].inspect
     verify_vm_diff(dump["diff"], [
       {type: "M", args: [{"_id" => "id0", "value" => "Q"}]},
       {type: "-", args: ["id1"]},
@@ -396,7 +394,6 @@ RSpec.describe "kern:vm_service_functional" do
       vm_rehash_page(dump.replay);
       vm_reindex_page(dump.replay);
     }
-    puts dump["diff"].inspect
     verify_vm_diff(dump["diff"], [
       {type: "+", args: [1, {"_id" => "id1", "value" => "Square"}]},
       {type: "-", args: ["id3"]},
@@ -420,7 +417,6 @@ RSpec.describe "kern:vm_service_functional" do
       vm_rehash_page(dump.replay);
       vm_reindex_page(dump.replay);
     }
-    puts dump["diff"].inspect
     verify_vm_diff(dump["diff"], [
       {type: "+", args: [1, {"_id" => "id1", "value" => "Square"}]},
       {type: "M", args: [{"_id" => "id2", "value" => "Z"}]},
@@ -477,138 +473,103 @@ RSpec.describe "kern:vm_service_functional" do
       {"_id" => "id1", "value" => "Z"},
       {"_id" => "id2", "value" => "Q"},
     ])
+
+    #vm_addendum:2c
+    #head:null                  head:world
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = head_null;
+      var to = head_world;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: "HEAD_M", args: ["world"]}
+    ])
+    expect(dump["replay"]["_head"]).to eq("world")
+
+    #vm_addendum:2d
+    #head:world                  head:null
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = head_world;
+      var to = head_null;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: "HEAD_M", args: [nil]}
+    ])
+    expect(dump["replay"]["_head"]).to eq(nil)
+
+    #vm_addendum:2e
+    #next:null                  next:world
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = next_null;
+      var to = next_world;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: "NEXT_M", args: ["world"]}
+    ])
+    expect(dump["replay"]["_next"]).to eq("world")
+
+    #vm_addendum:2f
+    #next:world                 next:null
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = next_world;
+      var to = next_null;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: "NEXT_M", args: [nil]}
+    ])
+    expect(dump["replay"]["_next"]).to eq(nil)
   end
   ###########################################################################
 
   #vm commit helpers
   ###########################################################################
-  it "can use vm_commit for older: [unbased, nochanges]" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
-
-    #Run the checks
+  def reload_vm_commit_pages(ctx)
+    pages_src = File.read("./spec/kern/assets/vm/vm_commit_pages.js")
     ctx.eval pages_src
-
-    ctx.eval %{
-      older = unbased_nochanges;
-      newer = page;
-      vm_commit(older, newer);
-    }
-
-    #Check changes_id
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["__changes_id"]).not_to eq(nil)
-
-    #Before & After diff
-    expect(newer["entries"]).not_to eq(older["entries"])
-    ctx.eval %{
-      vm_diff_replay(older, newer.__changes);
-    }
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["entries"]).to eq(older["entries"])
   end
 
-  it "can use vm_commit for older: [unbased, changes]" do
+  it "can use vm_commit" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
 
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      older = unbased_changes;
-      newer = page;
-      vm_commit(older, newer);
+    #vm_commit:0
+    #| Triangle | Circle   | -> | Triangle | Square   | 
+    #|          | Q        | -> | Z        |          |
+    #newer                       older
+    reload_vm_commit_pages(ctx)
+    dump = ctx.evald %{
+      dump.newer = triangle_circle_null_q;
+      dump.older = triangle_square_z_null;
+      vm_commit(dump.older, dump.newer);
     }
 
-    #Check changes_id & __base
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["__changes_id"]).not_to eq(nil)
-    expect(newer["__base"]).not_to eq(nil)
-    expect(newer["__base"]).to eq(older)
-
-    #Before & After diff
-    expect(newer["entries"]).not_to eq(older["entries"])
-    ctx.eval %{
-      vm_diff_replay(older, newer.__changes);
-    }
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["entries"]).to eq(older["entries"])
-  end
-
-  it "can use vm_commit for older: [based[unbased, changes], changes]]" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
-
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      older = based_changes;
-      newer = page;
-      vm_commit(older, newer);
-    }
-
-    #Check changes_id & __base
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["__changes_id"]).not_to eq(older["__base"]["__changes_id"])
-    expect(newer["__changes_id"]).not_to eq(older["__changes_id"])
-    expect(newer["__base"]).not_to eq(nil)
-    expect(newer["__base"]).to eq(older["__base"])
-
-    #Before & After diff
-    expect(newer["entries"]).not_to eq(older["entries"])
-    ctx.eval %{
-      vm_diff_replay(older.__base, newer.__changes);
-    }
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(newer["entries"]).not_to eq(older["entries"])
-    expect(newer["entries"]).to  eq(older["__base"]["entries"])
-  end
-
-  it "can use vm_rebase for newer: [unbased, nochanges]" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
-
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      newer = unbased_nochanges;
-      older = page;
-      vm_rebase(newer, older);
-    }
-
-    #older should not have been modified
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(older["__changes_id"]).to eq(nil)
-    expect(older["__base"]).to eq(nil)
-    expect(older["__changes"]).to eq(nil)
-  end
-
-  it "can use vm_rebase for newer: [unbased, changes]" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller22.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    pages_src = File.read("./spec/kern/assets/vm/vm_commit.js")
-
-    #Run the checks
-    ctx.eval pages_src
-
-    ctx.eval %{
-      newer = unbased_changes;
-      older = page;
-      vm_rebase(newer, older);
-    }
-
-    #Older should take __changes & __changes_id from newer.
-    older = ctx.dump("older"); newer = ctx.dump("newer")
-    expect(older["__changes_id"]).to eq(newer["__changes_id"])
-    expect(older["__changes"]).to eq(newer["__changes"])
-
-    #Before & After diff (Each value is indexed so that its id lines up, therefore modification
-    #for first element takes place, and insertion for second when going from a1 => unbased_changes
-    expect(older["entries"]).not_to eq(newer["entries"])
-    expect(older["entries"].map{|e| e["value"]}).to include("8")
-    expect(older["entries"].map{|e| e["value"]}).to include("6")
+    expect(dump).to eq({})
   end
   ###########################################################################
 
