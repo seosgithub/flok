@@ -910,15 +910,13 @@ RSpec.describe "kern:vm_service_functional" do
       dump.newer.__base.__changes = [
         ["-", "id1"],
         ["M", {"_id": "id2", "_sig": "A", "value": "A"}],
-        ["+", 2, {"_id": "id3", "_sig": "+", "value": "+"}],
+        ["+", 2, {"_id": "id3", "_sig": "+", "value": "M"}],
       ]
       dump.newer.__base.__changes_id = "YYYYYYY";
       vm_rebase(dump.newer, dump.older);
     }
 
-    require 'pry'; binding.pry
-
-    verify_vm_page_entrie(dump["older"], [
+    verify_vm_page_entries(dump["older"], [
       {"_id" => "id0", "value" => "P"},
       {"_id" => "id1", "value" => "Square"},
     ])
@@ -929,6 +927,7 @@ RSpec.describe "kern:vm_service_functional" do
       {type: "-", args: ["id3"]},
     ])
     expect(dump["older"]["__changes_id"]).not_to eq(nil)
+    expect(dump["older"]["__changes_id"]).not_to eq("XXXXX")
 
     #Base with changes
     verify_vm_page_entries(dump["older"]["__base"], [
@@ -940,9 +939,8 @@ RSpec.describe "kern:vm_service_functional" do
       {type: "M", args: [{"_id" => "id2", "value" => "A"}]},
       {type: "+", args: [2, {"_id" => "id3", "value" => "M"}]},
     ])
-    expect(dump["older"]["__base"]["__changes_id"]).not_to eq(nil)
+    expect(dump["older"]["__base"]["__changes_id"]).to  eq("YYYYYYY")
     expect(dump["older"]["__base"]["__base"]).to  eq(nil)
-
   end
   ###########################################################################
 end

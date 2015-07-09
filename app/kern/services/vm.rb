@@ -278,6 +278,18 @@ service :vm do
 
         //Copy the page, we need to use the copy as a '__base' page because we want the non-copied older page to be the non-base version. (And we
         //will make it the 'non' base version by again, replaying changes from the 'newer.__changes') after setting the __base to the copy.
+        var older_copy = vm_copy_page(older);
+        older_copy.__changes = newer.__base.__changes;
+        older_copy.__changes_id = newer.__base.__changes_id;
+        vm_reindex_page(older_copy);
+        older.__base = older_copy;
+
+        //Now update the older page w/ the `newer.__changes`
+        vm_diff_replay(older, newer.__changes);
+
+        //Calculate diff for older
+        older.__changes = vm_diff(older.__base, older);
+        older.__changes_id = gen_id();
       }
     }
     ///////////////////////////////////////////////////////////////////////////
