@@ -704,7 +704,7 @@ RSpec.describe "kern:vm_service_functional" do
       {type: "M", args: [{"_id" => "id2", "value" => "Z"}]},
     ])
     expect(dump["newer"]["__base"]["__changes_id"]).not_to eq(nil)
-    expect(dump["newer"]["__base"]["__base"]).o eq(nil)
+    expect(dump["newer"]["__base"]["__base"]).to eq(nil)
 
     #vm_commit:2 older[base[nobase, changes], changes]
     #| Q        |          | -> | Triangle | Circle   | --__changes-- | -----             |
