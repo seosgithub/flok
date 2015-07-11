@@ -26,9 +26,23 @@ service :vm do
     function vm_cache_write(ns, page) {
       <% if @debug %>
         if (vm_transaction_in_progress === false) { throw "vm_cache_write called but a transaction was not in progress. Make sure to call vm_transaction_begin and vm_transaction_end" }
+        if (vm_transaction_ns !== null && vm_transaction_ns !== ns) { throw "vm_cache_write called, and is within a vm_transaction but the ns given: " + ns + " does not match the transaction ns of: " + vm_transaction_ns };
       <% end %>
+
+      //Namespace is needed for vm_transaction_end
+      vm_transaction_ns = ns;
+
+      vm_rehash_page(page);
+
       var old = vm_cache[ns][page._id];
-      if (old && old._hash == page._hash) { return; }
+      if (old) {
+        //Same, don't do anything
+        if (old._hash === page._hash) { return; }
+
+        //Diff
+        vm_transaction_diffs.push(vm_diff(old, page));
+        vm_transaction_changed_ids.push(page._id);
+      }
 
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
@@ -374,6 +388,9 @@ service :vm do
         if (vm_transaction_in_progress === true) { throw "vm_transaction_begin called but a transaction was already in progress" }
       <% end %>
       vm_transaction_in_progress = true;
+      vm_transaction_diffs = [];
+      vm_transaction_changed_ids = [];
+      vm_transaction_ns = null;
     }
 
     function vm_transaction_end() {
@@ -381,6 +398,32 @@ service :vm do
         if (vm_transaction_in_progress === false) { throw "vm_transaction_end called but vm_transaction_begin was never called" }
       <% end %>
       vm_transaction_in_progress = false;
+
+      for (var i = 0; i < vm_transaction_changed_ids.length; ++i) {
+        var page_id = vm_transaction_changed_ids[i];
+        var bps = vm_notify_map[vm_transaction_ns][page_id];
+        if (bps !== undefined) {
+          pieces = [];
+          for (var x = 0; x < vm_transaction_diffs[i].length; ++x) {
+            //Get diff entry
+            var diff_entry = vm_transaction_diffs[i][x];
+            pieces.push(diff_entry);
+
+            //For all listening controllers
+            for (var y = 0; y < bps.length; ++y) {
+              var bp = bps[y];
+
+              if (diff_entry[0] === "M") {
+                int_event_defer(bp, "entry_modify", {page_id: page_id, entry: diff_entry[1]});
+              } else if (diff_entry[0] === "-") {
+                int_event_defer(bp, "entry_del", {page_id: page_id, entry_id: diff_entry[1]});
+              }
+            }
+          }
+
+          //throw JSON.stringify(pieces);
+        }
+      }
     }
     ///////////////////////////////////////////////////////////////////////////
   }
