@@ -6,6 +6,8 @@ controller :my_controller do
     entry_modify_params = [];
     entry_del_params = [];
     entry_ins_params = [];
+    next_changed_params = [];
+    head_changed_params = [];
   }
 
   action :my_action do
@@ -32,6 +34,14 @@ controller :my_controller do
     on "entry_ins", %{
       entry_ins_called = true;
       entry_ins_params.push(params);
+    }
+
+    on "head_changed", %{
+      head_changed_params.push(params);
+    }
+
+    on "next_changed", %{
+      next_changed_params.push(params);
     }
   end
 end

@@ -176,7 +176,7 @@ RSpec.describe "kern:vm_transaction" do
     ])
   end
 
-  it "does send the controller the entry_move when an entry is deleted in the page" do
+  it "does send the controller the entry_move when an entry is moved within the same page" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0_diff.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
     reload_vm_transaction_diff_pages(ctx)
     dump = ctx.evald %{
@@ -214,6 +214,111 @@ RSpec.describe "kern:vm_transaction" do
         "from_page_id" => "default",
         "to_page_id" => "default",
         "to_page_index" => 1,
+      },
+    ])
+  end
+
+  it "does send the controller the entry_ins when an entry is inserted in the page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0_diff.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
+    reload_vm_transaction_diff_pages(ctx)
+    dump = ctx.evald %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      //Write
+      vm_transaction_begin();
+        vm_cache_write("dummy", p_null_null_q);
+        vm_cache_write("dummy", triangle_square_z_null);
+      vm_transaction_end();
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+
+      dump.entry_modify_params = entry_modify_params;
+      dump.entry_move_params = entry_move_params;
+      dump.entry_del_params = entry_del_params;
+      dump.entry_ins_params = entry_ins_params;
+    }
+
+    expect(dump["entry_ins_params"]).to eq([
+      {
+        "page_id" => "default",
+        "index" => 1,
+        "entry" => {"_id" => "id1", "_sig" => "Square", "value" => "Square"}
+      },
+      {
+        "page_id" => "default",
+        "index" => 2,
+        "entry" => {"_id" => "id2", "_sig" => "Z", "value" => "Z"}
+      },
+    ])
+  end
+
+  it "does send the controller the next_changed when the page next changes" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0_diff.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
+    reload_vm_transaction_diff_pages(ctx)
+    dump = ctx.evald %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      //Write
+      vm_transaction_begin();
+        vm_cache_write("dummy", next_null);
+        vm_cache_write("dummy", next_world);
+      vm_transaction_end();
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+
+      dump.head_changed_params = head_changed_params;
+      dump.next_changed_params = next_changed_params;
+    }
+
+    expect(dump["next_changed_params"]).to eq([
+      {
+        "page_id" => "default",
+        "value" => "world"
+      },
+    ])
+  end
+
+
+  it "does send the controller the next_changed when the page head changes" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0_diff.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
+    reload_vm_transaction_diff_pages(ctx)
+    dump = ctx.evald %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      //Write
+      vm_transaction_begin();
+        vm_cache_write("dummy", head_null);
+        vm_cache_write("dummy", head_world);
+      vm_transaction_end();
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+
+      dump.head_changed_params = head_changed_params;
+      dump.next_changed_params = next_changed_params;
+    }
+
+    expect(dump["head_changed_params"]).to eq([
+      {
+        "page_id" => "default",
+        "value" => "world"
       },
     ])
   end

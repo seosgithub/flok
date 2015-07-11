@@ -421,7 +421,15 @@ service :vm do
                 var eindex = diff_entry[1];
                 var eid = diff_entry[2];
                 int_event_defer(bp, "entry_move", {entry_id: eid, from_page_id: page_id, to_page_id: page_id, to_page_index: eindex});
-              }
+              } else if (diff_entry[0] === "+") {
+                var eindex = diff_entry[1];
+                var entry = diff_entry[2];
+                int_event_defer(bp, "entry_ins", {page_id: page_id, index: eindex, entry: entry});
+              } else if (diff_entry[0] === "NEXT_M") {
+                int_event_defer(bp, "next_changed", {page_id: page_id, value: diff_entry[1]});
+              } else if (diff_entry[0] === "HEAD_M") {
+                int_event_defer(bp, "head_changed", {page_id: page_id, value: diff_entry[1]});
+              } 
             }
           }
 
