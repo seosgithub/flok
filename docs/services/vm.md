@@ -82,9 +82,9 @@ Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types ar
 ["M", ehash]
 
 #Entry Move
-#efrom_index - The index, an integer, that the entry was located at.
-#eto_index - The index, an integer, that the entry is now located at.
-[">", efrom_index, eto_index]
+#to_index - The index, an integer, that the entry should be insertad at
+#eid - The id of the entry to be moved to the to_index
+[">", to_index, eid]
 
 #Head or next pointer changed
 ["HEAD_M", new_head_id]
