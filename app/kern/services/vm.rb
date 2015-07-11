@@ -24,6 +24,9 @@ service :vm do
 
     //Cache
     function vm_cache_write(ns, page) {
+      <% if @debug %>
+        if (vm_transaction_in_progress === false) { throw "vm_cache_write called but a transaction was not in progress. Make sure to call vm_transaction_begin and vm_transaction_end" }
+      <% end %>
       var old = vm_cache[ns][page._id];
       if (old && old._hash == page._hash) { return; }
 
@@ -38,7 +41,6 @@ service :vm do
         }
       }
     }
-
 
     function vm_pageout() {
       <% @options[:pagers].each do |p| %>
@@ -361,6 +363,24 @@ service :vm do
       } else if (page.__base !== undefined && changes_id === page.__base.__changes_id) {
         delete page.__base;
       }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    //vm transaction helpers
+    ///////////////////////////////////////////////////////////////////////////
+    vm_transaction_in_progress = false;
+    function vm_transaction_begin() {
+      <% if @debug %>
+        if (vm_transaction_in_progress === true) { throw "vm_transaction_begin called but a transaction was already in progress" }
+      <% end %>
+      vm_transaction_in_progress = true;
+    }
+
+    function vm_transaction_end() {
+      <% if @debug %>
+        if (vm_transaction_in_progress === false) { throw "vm_transaction_end called but vm_transaction_begin was never called" }
+      <% end %>
+      vm_transaction_in_progress = false;
     }
     ///////////////////////////////////////////////////////////////////////////
   }
