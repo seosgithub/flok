@@ -39,38 +39,6 @@ service :vm do
       }
     }
 
-    function vm_rehash_page(page) {
-      var z = 0;
-
-      //head and next are optional
-      if (page._head) { var z = crc32(0, page._head) }
-      if (page._next) { z = crc32(z, page._next) }
-
-      z = crc32(z, page._id)
-
-      //Hash differently based on type
-      if (page._type === "array") {
-        var e = page.entries;
-        for (var i = 0; i < e.length; ++i) {
-          z = crc32(z, e[i]._sig);
-        }
-      } else if (page._type === "hash") {
-        var keys = Object.keys(page.entries);
-        var e = page.entries;
-        var q = 0;
-        for (var i = 0; i < keys.length; ++i) {
-          var _sig = e[keys[i]]._sig;
-          var r = crc32(0, _sig);
-          q = q + r;
-        }
-        q = +q;
-        z = crc32(z, q.toString());
-      } <% if @debug %> else {
-        throw "vm_rehash_page got an unspported type: "+page._type;
-      }
-      <% end %>
-      page._hash = z.toString();
-    }
 
     function vm_pageout() {
       <% @options[:pagers].each do |p| %>
@@ -111,6 +79,290 @@ service :vm do
     <% if @debug %>
       vm_write_list = [];
     <% end %>
+
+    //Generic Page Helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function vm_create_page(id) {
+      if (id === undefined) {
+        id = gen_id();
+      }
+
+      var page = {
+        _id: id,
+        _head: null,
+        _next: null,
+        _hash: null,
+        entries: [],
+        __index: {},
+      };
+
+      return page;
+    }
+
+    function vm_copy_page(page) {
+      var page = {
+        _id: page._id,
+        _head: page._head,
+        _next: page._next,
+        _hash: page._hash,
+        entries: JSON.parse(JSON.stringify(page.entries)),
+      };
+
+      return page;
+    }
+
+    function vm_rehash_page(page) {
+      var z = 0;
+
+      //head and next are optional
+      if (page._head) { var z = crc32(0, page._head) }
+      if (page._next) { z = crc32(z, page._next) }
+
+      z = crc32(z, page._id)
+
+      //Hash differently based on type
+      var e = page.entries;
+      for (var i = 0; i < e.length; ++i) {
+        z = crc32(z, e[i]._sig);
+      }
+
+      page._hash = z.toString();
+    }
+
+    function vm_reindex_page(page) {
+      page.__index = {};
+      for (var i = 0; i < page.entries.length; ++i) {
+        page.__index[page.entries[i]._id] = i;
+      }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    //vm_diff helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function vm_diff(old_page, new_page) {
+      var diff_log = [];
+      if (old_page._head !== new_page._head) {
+        diff_log.push(["HEAD_M", new_page._head])
+      }
+
+      if (old_page._next !== new_page._next) {
+        diff_log.push(["NEXT_M", new_page._next])
+      }
+
+      var from_entries = old_page.entries;
+      var to_entries = new_page.entries;
+
+      //Calculated lists
+      var ins = [];
+      var dels = [];
+      var moves = [];
+      var modify = [];
+
+      //a_prime is Union (ordered) of from
+      //b_prime is Union (ordered) of to
+      var a_prime = [];
+      var b_prime = [];
+
+      //Save all entry sigs
+      var from_entries_sig  = [];
+      for (var i = 0; i < from_entries.length; ++i) {
+        from_entries_sig[from_entries[i]._id] = from_entries[i]._sig;
+      }
+
+      //Need to re-index page for the modify code which needs to know the index
+      //of the id of the new entry
+      vm_reindex_page(new_page);
+
+      //Save all the entry sigs
+      var to_entries_sig  = [];
+      for (var i = 0; i < to_entries.length; ++i) {
+        to_entries_sig[to_entries[i]._id] = to_entries[i]._sig;
+      }
+
+      //I. Calculate all elements in to_entries that are not in from_entries
+      //for each one of those elements, mark it as insertion and remove them in reverse order.
+      for (var i = 0; i < to_entries.length; ++i) {
+        //Does the entry *not* exist in from_entries?
+        var to_entry_id = to_entries[i]._id;
+        if (from_entries_sig[to_entry_id] === undefined) {
+          ins.push(["+", i, to_entries[i]]);
+        } else {
+          //The entry *does* exist, therefore it must be part of the shared
+          b_prime.push(to_entries[i]._id);
+        }
+      }
+
+      for (var i = 0; i < from_entries.length; ++i) {
+        var from_entry_id = from_entries[i]._id;
+        if (to_entries_sig[from_entry_id] === undefined) {
+          dels.push(["-", from_entries[i]._id]);
+        } else {
+          a_prime.push(from_entries[i]._id);
+
+          if (from_entries[i]._sig != to_entries_sig[from_entry_id]) {
+            modify.push(["M", new_page.entries[new_page.__index[from_entry_id]]]);
+          }
+        }
+      }
+
+      //*==================================*
+      //| Wild UNOPTIMIZED ALGORITHM       |
+      //|                                  |
+      //| appeared!                        |
+      //|                                v |
+      //*==================================*
+      while(1) {
+        var wdiff = 0;
+        var wb_index;
+        var wa_index;
+
+        for (var i = 0; i < a_prime.length; ++i) {
+          var b_index = b_prime.indexOf(a_prime[i]);
+          var diff = b_index - i;
+
+          if (Math.abs(diff) > Math.abs(wdiff)) {
+            wdiff = diff;
+            wa_index = i;
+            wb_index = b_index;
+          }
+        }
+
+        if (Math.abs(wdiff) > 0) {
+          var r = a_prime.splice(wa_index, 1);
+          a_prime.splice(wb_index, 0, r[0]);
+
+          moves.push([">", wb_index, r[0]]);
+        } else {
+          break
+        }
+      }
+
+      var res = diff_log.concat(dels).concat(modify).concat(moves).concat(ins);
+      return res;
+    }
+
+    function vm_diff_replay(page, diff) {
+      for (var i = 0; i < diff.length; ++i) {
+        vm_reindex_page(page);
+        var e = diff[i];
+
+        //vm_diff type
+        var type = e[0];
+        if (type === "+") {
+          var eindex = e[1];
+          var entry = e[2];
+
+          //Ignore insertion if an element already exists with the given id
+          if (page["__index"][entry["_id"]] === undefined) {
+            //Insertion
+            page.entries.splice(eindex, 0, entry);
+          }
+        } else if (type === ">") {
+          var eindex = e[1];
+          var entry_id = e[2];
+
+          var current_index = page["__index"][entry_id];
+          if (current_index !== undefined) {
+            var entry = page.entries.splice(current_index, 1)[0];
+            page.entries.splice(eindex, 0, entry);
+          }
+        } else if (type === "M") {
+          var entry = e[1];
+
+          //Take out old, put in new
+          if (page["__index"][entry["_id"]] !== undefined) {
+            page.entries.splice(page["__index"][entry["_id"]], 1, entry);
+          }
+        } else if (type === "-") {
+          var eid = e[1];
+
+          var index = page.__index[eid];
+
+          //Take out
+          if (page["__index"][eid] !== undefined) {
+            page.entries.splice(index, 1);
+          }
+        } else if (type === "HEAD_M") {
+          page._head = e[1];
+        } else if (type === "NEXT_M") {
+          page._next = e[1];
+        }
+      }
+    } 
+    ///////////////////////////////////////////////////////////////////////////
+
+    //Commit helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function vm_commit(older, newer) {
+      newer.__changes_id = gen_id();
+
+      if (older.__changes && !older.__base) {
+        newer.__base = older;
+      } else if (older.__changes) {
+        newer.__base = older.__base;
+      }
+
+      if (older.__base) {
+        newer.__changes = vm_diff(older.__base, newer);
+      } else {
+        newer.__changes = vm_diff(older, newer);
+      }
+    }
+
+    function vm_rebase(newer, older) {
+      if (newer.__changes && !newer.__base) {
+        <% if @debug %>
+          if (newer.__changes_id === undefined) {
+            throw "__changes_id did not exist on newer: " + JSON.stringify(newer) + " but it did have __changes";
+          }
+        <% end %>
+        older.__changes = newer.__changes;
+        older.__changes_id = newer.__changes_id;
+
+        vm_diff_replay(older, older.__changes);
+      } else if (newer.__changes && newer.__base) {
+        <% if @debug %>
+          if (newer.__changes_id === undefined) {
+            throw "__changes_id did not exist on newer: " + JSON.stringify(newer) + " but it did have __changes";
+          }
+        <% end %>
+
+        //Reconstruct the __base by playing newer.__base.__changes ontop of older (which is the base we are rebasing on)
+        //Imagine that you texted a teacher changes, but are unsure whether that teacher has received those changes, meanwhile,
+        //the teacher texts you a new fresh copy of the page. You must now keep track of the changes you texted her (newer.__base.__changes)
+        //while still being able to create a new list of changes for any future changes that you make (as we diff pages to create the changes)
+        //So we reconstruct the newer.__base page  by taking what the teacher gave us, trash the newer.__base page, but replay the changes
+        //that newer.__base.__changes had onto the copy the teacher gave us. E.g. we cross out "Sally" on our list, text teacher that we crossed
+        //out sally. Teacher gave us a new list that has "Bill" Crossed out. We Then take the new list and cross out "Sally" and call that our new
+        //base page.
+        vm_diff_replay(older, newer.__base.__changes);
+
+        //Copy the page, we need to use the copy as a '__base' page because we want the non-copied older page to be the non-base version. (And we
+        //will make it the 'non' base version by again, replaying changes from the 'newer.__changes') after setting the __base to the copy.
+        var older_copy = vm_copy_page(older);
+        older_copy.__changes = newer.__base.__changes;
+        older_copy.__changes_id = newer.__base.__changes_id;
+        vm_reindex_page(older_copy);
+        older.__base = older_copy;
+
+        //Now update the older page w/ the `newer.__changes`
+        vm_diff_replay(older, newer.__changes);
+
+        //Calculate diff for older
+        older.__changes = vm_diff(older.__base, older);
+        older.__changes_id = gen_id();
+      }
+    }
+
+    function vm_mark_changes_synced(page, changes_id) {
+      if (page.__base === undefined && changes_id === page.__changes_id) {
+        delete page.__changes;
+        delete page.__changes_id;
+      } else if (page.__base !== undefined && changes_id === page.__base.__changes_id) {
+        delete page.__base;
+      }
+    }
+    ///////////////////////////////////////////////////////////////////////////
   }
 
   on_wakeup %{

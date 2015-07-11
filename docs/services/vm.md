@@ -8,35 +8,20 @@ Each pager belongs to a *namespace*; page faults hit a namespace and then the pa
 Fun aside; Because of the hashing schemantics; this paging system solves the age old problem of ... how do you show that data has changed *now* when to be assured that you have perferctly synchronized data with the server?;... you need to do a 3-way handshake with the updates.  You could have a network server pager that supports writes but dosen't forward those to the network. That way, you can locally modify the page and then if the modifications were guessed correctly, the server would not even send back a page modification update! (Locally, the page would have been propogated as well).  In the meantime, after modifying the local page, you would send a real network request to the server which would in turn update it's own paging system but at that point, the server would check in with you about your pages, but miraculously, because you gussed the updated page correctly, no modifications will need to be made. You could even purposefully put a 'not_synced' key in and actually show the user when the page was correctly synchronized.
 
 ##Pages
-Each page is either of a `array` type or `hash` type.
-
-###Array type
+###Example
 ```ruby
 page_example = {
   _head: <<uuid STR or NULL>>,
-  _type: "array",
   _next: <<uuid STR or NULL>,
   _id: <<uuid STR>,
   entries: [
     {_id: <<uuid STR>>, _sig: <<random_signature for inserts and modifies STR>>},
     ...
   ],
-  _hash: <<CRC32 >
-}
-```
-
-###Hash type
-```ruby
-page_example = {
-  _head: <<uuid STR or NULL>>,
-  _type: "hash",
-  _next: <<uuid STR or NULL>,
-  _id: <<uuid STR>
-  entries: {
-    "my_id0" => {_sig: <<random_signature for inserts and modifies STR>>},
-    ...
-  },
-  _hash: <<CRC32 >
+  _hash: <<CRC32>>,
+  __index: {
+    entry_id: entry_index,
+  }
 }
 ```
 
@@ -44,10 +29,8 @@ page_example = {
   * `_next (string or null)` - The next element on this list. If `_next` is non-existant, then this page is the endpoint of the list.
   * `_id (string)` - The name of this page. Even if every key changed, the `_id` will not change. This is supposed to indicate, semantically, that this page still *means* the same thing.  For example, imagine a page.  If all entries were to be **removed** from this page and new entries were **inserted** on this page, then it would be semantically sound to say that the entries were **changed**.
   * `entries`
-    * `_type == 'array'`
-      * An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` which should be a generated hash value that changes when the entry changes.
-    * `_type == 'hash'`
-      * A dictionary of dictionaries. Entries have a `_sig` which should be a generated hash value that changes when the entry changes.
+    * An array of dictionaries. Each element contains a `_id` that is analogous to the page `_id`. (These are not the same, but carry the same semantics).  Entries also have a `_sig` which should be a generated hash value that changes when the entry changes.
+  * `__index` - A dictionary mapping entry `_id` into an index of the `entries` array.
   * `_hash (string)` - All entry `_id's`, `_next`, the page `_id`, and `head` are hashed togeather. Any changes to this page will cause this `_hash` to change which makes it a useful way to check if a page is modified and needs to be updated. The hash function is an ordered CRC32 function run in the following order.  See [Calculating Page Hash](#calculating_page_hash).
 
 ------
@@ -70,6 +53,21 @@ If a key is null, then the crc step is skipped for that key.  e.g. if `_head` wa
 Assuming a crc function of `crc32(seed, string)`
 
 ------
+
+##Schemas & Data-Types
+
+####`vm_diff_entry`
+See [VM Diff](./vm/diff.md) for specific information.
+
+###`Based page`
+A based page contains the additional keys of `__base` and `__changes`, and these keys are not `null`. Optionally, it may contain the keys
+`__base_sync` (which is also not null).
+  * `__base` - A copy of the fully synchronized page (fully embedded)
+  * `__changes` - An `vm_diff` array of changes from either `__base`, or if not `null` and not `undefined`, the `__base_sync` page.
+  * `__base_sync` - An optional key, serves the same purpose as `__base`, but when synchronizing, the `__base_sync` is used for `__changes` as
+      `__base_sync` holds a full copy of the currently in sync page.
+
+Pages that are being synhronized are known as a `based in-sync page`.
 
 ##Configuration
 The paging service may be configured in your `./config/services.rb`. You must set an array of pagers where each pager is responsible for a particular
@@ -168,12 +166,44 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.
 
 ##Helper Methods
-###Pager specific
-  * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
 
-###Page modification
-  * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
+###Functional
+####Page modification (assuming inputs are modifiable)
+  * **Generic Page**
+    * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**.
+    * `vm_create_page()` -  Same as vm_create_page, but generates an id fore you.
+    * `vm_copy_page(page)` - Creates a copy of the page. Only copies the `_head`, `_next`, `_id`, `entries`, `_hash`
+    * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it
+    * `vm_reindex_page(page)` - Recalculates the `__index` field of the page. If `__index` does not exist, it is added.
+  * **Diff helpers**
+    * See [VM Diff](./vm/diff.md) section on *Functional Kernel
+  * **Commit helpers**
+    * `vm_commit(older, newer)` - Modifications will be done to `newer`. It is assumed that `newer` is neither based nor changed. This is typical of a
+        new page creation. It is assumed that `older` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased, changes], changes]`.
+       2You would use this when a page is being written over a page that already exists.
+          1. `older: [unbased, nochanges]` - `newer.__changes` will equal `vm_diff(older, newer)` and `newer.__changes_id` will be generated.
+          2. `older: [unbased, changes]` - `newer.__base` will point to `older`. `newer.__changes` will equal `vm_diff(older, newer)` and
+          `newer__changes_id` will be generated.
+          3. `older: [based[unbased, changes], changes]]` - `newer.__base` will point to `older.__base`. Then `newer.__changes` will equal
+          `vm_diff(older.__base, newer)` and `newer.__changes_id` will be generated.
+    * `vm_rebase(newer, older)` - Modifications are done to `older`. It is assumed that `older` is not based nor changed. This is typical of a
+        synchronized page from a server. It is assumed that `newer` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased,
+        changes], changes]`.
+          1. `newer: [unbased, nochanges]` - No changes as `newer` does not contain any changes, therefore, `older` is the *truth*.
+          2. `newer: [unbased, changes]` - `older` takes `newer.__changes` and `newer.__changes_id`. `older` then replays `older.__changes` on itself.
+          3. `newer: [based[unbased, changes], changes]]`
+            1. `older` takes `newer.__base.__changes` and `newer.__base.__changes_id`. `older` then replays `older.__changes` onto itself.
+            2. `older` clones itself, let that clone be called `oldest`. `older.__base` is set to `oldest`.
+            3. `older` replays `newer.__changes` onto itself.
+            4. `older` then calculates `__changes` based off `oldest`.
+    * `vm_mark_changes_synced(page, changes_id)` - Will reverse the steps of `vm_commit`. If the page has changes but is not based, then the changes are removed if the
+        `__changes_id` of the page matches `changes_id`. If the page is based (implying the base page has changes and the page has changes as all base
+        pages have changes), then if the `changes_id` matches the **base** `__changes_id` , the `__base` is removed from the page. If `changes_id`
+        does not match in either of the cases, then nothing happends. This may happend if a synchronization errousouly comes in.
+###Non functional
+####Pager specific
+  * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
 
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers
@@ -184,19 +214,17 @@ Aside, modifying a page goes against the semantics of the vm system; you're thin
 If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`.
 
 ####Per entry
-  * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements. type can either be `array` or `hash`. `_id` is generated if it is not passed.
+  * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_next`, `_head`, and `entries` array with 0 elements.  `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.
-      
-  * For both `array` and `hashes`, the following functions work (albeit different semantics). For array types, the `eindex` is an integer in the array, For hash types, the `eindex` is a key inside the dictionary.
-    * `EntryDel(page, eindex)` - Remove a single entry from a page. (Internally this deletes the array entry).
-    * `EntryInsert(page, eindex, entry)` - Insert an entry, entry should be a dictionary value. 
-      * For arrays, this generates the `_sig` and `_id` for you.
-      * For hashes, this generates the `_sig` for you.
-    * `EntryMutable(page, eindex)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
-        use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
-    * `SetPageNext(page, id)` - Sets the `_next` id for the page
-    * `SetPageHead(page, id)` - Sets the `_head` id for the page
+  * `EntryDel(page, eid)` - Remove a single entry from a page. (Internally this deletes the array entry).
+  * `EntryInsertAtIndex(page, eindex, entry)` - Insert an entry at a specific index. This generates the `_sig` and `_id` for you.
+  * `EntryInsertAtId(page, eid, entry)` - Insert an entry with a particular `_id`. This generates `_sig` for you. It will be put at the end of the
+      array
+  * `EntryMutable(page, eid)` - Set a mutable entry at a specific index which you can then modify. The signature is changed for you. You can not
+      use this with dot syntax like `EntryMutable(page, eindex).id = 'foo'`, you may only get a variable.
+  * `SetPageNext(page, id)` - Sets the `_next` id for the page
+  * `SetPageHead(page, id)` - Sets the `_head` id for the page
 
 Here is an example of a page being modified inside a controller after a `read_res`
 ```js
