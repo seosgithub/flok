@@ -12,8 +12,6 @@ If you haven't already, read [VM Service](../vm.md) for context on pagers.
   * `$NAME_write(page)` - You should write this page, e.g. to network, and/or write to `vm_cache_write`.  Alternatively, you can write the page over the network and then let the response from that call `vm_cache_write` in what ever listening code you have.
     * `page` - A fully constructed page with correctly calculated `_hash` and _sigs on entries.
 
-
- 
 ##When are pagers invoked?
 Pagers handle all requests from controllers except for the following conditions:
   1. There is a `watch` request placed but a previous `watch` request already exists for the requested page. The pager is already aware of the page watch request and is already waiting for a response. Cached pages would have been returned to the controller that made the `watch` request.

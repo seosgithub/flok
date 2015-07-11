@@ -181,7 +181,7 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * **Commit helpers**
     * `vm_commit(older, newer)` - Modifications will be done to `newer`. It is assumed that `newer` is neither based nor changed. This is typical of a
         new page creation. It is assumed that `older` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased, changes], changes]`.
-       2You would use this when a page is being written over a page that already exists.
+       You would use this when a page is being written over a page that already exists. This will mark page as having changes.
           1. `older: [unbased, nochanges]` - `newer.__changes` will equal `vm_diff(older, newer)` and `newer.__changes_id` will be generated.
           2. `older: [unbased, changes]` - `newer.__base` will point to `older`. `newer.__changes` will equal `vm_diff(older, newer)` and
           `newer__changes_id` will be generated.
