@@ -417,6 +417,10 @@ service :vm do
                 int_event_defer(bp, "entry_modify", {page_id: page_id, entry: diff_entry[1]});
               } else if (diff_entry[0] === "-") {
                 int_event_defer(bp, "entry_del", {page_id: page_id, entry_id: diff_entry[1]});
+              } else if (diff_entry[0] === ">") {
+                var eindex = diff_entry[1];
+                var eid = diff_entry[2];
+                int_event_defer(bp, "entry_move", {entry_id: eid, from_page_id: page_id, to_page_id: page_id, to_page_index: eindex});
               }
             }
           }

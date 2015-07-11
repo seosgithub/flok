@@ -176,5 +176,47 @@ RSpec.describe "kern:vm_transaction" do
     ])
   end
 
+  it "does send the controller the entry_move when an entry is deleted in the page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0_diff.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
+    reload_vm_transaction_diff_pages(ctx)
+    dump = ctx.evald %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      //Write
+      vm_transaction_begin();
+        vm_cache_write("dummy", triangle_square_z_null);
+        vm_cache_write("dummy", triangle_square_z_null_moved_z_square_triangle);
+      vm_transaction_end();
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+
+      dump.entry_modify_params = entry_modify_params;
+      dump.entry_move_params = entry_move_params;
+      dump.entry_del_params = entry_del_params;
+      dump.entry_ins_params = entry_ins_params;
+    }
+
+    expect(dump["entry_move_params"]).to eq([
+      {
+        "entry_id" => "id0",
+        "from_page_id" => "default",
+        "to_page_id" => "default",
+        "to_page_index" => 2,
+      },
+      {
+        "entry_id" => "id1",
+        "from_page_id" => "default",
+        "to_page_id" => "default",
+        "to_page_index" => 1,
+      },
+    ])
+  end
+
   ######################################################################
 end
