@@ -140,18 +140,7 @@ service :vm do
     //vm_diff helpers
     ///////////////////////////////////////////////////////////////////////////
     function vm_diff(old_page, new_page) {
-      //All diff messages end up here
       var diff_log = [];
-      var entry_diff = {};
-
-      //Old entrys first
-      for (var i = 0; i < old_page.entries.length; ++i) {
-        var old_entry = old_page.entries[i];
-        var _id = old_entry._id;
-        var _sig = old_entry._sig;
-        entry_diff[_id] = _sig;
-      }
-
       if (old_page._head !== new_page._head) {
         diff_log.push(["HEAD_M", new_page._head])
       }
@@ -160,37 +149,98 @@ service :vm do
         diff_log.push(["NEXT_M", new_page._next])
       }
 
-      //New entrys
-      for (var i = 0; i < new_page.entries.length; ++i) {
-        var new_entry = new_page.entries[i];
-        var _id = new_entry._id;
-        var _sig = new_entry._sig;
-        //Modify:
-        //  Existed in old entry and the signature is different
-        var old_sig = entry_diff[_id];
-        if (old_sig) {
-          if (old_sig != _sig) {
-            diff_log.push(["M", new_entry]);
+      var from_entries = old_page.entries;
+      var to_entries = new_page.entries;
+
+      //Calculated lists
+      var ins = [];
+      var dels = [];
+      var moves = [];
+      var modify = [];
+
+      var a_prime = [];
+      var b_prime = [];
+
+      //Save all entry sigs
+      var from_entries_sig  = [];
+      for (var i = 0; i < from_entries.length; ++i) {
+        from_entries_sig[from_entries[i]._id] = from_entries[i]._sig;
+      }
+
+      //Need to re-index page for the modify code which needs to know the index
+      //of the id of the new entry
+      vm_reindex_page(new_page);
+
+      //Save all the entry sigs
+      var to_entries_sig  = [];
+      for (var i = 0; i < to_entries.length; ++i) {
+        to_entries_sig[to_entries[i]._id] = to_entries[i]._sig;
+      }
+
+      //I. Calculate all elements in to_entries that are not in from_entries
+      //for each one of those elements, mark it as insertion and remove them in reverse order.
+      for (var i = 0; i < to_entries.length; ++i) {
+        //Does the entry *not* exist in from_entries?
+        var to_entry_id = to_entries[i]._id;
+        if (from_entries_sig[to_entry_id] === undefined) {
+          ins.push(["+", i, to_entries[i]]);
+        } else {
+          //The entry *does* exist, therefore it must be part of the shared
+          a_prime.push(to_entries[i]._id);
+        }
+      }
+
+      for (var i = 0; i < from_entries.length; ++i) {
+        var from_entry_id = from_entries[i]._id;
+        if (to_entries_sig[from_entry_id] === undefined) {
+          dels.push(["-", from_entries[i]._id]);
+        } else {
+          b_prime.push(from_entries[i]._id);
+
+          if (from_entries[i]._sig != to_entries_sig[from_entry_id]) {
+            modify.push(["M", new_page.entries[new_page.__index[from_entry_id]]]);
           }
-          delete entry_diff[_id];
-        }
-        //Inserted, old_sig didn't exist
-        else {
-          diff_log.push(["+", i, new_entry]);
         }
       }
 
-      //Remaining have been deleted
-      var old_ids = Object.keys(entry_diff);
-      while (old_ids.length > 0) {
-          diff_log.push(["-", old_ids.pop()]);
+      //*==================================*
+      //| Wild UNOPTIMIZED ALGORITHM       |
+      //|                                  |
+      //| appeared!                        |
+      //|                                v |
+      //*==================================*
+      while(1) {
+        var wdiff = 0;
+        var wb_index;
+        var wa_index;
+
+        for (var i = 0; i < b_prime.length; ++i) {
+          var a_index = a_prime.indexOf(b_prime[i]);
+          var diff = a_index - i;
+
+          if (Math.abs(diff) > Math.abs(wdiff)) {
+            wdiff = diff;
+            wb_index = i;
+            wa_index = a_index;
+          }
+        }
+
+        if (Math.abs(wdiff) > 0) {
+          var r = b_prime.splice(wb_index, 1);
+          b_prime.splice(wa_index, 0, r[0]);
+
+          moves.push([">", wb_index, r[0]]);
+        } else {
+          break
+        }
       }
 
-      return diff_log;
+      var res = diff_log.concat(dels).concat(modify).concat(ins);
+      return res;
     }
 
     function vm_diff_replay(page, diff) {
-      for (var i = diff.length-1; i >= 0; --i) {
+      for (var i = 0; i < diff.length; ++i) {
         vm_reindex_page(page);
         var e = diff[i];
 
