@@ -158,6 +158,8 @@ service :vm do
       var moves = [];
       var modify = [];
 
+      //a_prime is Union (ordered) of from
+      //b_prime is Union (ordered) of to
       var a_prime = [];
       var b_prime = [];
 
@@ -186,7 +188,7 @@ service :vm do
           ins.push(["+", i, to_entries[i]]);
         } else {
           //The entry *does* exist, therefore it must be part of the shared
-          a_prime.push(to_entries[i]._id);
+          b_prime.push(to_entries[i]._id);
         }
       }
 
@@ -195,7 +197,7 @@ service :vm do
         if (to_entries_sig[from_entry_id] === undefined) {
           dels.push(["-", from_entries[i]._id]);
         } else {
-          b_prime.push(from_entries[i]._id);
+          a_prime.push(from_entries[i]._id);
 
           if (from_entries[i]._sig != to_entries_sig[from_entry_id]) {
             modify.push(["M", new_page.entries[new_page.__index[from_entry_id]]]);
@@ -214,20 +216,20 @@ service :vm do
         var wb_index;
         var wa_index;
 
-        for (var i = 0; i < b_prime.length; ++i) {
-          var a_index = a_prime.indexOf(b_prime[i]);
-          var diff = a_index - i;
+        for (var i = 0; i < a_prime.length; ++i) {
+          var b_index = b_prime.indexOf(a_prime[i]);
+          var diff = b_index - i;
 
           if (Math.abs(diff) > Math.abs(wdiff)) {
             wdiff = diff;
-            wb_index = i;
-            wa_index = a_index;
+            wa_index = i;
+            wb_index = b_index;
           }
         }
 
         if (Math.abs(wdiff) > 0) {
-          var r = b_prime.splice(wb_index, 1);
-          b_prime.splice(wa_index, 0, r[0]);
+          var r = a_prime.splice(wa_index, 1);
+          a_prime.splice(wb_index, 0, r[0]);
 
           moves.push([">", wb_index, r[0]]);
         } else {
@@ -235,7 +237,7 @@ service :vm do
         }
       }
 
-      var res = diff_log.concat(dels).concat(modify).concat(ins);
+      var res = diff_log.concat(dels).concat(modify).concat(moves).concat(ins);
       return res;
     }
 
@@ -253,6 +255,15 @@ service :vm do
           //Ignore insertion if an element already exists with the given id
           if (page["__index"][entry["_id"]] === undefined) {
             //Insertion
+            page.entries.splice(eindex, 0, entry);
+          }
+        } else if (type === ">") {
+          var eindex = e[1];
+          var entry_id = e[2];
+
+          var current_index = page["__index"][entry_id];
+          if (current_index !== undefined) {
+            var entry = page.entries.splice(current_index, 1)[0];
             page.entries.splice(eindex, 0, entry);
           }
         } else if (type === "M") {

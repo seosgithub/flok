@@ -314,6 +314,19 @@ RSpec.describe "kern:vm_service_functional" do
     raise "verify_vm_page_entries failed: Matchers did not all match an entry. \nRemaining matchers include\n#{left_matchers.inspect}\n and matched matchers include \n#{matching_matchers.inspect}\n for the page of #{page.inspect}" if left_matchers.length > 0
   end
 
+  #Same as verify_vm_page_entries, but the order of the matchers is taken into account
+  def verify_vm_page_entries_with_order page, matchers
+    page["entries"].each_with_index do |entry, i|
+      matcher = matchers[i]
+
+      #Matcher should match all k, v pairs
+      matcher.each do |k, v|
+        raise "Matcher #{matcher.inspect} did not match entry: #{entry.inspect}\n The order was taken into consideration for entries:\n#{page["entries"].inspect}\nWith Matchers\n#{matchers.inspect}" if entry[k] != v
+      end
+    end
+  end
+
+
   #Reload the vm_diff_pages.js.  Needed because vm_diff functions
   #are often destructive and multiple tests need to have a fresh
   #copy of the pages
@@ -607,6 +620,77 @@ RSpec.describe "kern:vm_service_functional" do
       {type: "NEXT_M", args: [nil]}
     ])
     expect(dump["replay"]["_next"]).to eq(nil)
+
+    #continued... moved, XXXXXXX(N) is the new index
+    #| Triangle(0) | Square(1)| -> | Triangle(1)| Square(0)|
+    #| Z(2)        |          | -> | Z(2)       |          |
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = triangle_square_z_null;
+      var to = triangle_square_z_null_moved_square_triangle_z;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: ">", args: [1, "id0"]}
+    ])
+    verify_vm_page_entries_with_order(dump["replay"], [
+      {"_id" => "id1", "value" => "Square"},
+      {"_id" => "id0", "value" => "Triangle"},
+      {"_id" => "id2", "value" => "Z"},
+    ])
+
+    #moved(2)
+    #| Triangle(0) | Square(1)| -> | Triangle(2)| Square(1)|
+    #| Z(2)        |          | -> | Z(0)       |          |
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = triangle_square_z_null;
+      var to = triangle_square_z_null_moved_z_square_triangle;
+      dump.diff = vm_diff(from, to)
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_diff(dump["diff"], [
+      {type: ">", args: [2, "id0"]},
+      {type: ">", args: [1, "id1"]}
+    ])
+    verify_vm_page_entries_with_order(dump["replay"], [
+      {"_id" => "id2", "value" => "Z"},
+      {"_id" => "id1", "value" => "Square"},
+      {"_id" => "id0", "value" => "Triangle"},
+    ])
+
+    #moved(3) Not taking a diff, presenting an illegal move diff
+    #to use on Q (Which dosen't exist)
+    #| Triangle(0) | Square(1)| -> | Triangle(2)| Square(1)|
+    #| Z(2)        |          | -> | Z(0)       |          |
+    #from                       to
+    reload_vm_diff_pages(ctx)
+    dump = ctx.evald %{
+      var from = triangle_square_z_null;
+      dump.diff = [
+        [">", 3, "id3"],
+        [">", 2, "id0"],
+        [">", 1, "id1"],
+      ]
+      vm_diff_replay(from, dump.diff);
+      dump.replay = from;
+      vm_rehash_page(dump.replay);
+      vm_reindex_page(dump.replay);
+    }
+    verify_vm_page_entries_with_order(dump["replay"], [
+      {"_id" => "id2", "value" => "Z"},
+      {"_id" => "id1", "value" => "Square"},
+      {"_id" => "id0", "value" => "Triangle"},
+    ])
   end
   ###########################################################################
 

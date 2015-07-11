@@ -36,6 +36,30 @@ PageFactory.prototype.addEntryFourSquare = function(values) {
   }
 }
 
+//Same as addEntryFourSquare but takes an index parameter before the
+//value that sets the id of each element
+//e.g. addEntryFourSquareCustomIds([["id0, "A"], ["id2, "B"], ["id1, "C"], ["id3, "D"]]).
+//[
+//  {_id: "id0", value: "A", _sig: "A"},
+//  {_id: "id3", value: "D", _sig: "D"},
+//  {_id: "id2", value: "C", _sig: "C"},
+//  {_id: "id1", value: "B", _sig: "B"},
+//]
+PageFactory.prototype.addEntryFourSquareCustomIds = function(values) {
+  for (var i = 0; i < values.length; ++i) {
+    //Get pair
+    var pair = values[i];
+    if (pair.length != 2) {
+      throw "FourSquareShuffle accepts pairs. E.g. ['id0', 'A']"
+    }
+
+    var id = pair[0];
+    var value = pair[1];
+
+    this.addEntry(id, value);
+  }
+}
+
 //Returns a page
 PageFactory.prototype.compile = function() {
   var page = vm_create_page("default");
@@ -106,3 +130,11 @@ next_null  = pf.compile();
 
 var pf = new PageFactory(null, "world");
 next_world = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquareCustomIds([["id1", "Square"], ["id0", "Triangle"], ["id2", "Z"]]);
+triangle_square_z_null_moved_square_triangle_z = pf.compile();
+
+var pf = new PageFactory();
+pf.addEntryFourSquareCustomIds([["id2", "Z"], ["id1", "Square"], ["id0", "Triangle"]]);
+triangle_square_z_null_moved_z_square_triangle = pf.compile();
