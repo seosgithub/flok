@@ -56,40 +56,8 @@ Assuming a crc function of `crc32(seed, string)`
 
 ##Schemas & Data-Types
 
-####`vm_diff`
-```ruby
-vm_diff_schema = [
-  <<vm_diff_entry>>,
-  <<vm_diff_entry>>,
-  ...
-]
-```
-
 ####`vm_diff_entry`
-Each `vm_diff_entry` is an array with the form `[type_str, *args]`. The types are:
-```ruby
-#Entry Insertion
-#eindex - The index of the insertion.
-#ehash - A hash that contains the entry.
-["+", eindex, ehash]
-
-#Entry Deletion
-#eid - The id of the entry that was deleted.
-["-", eid]
-
-#Entry Modification
-#ehash - A hash that contains the new entry to replace the old entry.
-["M", ehash]
-
-#Entry Move
-#to_index - The index, an integer, that the entry should be insertad at
-#eid - The id of the entry to be moved to the to_index
-[">", to_index, eid]
-
-#Head or next pointer changed
-["HEAD_M", new_head_id]
-["NEXT_M", new_next_id]
-```
+See [VM Diff](./vm/vm_diff.md) for specific information.
 
 ###`Based page`
 A based page contains the additional keys of `__base` and `__changes`, and these keys are not `null`. Optionally, it may contain the keys
@@ -209,9 +177,7 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
       will create it
     * `vm_reindex_page(page)` - Recalculates the `__index` field of the page. If `__index` does not exist, it is added.
   * **Diff helpers**
-    * `vm_diff(old_page, new_page)` - Returns an array of type `vm_diff` w.r.t to the old page.  E.g. if A appears in `new_page`, but not `old_page`
-        then it is an insertion.
-    * `vm_diff_replay(page, diff)` - Will run the diff against the page; the page will be modified. This will have no effect on any changelists.
+    * See [VM Diff](./vm/diff.md) section on *Functional Kernel
   * **Commit helpers**
     * `vm_commit(older, newer)` - Modifications will be done to `newer`. It is assumed that `newer` is neither based nor changed. This is typical of a
         new page creation. It is assumed that `older` is either `[unbased, nochanges]`, `[unbased, changes]` or `[based[unbased, changes], changes]`.
