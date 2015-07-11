@@ -57,7 +57,7 @@ Assuming a crc function of `crc32(seed, string)`
 ##Schemas & Data-Types
 
 ####`vm_diff_entry`
-See [VM Diff](./vm/vm_diff.md) for specific information.
+See [VM Diff](./vm/diff.md) for specific information.
 
 ###`Based page`
 A based page contains the additional keys of `__base` and `__changes`, and these keys are not `null`. Optionally, it may contain the keys
