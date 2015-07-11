@@ -14,6 +14,105 @@ simple comparisons. Entry specific vm_diff_entry types, like `+`, need to be in 
     2. Moves (`>`)
     3. Insetions (`+`)
 
+The order is special; imagine that we want to calculate a diff for a `from` list to a `to` list
+
+```ruby
+#from  to
+#---# #---#      
+#-A-# #-A-#    
+#-B-# #-D-#    
+#-F-# #-C-#    
+#-D-# #-B-#    
+#---# #-E-#    
+      #---#    
+```
+
+First we remove all entries in the `to` list that are not on the `from` list. All these entries are `+` entries, we take note of the index they were removed from.
+
+```ruby
+#Removed C at index 2 and E and index 4
+#to
+#---#
+#-A-#
+#-D-#
+#-B-#
+#---#
+```
+
+Second we remove all entries in the `from` list that are not in the `to` list. All the removed entries are `-` deletions.
+```ruby
+#Removed F
+#from
+#---#
+#-A-#
+#-B-#
+#-D-#
+#---# 
+```
+
+Last, we compare the `to` and `from` lists making note of how we could remove and re-insert items in the `to` list to re-create the `from` list
+```ruby
+#from    to
+#---#    #---#      
+#-A-#    #-A-#    
+#-B-# => #-D-#    
+#-D-#    #-B-#      
+#---#    #---#
+
+#1. Remove B and Insert at index 2 [">", "b_id", 2]
+#from
+#---#
+#-A-#
+#-D-#
+#-B-#
+#---#
+```
+Now we have all the pieces of the diff. If played in the order `delete`, `move`, and then `insert`, the resulting list will always be the same. `modifications` are position independent so they can be done at any time.
+
+####Example replay `from => to`
+```ruby
+#from   # diff
+#---#   # (-) F
+#-A-#   # (>) b_id to index:2
+#-B-#   # (+) C @ index 2
+#-F-#   # (+) E @ index 4
+#-D-#
+#---#
+
+#1) (-) F
+#---#
+#-A-#
+#-B-#
+#-D-#
+#---#
+
+#2) (>) b_id to index:2 
+#---#
+#-A-#
+#-D-#
+#-B-#
+#---#
+
+#3) (+) C @ index 2 
+#---#
+#-A-#
+#-D-#
+#-C-#
+#-B-#
+#---#
+
+#4) (+) E @ index 4 
+#---#
+#-A-#
+#-D-#
+#-C-#
+#-B-#
+#-E-#
+#---#
+
+Now `from` is the original `to`
+```
+
 ##Helpers
 ###Functional Kernel
   * `vm_diff(old_page, new_page)` - Returns an array of type `vm_diff` w.r.t to the old page.  E.g. if A appears in `new_page`, but not `old_page`
