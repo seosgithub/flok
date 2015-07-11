@@ -54,3 +54,6 @@ This pager provides you with local memory that will be automatically cached to d
   * `watch` - Does nothing
   * `unwatch` - Does nothing
   * `write` - Writes the given page to `vm_cache_write`
+
+####Dummy pager | `pg_dummy0`
+This pager doesn't do anything. Used by some specs which manually write to the vm_cache in leu of the pager
