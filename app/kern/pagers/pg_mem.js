@@ -16,6 +16,8 @@
   }
 
   function pg_mem<%= i %>_write(page) {
+    vm_transaction_begin();
     vm_cache_write(pg_mem<%= i %>_ns, page);
+    vm_transaction_end();
   }
 <% end %>
