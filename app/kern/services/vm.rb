@@ -15,6 +15,8 @@ service :vm do
 
     vm_bp_to_nmap = {};
 
+    read_sync_in_progress = false;
+
     //Notification listeners, converts ns+key to an array of base pointers
     vm_notify_map = {
       <% @options[:pagers].each do |p| %>
@@ -82,10 +84,10 @@ service :vm do
     //res is page
     function int_per_get_res(s, ns, res) {
       //Controller made a read_sync request, fulfull it
-      if (read_sync_in_progress !== undefined) {
+      if (read_sync_in_progress !== false) {
 
         int_event(read_sync_in_progress, "read_sync_res", {page: res, ns: ns});
-        read_sync_in_progress = undefined;
+        read_sync_in_progress = false;
       }
 
       //If the key didn't exist, ignore it
