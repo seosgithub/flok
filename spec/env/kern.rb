@@ -131,9 +131,17 @@ shared_context "kern" do
       name = @cq.shift
       args = @cq.shift(arg_len)
 
+      msg_args.each_with_index do |e, i|
+        if e == Integer
+          msg_args[i] = args[i];
+        end
+      end
+
       expect(name).to eq(msg_name)
       expect(args).to eq(msg_args)
       expect(priority).to eq(@cp)
+
+      return args
     end
 
     #Ignore all messages until this one is received, then keep that one in the queue

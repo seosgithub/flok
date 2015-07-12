@@ -1,5 +1,19 @@
 service :rest do
   global %{
+    rest_in_flight = {}
+
+    function rest_cb(tp, success, info) {
+      var e = rest_in_flight[tp];
+      var bp = e[0];
+      var path = e[1];
+
+      int_event(bp, "rest_res", {
+        path: path,
+        res: info
+      });
+
+      tel_del(tp);
+    }
   }
 
   on_wakeup %{
@@ -11,9 +25,22 @@ service :rest do
   on_connect %{
   }
 
-  on_disconnect %{
+  on "get", %{
+    <% if @debug %>
+      if (params.path === undefined) {
+        throw "rest_service, no path given in get request";
+      }
+
+      if (params.params === undefined) {
+        throw "rest_service, no params given in get request";
+      }
+    <% end %>
+
+    var tp = tel_reg(rest_cb);
+    rest_in_flight[tp] = [bp, params.path];
+    SEND("net", "if_net_req", "GET", "<%= @options[:base_url] %>"+params.path, params.params, tp);
   }
 
-  every 20.seconds, %{
+  on_disconnect %{
   }
 end

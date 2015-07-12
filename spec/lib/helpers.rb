@@ -23,7 +23,12 @@ class DuplexPipe
     @w = @w1
   end
 
-
+  def close
+    @r0.close
+    @w0.close
+    @r1.close
+    @w1.close
+  end
 
   def claim_high
     @r = @r1
@@ -56,7 +61,9 @@ module Webbing
     attr_accessor :port
 
     def kill
-      Process.kill(:KILL, @pid)
+      $stderr.puts "KILL"
+      @pipe.close
+      Process.kill(:TERM, @pid)
     end
 
     def initialize verb, path, port=nil, &block
