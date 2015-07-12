@@ -81,6 +81,13 @@ service :vm do
     //Part of the persist module
     //res is page
     function int_per_get_res(s, ns, res) {
+      //Controller made a read_sync request, fulfull it
+      if (read_sync_in_progress !== undefined) {
+
+        int_event(read_sync_in_progress, "read_sync_res", {page: res, ns: ns});
+        read_sync_in_progress = undefined;
+      }
+
       //If the key didn't exist, ignore it
       if (res === null) { return; }
 
@@ -579,6 +586,25 @@ service :vm do
     <% end %>
   }
 
+  on "read_sync", %{
+    <% if @debug %>
+      if (params.id === undefined) {
+        throw "You need to pass an id for the page in read_sync request";
+      }
+
+      if (params.ns === undefined) {
+        throw "You need to pass an ns for the page in read_sync request";
+      }
+    <% end %>
+
+    read_sync_in_progress = bp;
+    var cache_entry = vm_cache[params.ns][params.id];
+    if (cache_entry !== undefined) {
+      int_event(bp, "read_sync_res", {ns: params.ns, page: cache_entry});
+    } else {
+      SEND("main", "if_per_get", "vm", params.ns, params.id);
+    }
+  }
 
   on "unwatch", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>

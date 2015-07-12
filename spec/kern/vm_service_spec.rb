@@ -655,6 +655,42 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 2)
   end
 
+  it "Does send a read request from disk cache when synchronously reading a key for the first time" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19c.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Call pageout *now*
+      vm_pageout();
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
+
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "default",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
+
+    dump = ctx.evald %{
+      dump.read_sync_in_progress = read_sync_in_progress;
+      dump.read_sync_res_params = read_sync_res_params;
+    }
+
+    expect(dump["read_sync_in_progress"]).to eq(nil)
+    expect(dump["read_sync_res_params"][0]["ns"]).to eq("spec")
+    expect(dump["read_sync_res_params"][0]["page"]["_id"]).to eq("default")
+  end
+
   it "Does send a sync read request from disk cache when watching a key for the first time with sync: true" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19b.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 

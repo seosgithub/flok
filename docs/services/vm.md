@@ -150,6 +150,16 @@ use the modification helpers. These modification helpers implement copy on write
   * Spec helpers
     * If in `@debug` mode, the variable `vm_write_list` contains an array dictionary of the last page passed to the pager (tail is latest).
 
+###`read_sync`
+Read from the disk synchronously, or memory if it exists, and return the value in `read_sync_res`. This will not watch the page.
+  * Parameters
+    * `ns` - Namespace of the page
+    * `id` - id of the page
+  * Event Responses
+    * `read_sync_res`
+      * `ns` - The namespace of the page, e.g. 'user'
+      * `page` - The page that was retrieved (or null if it dosen't exist)
+
 ##Cache
 See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty. `vm_cache_write` notifies controllers asynchronously and is not effected by the `watch` flag on controllers.
 
