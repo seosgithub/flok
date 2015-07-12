@@ -61,8 +61,13 @@ PageFactory.prototype.addEntryFourSquareCustomIds = function(values) {
 }
 
 //Returns a page
-PageFactory.prototype.compile = function() {
-  var page = vm_create_page("default");
+PageFactory.prototype.compile = function(page_id) {
+  if (page_id === undefined) {
+    var page = vm_create_page("default");
+  } else {
+    var page = vm_create_page(page_id);
+  }
+
   page._head = this.head;
   page._next = this.next;
 
@@ -138,3 +143,8 @@ triangle_square_z_null_moved_square_triangle_z = pf.compile();
 var pf = new PageFactory();
 pf.addEntryFourSquareCustomIds([["id2", "Z"], ["id1", "Square"], ["id0", "Triangle"]]);
 triangle_square_z_null_moved_z_square_triangle = pf.compile();
+
+//Seperate page
+var pf = new PageFactory();
+pf.addEntryFourSquare(["P", "Square", null, null]);
+default2_square_null_null  = pf.compile("default2");
