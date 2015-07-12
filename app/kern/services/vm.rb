@@ -89,7 +89,9 @@ service :vm do
       //date
       if (vm_cache[ns][res._id]) { return };
 
+      vm_transaction_begin();
       vm_cache_write(ns, res);
+      vm_transaction_end();
     }
 
     <% if @debug %>
