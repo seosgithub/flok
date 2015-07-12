@@ -4,18 +4,17 @@ This is the RESTful network request service. Designed for small payloads of REST
 ###Info to start a request
 ```js
 var info = {
-  url: "http://my_rest_endpoint",
+  path: "/user/register",
   params: {
     my_param_0: "test",
   }
 }
+
+Request("<service name>", "get", info);
 ```
 
-When you receive a request back, you will receive 
-```js
-{
-  success: true,
-  info: 
-}
-```
-Where if success is true, then info is a hash. If success is false, then info is a failure message.
+You will then receive the event `rest_res`.
+
+For sucessful requests, `rest_res` will be sent as an event. This event
+will contain `path` and `res` where `path` is the `path` given in the 
+request and `res` is the results of the request.
