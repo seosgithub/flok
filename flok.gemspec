@@ -18,12 +18,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "execjs", "~> 2.5"
+  spec.add_development_dependency "execjs", "~> 2.5"
   spec.add_runtime_dependency "bundler", "~> 1.6"
   spec.add_runtime_dependency "rspec", "~> 3.2"
   spec.add_runtime_dependency 'webrick', '~> 1.3'
   spec.add_runtime_dependency "closure-compiler", "~> 1.1"
-  spec.add_runtime_dependency "phantomjs", "~> 1.9"
+  spec.add_development_dependency "phantomjs", "~> 1.9"
   spec.add_runtime_dependency "pry", "~> 0.10"
   spec.add_runtime_dependency "rspec-wait", "~> 0.0"
   spec.add_runtime_dependency "os", "0.9.6"
@@ -32,8 +32,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "cakery", "~> 0.0"
   spec.add_runtime_dependency "thor", "~> 0.19"
   spec.add_runtime_dependency "rake", "~> 10.3"
-  spec.add_runtime_dependency "therubyracer", "~> 0.12"
-  spec.add_runtime_dependency "guard", "~> 2.1"
-  spec.add_runtime_dependency "guard-shell", "~> 0.7"
+  spec.add_development_dependency "therubyracer", "~> 0.12"
   spec.executables << 'flok'
 end
