@@ -1,0 +1,28 @@
+DEBUG:
+  debug_attach: socket_io
+  mods:
+    - ui
+    - event
+    - net
+    - segue
+    - controller
+    - debug
+    - sockio
+    - persist
+    - timer
+  defines:
+    - mem_pager
+    - sockio_pager
+RELEASE:
+  mods:
+    - ui
+    - event
+    - net
+    - segue
+    - controller
+    - sockio
+    - persist
+    - timer
+  defines:
+    - mem_pager
+    - sockio_pager
