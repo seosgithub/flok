@@ -1,4 +1,3 @@
-require 'natural_sort_kernel'
 require 'yaml'
 require 'json'
 require 'erb'
@@ -15,7 +14,7 @@ module Flok
     out = ""
     FileUtils.mkdir_p(dir_path)
     FileUtils.mkdir_p(File.dirname(output_path))
-    Dir[File.join(dir_path, "*.#{type}")].natural_sort.each do |f|
+    NaturalSort.sort(Dir[File.join(dir_path, "*.#{type}")]).each do |f|
       out << File.read(f) << "\n"
     end
 
