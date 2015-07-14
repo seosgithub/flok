@@ -24,9 +24,11 @@ Let's write a `fuc` controller that has 2 tabs and a content area. The view is i
 ```ruby
 controller "tab_controller" do
   spots "content"
-  services "my_service" #See docs on services for what this means
+  services "my_service", "vm" #See docs on services for what this means
 
-  #Global on_entry, will only be run once on the first action
+  #Global on_entry, will only be run once on the first action. If chooose_action
+  #is used, this is run before choose_action, but still only once throughout this
+  #controller's lifetime
   on_entry %{
   }
 
@@ -35,6 +37,30 @@ controller "tab_controller" do
     on "shared_clicked" do
       Goto("home")
     end
+  end
+
+  #Optional
+  #Called after on_entry, but before any action is entered. This is a pseudo
+  #action and assumes that everything you do inside will be performed fully
+  #synchronously. This action will not notify your view hierarchy that the
+  #action has been entered. Only supports Request and Goto macros. Embedding will
+  #result in undefined behavior. If you decide to not use choose_action then
+  #the first action will be the action that is run first
+  choose_action do
+    on_entry %{
+      var info = {ns: "session", id: "session"};
+      Request("vm", "read_sync", info);
+    }
+
+    #Like every normal action, choose_action supports getting events
+    #Here we are checking a synchronous read for the session information
+    on "read_sync_res", %{
+      if (params.page === null) {
+        Goto("home");
+      } else {
+        Goto("about");
+      }
+    }
   end
 
   #The home tab
