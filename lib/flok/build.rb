@@ -1,6 +1,7 @@
 require 'yaml'
 require 'json'
 require 'erb'
+require 'natural_sort'
 
 ##################################################################
 #This file contains everything relating to compiling source files
