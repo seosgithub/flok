@@ -614,7 +614,6 @@ RSpec.describe "kern:controller_spec" do
     expect(ctx.eval("read_res_called")).to eq(true)
   end
 
-
   it "Does allow interval (every) events" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/interval.rb')
@@ -766,5 +765,16 @@ RSpec.describe "kern:controller_spec" do
     end
 
     expect(ctx.eval("timer_called")).to eq(2)
+  end
+
+  it "Does support the optional choose_action function" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+    }
   end
 end

@@ -490,6 +490,9 @@ module Flok
       @_on_entry = _macro(str)
     end
 
+    def choose_action &block
+    end
+
     #Names of spots
     def spots *spots
       @spots += spots
