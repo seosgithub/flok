@@ -61,6 +61,7 @@ ctable = {
                     <%= e[:name] %>: function(__base__, params) {
                       var __info__ = tel_deref(__base__);
                       var context = __info__.context;
+                      var current_action = __info__.action;
 
                       <%= e[:src] %>
                     },

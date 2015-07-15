@@ -868,4 +868,27 @@ RSpec.describe "kern:controller_spec" do
       }
     }.to raise_error(/choose_action.*Goto/)
   end
+
+  it "Does support using a macro that contains current_action" do
+    ctx = flok_new_user File.read('./spec/kern/assets/current_action_nav.rb')
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      int_dispatch([3, "int_event", base, "about_clicked", {}]);
+      int_dispatch([3, "int_event", base, "home_clicked", {}]);
+      int_dispatch([3, "int_event", base, "home_clicked", {}]);
+      int_dispatch([3, "int_event", base, "home_reload_clicked", {}]);
+      int_dispatch([3, "int_event", base, "about_clicked", {}]);
+      int_dispatch([3, "int_event", base, "home_reload_clicked", {}]);
+    }
+
+    #Expect not to get an event from the choose_action
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [Integer, "action", {"from" => nil, "to" => "home"}])
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "home", "to" => "about"}])
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "about", "to" => "home"}])
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "home", "to" => "home"}])
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "home", "to" => "about"}])
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "about", "to" => "home"}])
+  end
 end

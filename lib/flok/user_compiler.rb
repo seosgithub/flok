@@ -462,7 +462,9 @@ module Flok
     def method_missing method, *args, &block
       if macro = @controller.macros[method]
         #Call the macro in our context
-        self.instance_eval(&macro)
+        @current_action = name
+          self.instance_eval(&macro)
+        @current_action = nil
       else
         raise "No macro found named: #{method}"
       end

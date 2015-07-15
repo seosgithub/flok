@@ -33,25 +33,25 @@ controller "tab_controller" do
   }
 
   #You can also define macros for shared action traits
-  macro "my_macro" do
+  macro :my_macro do
     on "shared_clicked", %{
       Goto("home")
     }
   end
 
-  #More advanced macros can use the @current_action to check
+  #More advanced macros can use the `current_action` to check
   #which action you are on
-  macro "my_nav_macro" do
+  macro :my_nav_macro do
     on "home_clicked", %{
-      <% if @current_action != "home" %>
+      if (current_action !== "home") {
         Goto("home")
-      <% end %>
+      }
     }
 
     on "about_clicked", %{
-      <% if @current_action != "about" %>
+      if (current_action !== "home") {
         Goto("about")
-      <% end %>
+      }
     }
   end
 
