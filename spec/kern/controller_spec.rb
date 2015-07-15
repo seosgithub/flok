@@ -858,7 +858,7 @@ RSpec.describe "kern:controller_spec" do
   end
 
   it "Calling an asynchronous request for the Goto in choose_action will result in an exception" do
-    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_async.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
     expect {
       ctx.evald %{
         base = _embed("my_controller", 0, {}, null);

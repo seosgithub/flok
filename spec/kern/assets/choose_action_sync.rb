@@ -5,10 +5,10 @@ controller :my_controller do
   choose_action do
     on_entry %{
       var info = {foo: "bar"};
-      Request("test", "test_async", info);
+      Request("test", "test_sync", info);
     }
 
-    on "test_async_res", %{
+    on "test_sync_res", %{
       Goto("index");
     }
   end
