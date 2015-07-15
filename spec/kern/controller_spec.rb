@@ -777,4 +777,57 @@ RSpec.describe "kern:controller_spec" do
       base = _embed("my_controller", 0, {}, null);
     }
   end
+
+  it "Does support the optional choose_action function with on_entry, and on_entry is called after on_entry global and before the first actions on_entry" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action.rb')
+
+    #Run the embed function
+    dump = ctx.evald %{
+      //Call embed on main root view
+      dump.base = _embed("my_controller", 0, {}, null);
+      dump.on_entry_call_order = on_entry_call_order; 
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+    }
+
+    #Global on_entry should be called before choose_action_on_entry
+    expect(dump["on_entry_call_order"]).to eq([
+      "global_on_entry",
+      "choose_action_on_entry",
+      "index_on_entry"
+    ])
+
+    #Expect not to get an event from the choose_action
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [Integer, "action", {"from" => nil, "to" => "index"}])
+  end
+
+  it "Does support a controller that lacks choose_action, the first action will be the first action that appears in the controller" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/no_choose_action.rb')
+
+    #Run the embed function
+    dump = ctx.evald %{
+      //Call embed on main root view
+      dump.base = _embed("my_controller", 0, {}, null);
+      dump.on_entry_call_order = on_entry_call_order; 
+
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+    }
+
+    #Global on_entry should be called before choose_action_on_entry
+    expect(dump["on_entry_call_order"]).to eq([
+      "global_on_entry",
+      "index_on_entry"
+    ])
+
+    #Expect not to get an event from the choose_action
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [Integer, "action", {"from" => nil, "to" => "index"}])
+  end
 end

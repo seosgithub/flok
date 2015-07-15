@@ -479,6 +479,16 @@ module Flok
       @controller = self
 
       self.instance_eval(&block)
+
+      #Ensure that choose_action exists
+      actions = @ctx.actions_for_controller(@name)
+      unless actions.detect{|e| e.name === :choose_action}
+        @ctx.action self, :choose_action do
+          on_entry %{
+            Goto("#{actions[0].name}");
+          }
+        end
+      end
     end
 
     #Create an action macro
@@ -491,6 +501,7 @@ module Flok
     end
 
     def choose_action &block
+      @ctx.action self, :choose_action, &block
     end
 
     #Names of spots

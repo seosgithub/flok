@@ -63,6 +63,7 @@ controller "tab_controller" do
     }
   end
 
+  #Actions are independent of one another, you may not name an action "choose_action"
   #The home tab
   action "home" do
     #Macros can be called via their name

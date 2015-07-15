@@ -2,6 +2,7 @@ ctable = {
   <% @controllers.each do |c| %>
       <%= c.name %>: {
         __init__: function(__base__) {
+          //Call service on_connect
           <% c._services.each do |s| %>
               <%= s %>_on_connect(__base__);
           <% end %>
