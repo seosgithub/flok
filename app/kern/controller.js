@@ -75,7 +75,7 @@ function _embed(vc_name, sp, context, event_gw) {
   //Create controller information struct
   var info = {
     context: context,
-    action: null,
+    action: "choose_action",
     cte: cte,
     embeds: embeds,
     event_gw: event_gw
@@ -91,7 +91,13 @@ function _embed(vc_name, sp, context, event_gw) {
   cte.__init__(base);
 
   //Call the on_entry function with the base address
-  cte.actions["choose_action"].on_entry(base);
+  cte.actions[info.action].on_entry(base);
+
+  <% if @debug %>
+  if (info.action === "choose_action") {
+    throw "choose_action did not specify a Goto";
+  }
+  <% end %>
 
   return base;
 }
@@ -104,7 +110,7 @@ function controller_event_callback(ep, event_name, info) {
   //Now, get the ctable entry
   var cte = inst.cte;
 
-  //Now find the event handler
+  //Now find the event handler for the current action of the controller
   var handler = cte.actions[inst.action].handlers[event_name];
   if (handler !== undefined) {
     handler(ep, info);

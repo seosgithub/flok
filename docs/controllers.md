@@ -54,6 +54,7 @@ controller "tab_controller" do
 
     #Like every normal action, choose_action supports getting events
     #Here we are checking a synchronous read for the session information
+    #You *must* use only synchronous events here
     on "read_sync_res", %{
       if (params.page === null) {
         Goto("home");

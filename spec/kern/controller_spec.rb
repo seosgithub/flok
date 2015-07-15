@@ -830,4 +830,42 @@ RSpec.describe "kern:controller_spec" do
     @driver.ignore_up_to "if_event"
     @driver.mexpect("if_event", [Integer, "action", {"from" => nil, "to" => "index"}])
   end
+
+  it "Does support using a synchronous request in choose_action" do
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect not to get an event from the choose_action
+    @driver.ignore_up_to "if_event"
+    @driver.mexpect("if_event", [Integer, "action", {"from" => nil, "to" => "index"}])
+  end
+
+  it "Not setting a Goto will result in an exception" do
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync_no_goto.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
+    expect {
+      ctx.evald %{
+        base = _embed("my_controller", 0, {}, null);
+
+        //Drain queue
+        int_dispatch([]);
+      }
+    }.to raise_exception
+  end
+
+  it "Calling an asynchronous request for the Goto in choose_action will result in an exception" do
+    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
+    expect {
+      ctx.evald %{
+        base = _embed("my_controller", 0, {}, null);
+
+        //Drain queue
+        int_dispatch([]);
+      }
+    }.to raise_error(/choose_action.*Goto/)
+  end
 end

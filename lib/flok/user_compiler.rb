@@ -196,6 +196,11 @@ module Flok
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
 
+            //'choose_action' pseudo-action will be sent as 'null' as it's the initial state
+            if (old_action === "choose_action") {
+              old_action = null;
+            }
+
             //Send off event for action change
             main_q.push([3, "if_event", __base__, "action", {
               from: old_action,
