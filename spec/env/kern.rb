@@ -137,7 +137,7 @@ shared_context "kern" do
         end
       end
 
-      expect(name).to eq(msg_name)
+      expect(name).to eq(msg_name), "name: #{name.inspect} of message received did not match #{msg_name.inspect}, args where #{args.inspect}"
       expect(args).to eq(msg_args)
       expect(priority).to eq(@cp)
 

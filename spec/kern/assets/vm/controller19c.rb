@@ -17,8 +17,8 @@ controller :my_controller do
         id: "test2"
       }
 
+      //requesting 'test' and 'test2'
       Request("vm", "read_sync", info);
-
       Request("vm", "read_sync", info2);
     }
 

@@ -151,7 +151,9 @@ use the modification helpers. These modification helpers implement copy on write
     * If in `@debug` mode, the variable `vm_write_list` contains an array dictionary of the last page passed to the pager (tail is latest).
 
 ###`read_sync`
-Read from the disk synchronously, or memory if it exists, and return the value in `read_sync_res`. This will not watch the page.
+Read from the disk synchronously, or memory if it exists, and return the value in `read_sync_res`. This will not watch the page. Multiple read_syncs
+in the same frame are allowed but discouraged as the order that pages are received back may not necessarily be the order they were synhronously
+requested. This is because a cached page will be returned by the call stack while a synchronous read has to go through the event queue.
   * Parameters
     * `ns` - Namespace of the page
     * `id` - id of the page
@@ -174,6 +176,12 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][id]` which yields an array of controller base pointers.
   * `vm_bp_to_nmap` - A dictionary that maps a `bp` key (usually from a controller) to a dictionary. This dictionary contains a mapping of `bp => ns => id` to an array that contains `[node, index]` where `node` is a reference to `vm_notify_map[ns][id]`. This inverted map must (a) provide a way for `unwatch` to quickly remove entries from itself and (b) provide a way for all entries in `vm_notify_map` to be removed when something (usually a controller) disconrnects.
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.
+  * `vm_read_sync_in_progress` - A queue of controller base pointers that are awaiting a response from `read_sync`. This may contain multiple
+      controllers if one controller makes multiple `read_sync` requests within one *frame* as `int_event` only queues the outbounds events
+      and dosen't immediately send them. Not that this makes it not synchronous, just the order of execution is not like a call stack and more
+      like a synchronous high priority deferred queue. The *frontmost* of the array is the lowest index, and the *backmost* is the highest index. In
+      javascript, this means that new requests are placed via `vm_read_sync_in_progress.unshift(new_bp)` and when requests are serviced, they are
+      serviced via the `var bp = vm_read_sync_in_progress.pop()`.
 
 ##Helper Methods
 

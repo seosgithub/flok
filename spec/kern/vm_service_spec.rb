@@ -655,7 +655,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 2)
   end
 
-  it "Does send a read request from disk cache when synchronously reading a key for the first time" do
+  it "Does send a read request from disk cache when synchronously reading a key for the first time via read_sync" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19c.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
@@ -678,17 +678,205 @@ RSpec.describe "kern:vm_service" do
       "entries" => [],
     }]
 
-    @driver.ignore_up_to "if_per_get", 0
     @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
 
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "default",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
     dump = ctx.evald %{
-      dump.read_sync_in_progress = read_sync_in_progress;
+      dump.vm_read_sync_in_progress = vm_read_sync_in_progress;
       dump.read_sync_res_params = read_sync_res_params;
     }
 
-    expect(dump["read_sync_in_progress"]).to eq(nil)
+    expect(dump["vm_read_sync_in_progress"]).to eq([])
+    expect(dump["read_sync_res_params"].length).to eq(2)
     expect(dump["read_sync_res_params"][0]["ns"]).to eq("spec")
     expect(dump["read_sync_res_params"][0]["page"]["_id"]).to eq("default")
+    expect(dump["read_sync_res_params"][1]["ns"]).to eq("spec")
+    expect(dump["read_sync_res_params"][1]["page"]["_id"]).to eq("default")
+  end
+
+  it "Calling read_sync on an entry that already exists in cache will not trigger a disk read" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19d.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Call pageout *now*
+      vm_pageout();
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect to have gotten one disk read request
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
+
+    #Send the disk read response back controller19d:14
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "test",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #Send the 'get_test' event which should trigger a disk read
+    ctx.eval %{
+      int_dispatch([3, "int_event", base, "get_test", {}])
+    }
+
+    #We should not get second if_per_get request because the data was already cached
+    #by the first request
+    expect {
+      @driver.ignore_up_to "if_per_get", 0
+    }.to raise_exception
+  end
+
+  it "Calling read_sync on two consecutive controllers within the same frame (i.e no change for int_dispatch to be invoked to drain queue), will result in both controllers getting correct copy of data and not out of order sync_reads as they have to be pulled from the vm_read_sync_in_progress queue to discover the read_sync request base pointer" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19e.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect to have gotten two disk read request, one for test1 and one for test2
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test1"], 0)
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
+
+    #Send the disk read response back for the first controller (my_controller)
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "test1",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #Send the disk read response back for the second controller (my_other_controller)
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "test2",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #The read_sync of each controller should match up with the page it requested
+    dump = @ctx.evald %{
+      dump.my_controller_read_sync_res = my_controller_read_sync_res;
+      dump.my_other_controller_read_sync_res = my_other_controller_read_sync_res;
+    }
+
+    expect(dump["my_controller_read_sync_res"]["page"]["_id"]).to eq("test1")
+    expect(dump["my_other_controller_read_sync_res"]["page"]["_id"]).to eq("test2")
+  end
+
+  it "Calling read_sync on frame0 for page 'A' on controller0 and then on frame1 for page 'A' on controller1 and page 'B' on controller2 will result in all controllers receiving the correct pages" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19f.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    dump = ctx.evald %{
+      dump.controller0_base = _embed("controller0", 1, {}, null);
+      dump.controller1_base = controller1_base; 
+      dump.controller2_base = controller2_base; 
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect the first request for controller0 for pageA
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "A"], 0)
+
+    #Send the disk read response back for controller0 pageA
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "A",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #Now signal to controller1 & controller2 to grab their pages
+    @driver.int "int_event", [dump["controller1_base"], "get", {}]
+    @driver.int "int_event", [dump["controller2_base"], "get", {}]
+
+    #We shouldn't receive 'A' because it will be retrieved by the cache read
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "B"], 0)
+
+    #Send the disk read response back for frame1 'B' for controller2
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "B",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #The read_sync of each controller should match up with the page it requested
+    dump = @ctx.evald %{
+      dump.controller1_read_sync_res = controller1_read_sync_res;
+      dump.controller2_read_sync_res = controller2_read_sync_res;
+    }
+
+    expect(dump["controller1_read_sync_res"]["page"]["_id"]).to eq("A")
+    expect(dump["controller2_read_sync_res"]["page"]["_id"]).to eq("B")
+  end
+
+  it "Calling read_sync on frame0 for page 'B' on controller0 and then on frame1 for page 'A' on controller1 and page 'B' on controller2 will result in all controllers receiving the correct pages (reversed order from above)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19g.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    dump = ctx.evald %{
+      dump.controller0_base = _embed("controller0", 1, {}, null);
+      dump.controller1_base = controller1_base; 
+      dump.controller2_base = controller2_base; 
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect the first request for controller0 for pageB
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "B"], 0)
+
+    #Send the disk read response back for controller0 pageB
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "B",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #Now signal to controller1 & controller2 to grab their pages
+    @driver.int "int_event", [dump["controller1_base"], "get", {}]
+    @driver.int "int_event", [dump["controller2_base"], "get", {}]
+
+    #We shouldn't receive 'B' because it will be retrieved by the cache read
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "A"], 0)
+
+    #Send the disk read response back for frame1 'A' for controller2
+    @driver.int "int_per_get_res", ["vm", "spec", {
+      "_id" => "A",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #The read_sync of each controller should match up with the page it requested
+    dump = @ctx.evald %{
+      dump.controller1_read_sync_res = controller1_read_sync_res;
+      dump.controller2_read_sync_res = controller2_read_sync_res;
+    }
+
+    expect(dump["controller1_read_sync_res"]["page"]["_id"]).to eq("A")
+    expect(dump["controller2_read_sync_res"]["page"]["_id"]).to eq("B")
   end
 
   it "Does send a sync read request from disk cache when watching a key for the first time with sync: true" do

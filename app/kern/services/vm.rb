@@ -15,7 +15,7 @@ service :vm do
 
     vm_bp_to_nmap = {};
 
-    read_sync_in_progress = false;
+    vm_read_sync_in_progress = [];
 
     //Notification listeners, converts ns+key to an array of base pointers
     vm_notify_map = {
@@ -84,10 +84,8 @@ service :vm do
     //res is page
     function int_per_get_res(s, ns, res) {
       //Controller made a read_sync request, fulfull it
-      if (read_sync_in_progress !== false) {
-
-        int_event(read_sync_in_progress, "read_sync_res", {page: res, ns: ns});
-        read_sync_in_progress = false;
+      if (vm_read_sync_in_progress.length > 0) {
+        int_event(vm_read_sync_in_progress.pop(), "read_sync_res", {page: res, ns: ns});
       }
 
       //If the key didn't exist, ignore it
@@ -599,11 +597,11 @@ service :vm do
       }
     <% end %>
 
-    read_sync_in_progress = bp;
     var cache_entry = vm_cache[params.ns][params.id];
     if (cache_entry !== undefined) {
       int_event(bp, "read_sync_res", {ns: params.ns, page: cache_entry});
     } else {
+      vm_read_sync_in_progress.unshift(bp);
       SEND("main", "if_per_get", "vm", params.ns, params.id);
     }
   }
