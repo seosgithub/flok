@@ -1,3 +1,3 @@
 module Flok
-  VERSION = "0.0.57"
+  VERSION = "0.0.58"
 end
