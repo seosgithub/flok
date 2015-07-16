@@ -75,7 +75,7 @@ RSpec.describe "kern:controller_spec" do
   end
 
   #Can initialize a controller via embed and the sub-controller has the correct info
-  it "Can initiate a controller via _embed" do
+  it "Can initiate a controller with a sub-controller via _embed" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/embed_info.rb')
 
@@ -287,7 +287,7 @@ RSpec.describe "kern:controller_spec" do
     expect(embeds).to eq([[base+4], []])
   end
 
-  it "Can receive 'test_event' and change actions" do
+  it "Can receive 'test_event' and change actions via Goto" do
     #Compile the controller
     ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
 
@@ -304,6 +304,43 @@ RSpec.describe "kern:controller_spec" do
     #to be called
     expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
   end
+
+  it "Can receive 'test_event' and change actions via Push" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/push.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue with test event
+      int_dispatch([3, "int_event", base, "test_event", {}]);
+    }
+
+    #Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
+    #to be called
+    expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
+  end
+
+  it "Can receive 'test_event' and change actions via Push and then back with Pop" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/push_pop.rb')
+
+    #Run the embed function
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue with test event
+      int_dispatch([3, "int_event", base, "test_event", {}]);
+    }
+
+    #Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
+    #to be called
+    expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
+  end
+
 
   it "Does tear down the old embedded view from the embedded view controller when switching actions" do
     #Compile the controller
