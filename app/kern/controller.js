@@ -93,12 +93,6 @@ function _embed(vc_name, sp, context, event_gw) {
   //Call the on_entry function with the base address
   cte.actions[info.action].on_entry(base);
 
-  <% if @debug %>
-  if (info.action === "choose_action") {
-    throw "choose_action did not specify a Goto";
-  }
-  <% end %>
-
   return base;
 }
 
