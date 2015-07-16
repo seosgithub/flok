@@ -1,6 +1,10 @@
 require 'yaml'
 require 'json'
 require 'erb'
+
+#Forwardable is required for natural_sort
+#https://github.com/johnnyshields/naturalsort/issues/1 
+require 'forwardable'
 require 'natural_sort'
 
 ##################################################################
