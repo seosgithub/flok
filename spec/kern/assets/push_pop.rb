@@ -1,9 +1,14 @@
 controller :my_controller do
   spots "hello", "world"
 
+  on_entry %{
+    my_action_entered_count = 0;
+  }
+
   action :my_action do
     on_entry %{
       Embed("my_controller2", "hello", {});
+      my_action_entered_count += 1;
     }
 
     on "test_event", %{

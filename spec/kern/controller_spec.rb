@@ -351,19 +351,46 @@ RSpec.describe "kern:controller_spec" do
     ctx = flok_new_user File.read('./spec/kern/assets/push_pop.rb')
 
     #Run the embed function
-    ctx.eval %{
+    dump = ctx.evald %{
       //Call embed on main root view
-      base = _embed("my_controller", 0, {}, null);
+      dump["base"] = _embed("my_controller", 0, {}, null);
 
-      //Drain queue with test event
-      int_dispatch([3, "int_event", base, "test_event", {}]);
+      //The controller's info
+      dump["controller_info"] = tel_deref(dump["base"]);
+      dump["ctable_entry"] = dump["controller_info"]["cte"];
+
+      //Dump the embeds array before we switch anything around, this is the embeds for `my_action`
+      dump["my_action_embeds_original_array"] = JSON.parse(JSON.stringify(dump["controller_info"]["embeds"]));
+
+      //Push the controller to 'my_other_action'
+      int_dispatch([3, "int_event", dump["base"], "test_event", {}]);
+
+      //Pop the controller back to 'my_action'
+      int_dispatch([3, "int_event", dump["base"], "back", {}]);
+
+      //The second action was entered
+      dump["my_other_action_on_entry_called"] = my_other_action_on_entry_called; 
+
+      //The first action was not entered twice
+      dump["my_action_entered_count"] = my_action_entered_count;
+
     }
 
-    #Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
-    #to be called
-    expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
-  end
+    #The controller's instance info `action` field was changed back to the old action
+    expect(dump["controller_info"]["action"]).to eq("my_action")
 
+    #The controller's embeds is now restored back to the original embeds from 'my_action'
+    expect(dump["controller_info"]["embeds"]).to eq(dump["my_action_embeds_original_array"])
+
+    #Does dealloc the pushed controller, we can check to see if the view was destroyed
+    @driver.ignore_up_to "if_free_view"
+    @driver.mexpect("if_free_view", [Integer, dump["base"]+1])
+
+    #Do not get a notification for the view hierarchy about the change
+    @driver.expect_not_to_contain "if_event" do |e|
+      next e[2] == {"from" => "my_other_action", "to" => "my_action"}
+    end
+  end
 
   it "Does tear down the old embedded view from the embedded view controller when switching actions" do
     #Compile the controller
