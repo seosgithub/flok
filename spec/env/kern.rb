@@ -195,6 +195,7 @@ shared_context "kern" do
     #Expect the queue to not contain a message matching
     def expect_not_to_contain msg_name, &block
       original_q = JSON.parse(@q.to_json)
+      @cq = []
 
       loop do
         if @q.count == 0 and @cq.count == 0

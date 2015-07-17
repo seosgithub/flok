@@ -376,6 +376,8 @@ RSpec.describe "kern:controller_spec" do
       //The first action was not entered twice
       dump["my_action_entered_count"] = my_action_entered_count;
 
+      //The poped controller's base pointer for the main view
+      dump["my_controller3_main_view_bp"] = my_controller3_main_view_bp;
     }
 
     #The controller's instance info `action` field was changed back to the old action
@@ -386,7 +388,11 @@ RSpec.describe "kern:controller_spec" do
 
     #Does dealloc the pushed controller, we can check to see if the view was destroyed
     @driver.ignore_up_to "if_free_view"
-    @driver.mexpect("if_free_view", [Integer, dump["base"]+1])
+    @driver.mexpect("if_free_view", [dump["my_controller3_main_view_bp"]])
+
+    #Do not get a notification for any more removals, or creations
+    @driver.expect_not_to_contain "if_free_view"
+    @driver.expect_not_to_contain "if_init_view"
 
     #Do not get a notification for the view hierarchy about the change
     @driver.expect_not_to_contain "if_event" do |e|

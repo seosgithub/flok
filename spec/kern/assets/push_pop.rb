@@ -18,6 +18,7 @@ controller :my_controller do
 
   action :my_other_action do
     on_entry %{
+      Embed("my_controller3", "hello", {});
       my_other_action_on_entry_called = true;
     }
 
@@ -33,3 +34,12 @@ controller :my_controller2 do
     }
   end
 end
+
+controller :my_controller3 do
+  action :my_action do
+    on_entry %{
+      my_controller3_main_view_bp = __base__+1;
+    }
+  end
+end
+

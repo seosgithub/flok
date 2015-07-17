@@ -43,7 +43,7 @@ controller_info {
   action: //The name of the current action that is active
   cte:    //The ctable entry pertaining to this controller
   embeds: //An array of arrays, where position 0 is the spot after `main`, each element in the array is a view controller base pointer.
-  stack: [] //When pushing, the stack contains a copy of the controller_info's action's and a reference to the embeds from the previous layer. 
+  stack: [{action:, embeds:}] //When pushing, the stack contains a copy of the controller_info's action's and a reference to the embeds from the previous layer. 
   event_gw: //When an event cannot be serviced, it is given to the gateway to continue propogating
 }
 ```

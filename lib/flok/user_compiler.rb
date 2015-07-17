@@ -219,7 +219,11 @@ module Flok
 
           #Switch the actions, reset embeds, and call on_entry
           res = %{
+            //Save state
             var old_action = __info__.action;
+            var old_embeds = __info__.embeds;
+            __info__.stack.push({action: old_action, embeds: old_embeds});
+
             __info__.action = "#{action_name}";
 
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
@@ -231,11 +235,6 @@ module Flok
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
-
-            //'choose_action' pseudo-action will be sent as 'null' as it's the initial state
-            if (old_action === "choose_action") {
-              old_action = null;
-            }
 
             //Send off event for action change
             main_q.push([3, "if_event", __base__, "action", {
@@ -250,8 +249,38 @@ module Flok
           l.gsub! /\)$/, ""
           l.gsub! /\);$/, ""
           o = l.split(",").map{|e| e.strip}
+          #Switch the actions, reset embeds, and call on_entry
+          res = %{
+            var restore_info = __info__.stack.pop();
 
-          #out.puts res
+            //Retrieve the original action info
+            var orig_action = restore_info.action;
+            var orig_embeds = restore_info.embeds;
+
+            //Save the old action
+            //var old_action = __info__.action;
+
+            //Restore the action we pushed from
+            __info__.action = orig_action;
+
+            //Remove all views, we don't have to recurse because removal of a view
+            //is supposed to remove *all* view controllers of that tree as well.
+            var embeds = __info__.embeds;
+            for (var i = 0; i < __info__.embeds.length; ++i) {
+              for (var j = 0; j < __info__.embeds[i].length; ++j) {
+                //Free +1 because that will be the 'main' view
+                main_q.push([1, "if_free_view", embeds[i][j]+1]);
+
+                //Call dealloc on the controller
+                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
+              }
+            }
+
+            //Restore embeds
+            __info__.embeds = orig_embeds;
+          }
+
+          out.puts res
         #Request(service_instance_name, ename, info)
         elsif l =~ /Request/
           l.strip!
