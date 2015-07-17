@@ -1,6 +1,9 @@
 #Debug (debug.js)
 The debug module provides information to the client (driver) module such as events that are available for a particular view.
 
+**This is depreciated and may no longer works correctly especially with view hierarchies that contain push / pop semantics. (Multiple layers in push
+/pop hierarchies will not reveal push / pop semantics, it will look flat)**
+
 ### Driver Messages
 `if_debug_assoc(base, key, value)` - Associate a key and value for an object called base (usually a pointer or string)
 

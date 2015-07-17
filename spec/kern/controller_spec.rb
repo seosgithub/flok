@@ -383,8 +383,11 @@ RSpec.describe "kern:controller_spec" do
     #The controller's instance info `action` field was changed back to the old action
     expect(dump["controller_info"]["action"]).to eq("my_action")
 
-    #The controller's embeds is now restored back to the original embeds from 'my_action'
+    #The controller's instance info embeds is now restored back to the original embeds from 'my_action'
     expect(dump["controller_info"]["embeds"]).to eq(dump["my_action_embeds_original_array"])
+
+    #The controller's instance info stack is now blank
+    expect(dump["controller_info"]["stack"]).to eq([])
 
     #Does dealloc the pushed controller, we can check to see if the view was destroyed
     @driver.ignore_up_to "if_free_view"
