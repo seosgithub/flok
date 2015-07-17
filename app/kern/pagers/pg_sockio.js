@@ -16,6 +16,10 @@
   }
 
   function pg_sockio<%= i %>_watch(id, page) {
+    var info = {
+      page_id: id
+    };
+    SEND("net", "if_sockio_send", pg_sockio<%= i %>_bp, "watch", info);
   }
 
   function pg_sockio<%= i %>_unwatch(id) {

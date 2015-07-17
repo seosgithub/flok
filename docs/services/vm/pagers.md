@@ -65,8 +65,8 @@ This pager connects to a socket.io server via the `sockio` module.
         `http://myapp.com/socket`
   * **Functions**
     * `init` - Will begin trying to establish a connection to the server. When pages are written, 
-    * `watch` - Signals to the socket.io server that a page is being watched via `/watch` with parameters `{page_id:}`
-    * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `/unwatch` with parameters `{page_id:}` 
+    * `watch` - Signals to the socket.io server that a page is being watched via `watch` event with parameters `{page_id:}`
+    * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `unwatch` event with parameters `{page_id:}` 
     * `write` - 
       * If the page already exists:
         * Commits unsynced changes to `vm_cache` and notifies the server of the changes if the page already existed via `/update` with `page_id:,

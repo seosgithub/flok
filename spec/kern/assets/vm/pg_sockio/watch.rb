@@ -4,15 +4,11 @@ controller :my_controller do
   action :my_action do
     on_entry %{
       var watch_info = {
-        ns: "net",
-        id: "weight", 
+        ns: "sockio",
+        id: "test", 
       };
 
       Request("vm", "watch", watch_info);
-    }
-
-    on "read_res", %{
-      read_res_params = params;
     }
   end
 end

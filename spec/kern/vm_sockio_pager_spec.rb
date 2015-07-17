@@ -53,4 +53,21 @@ RSpec.describe "kern:sockio_pager" do
     @driver.ignore_up_to "if_sockio_init", 1
     @driver.mexpect "if_sockio_init", ["http://localhost", Integer], 1
   end
+
+  it "Does send a watch request via socket.io when a page is watched" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/watch.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #We are sending a watch request for a page named 'test'
+    @driver.ignore_up_to "if_sockio_send", 1
+    @driver.mexpect "if_sockio_send", [Integer, "watch", {
+      "page_id" => "test"
+    }], 1
+  end
 end
