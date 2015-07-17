@@ -24,4 +24,18 @@ RSpec.describe "kern:sockio_pager" do
     res = ctx.eval("pg_sockio0_spec_did_init")
     expect(res).to eq(true)
   end
+
+  it "Does throw an exception if not given a url" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/nothing.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config_no_url.rb") 
+
+    expect {
+      ctx.eval %{
+        //Call embed on main root view
+        base = _embed("my_controller", 0, {}, null);
+
+        //Drain queue
+        int_dispatch([]);
+      }
+    }.to raise_error(/url/)
+  end
 end

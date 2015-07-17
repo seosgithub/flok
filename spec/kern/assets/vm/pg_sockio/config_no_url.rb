@@ -5,7 +5,6 @@ service_instance :vm, :vm, {
       :name => "pg_sockio0",
       :namespace => "sockio",
       :options => {
-        :url => "http://localhost"
       }
     }
   ]
