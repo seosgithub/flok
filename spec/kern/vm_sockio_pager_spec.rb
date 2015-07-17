@@ -38,4 +38,19 @@ RSpec.describe "kern:sockio_pager" do
       }
     }.to raise_error(/url/)
   end
+
+  it "Does initialize a socketio connection" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/nothing.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #URL is specified in the config
+    @driver.ignore_up_to "if_sockio_init", 1
+    @driver.mexpect "if_sockio_init", ["http://localhost", Integer], 1
+  end
 end

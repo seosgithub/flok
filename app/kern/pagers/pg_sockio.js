@@ -10,6 +10,9 @@
     <% if @debug %>
       pg_sockio<%= i %>_spec_did_init = true;
     <% end %>
+
+    pg_sockio<%= i %>_bp = tels(1);
+    SEND("net", "if_sockio_init", options.url, pg_sockio<%= i %>_bp);
   }
 
   function pg_sockio<%= i %>_watch(id, page) {
