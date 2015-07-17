@@ -73,3 +73,5 @@ This pager connects to a socket.io server via the `sockio` module.
             changes:`
       * If the page does not exist:
         * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
+  * **Spec**
+    * If `@debug`, then `sockio{N}_spec_did_init` will be true
