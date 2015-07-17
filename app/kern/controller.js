@@ -78,7 +78,8 @@ function _embed(vc_name, sp, context, event_gw) {
     action: "choose_action",
     cte: cte,
     embeds: embeds,
-    event_gw: event_gw
+    event_gw: event_gw,
+    stack: [],
   };
 
   //Register controller base with the struct, we already requested base

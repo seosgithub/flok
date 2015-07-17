@@ -127,12 +127,14 @@ RSpec.describe "kern:controller_spec" do
       action = info.action
       cte = info.cte
       event_gw = info.event_gw
+      stack = info.stack
     }
 
     expect(ctx.eval('context')).not_to eq(nil)
     expect(ctx.eval('action')).not_to eq(nil)
     expect(ctx.eval('cte')).not_to eq(nil)
     expect(ctx.eval('"event_gw" in info')).not_to eq(nil)
+    expect(ctx.eval('stack')).not_to eq(nil)
   end
 
  it "calls on_entry with the base pointer when a controller is embedded for the initial action" do
