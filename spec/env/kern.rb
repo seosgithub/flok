@@ -192,6 +192,46 @@ shared_context "kern" do
       end
     end
 
+    #Expect the queue to not contain a message matching
+    def expect_not_to_contain msg_name, &block
+      original_q = JSON.parse(@q.to_json)
+
+      loop do
+        if @q.count == 0 and @cq.count == 0
+          #Good
+          @q = original_q
+          @cq = nil
+          return
+        end
+        #Dequeue from multi-priority queue if possible
+        if @cq.nil? or @cq.count == 0
+          @cq = @q.shift
+          @cp = @cq.shift #save priority
+        end
+
+        #Check to see if it's the correct item
+        arg_len = @cq.shift
+        name = @cq.shift
+        if arg_len.class == String
+          $stderr.puts "Arg len is: #{arg_len.inspect}"
+          $stderr.puts "Name is #{name.inspect}"
+        end
+        args = @cq.shift(arg_len)
+
+        #Matches message name
+        if name == msg_name
+          #Optional test block
+          if block
+            next unless block.call(args)
+          end
+
+          #Uh oh, we found one!
+          block_info = block ? " You gave a block to filter... check the code to see what it's checking for, it's more than just the message name" : ""
+          raise "Expected not to find a message matching #{msg_name.inspect} in the queue, but found one!#{block_info}"
+        end
+      end
+    end
+
     #Retrieve a message, we at least expect a name and priority
     def get msg_name, priority=0
       #Dequeue from multi-priority queue if possible

@@ -222,34 +222,6 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
-            //Remove all views, we don't have to recurse because removal of a view
-            //is supposed to remove *all* view controllers of that tree as well.
-            var embeds = __info__.embeds;
-            for (var i = 0; i < __info__.embeds.length; ++i) {
-              for (var j = 0; j < __info__.embeds[i].length; ++j) {
-                //Free +1 because that will be the 'main' view
-                main_q.push([1, "if_free_view", embeds[i][j]+1]);
-
-                //Call dealloc on the controller
-                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
-
-                <% if @debug %>
-                  var vp = embeds[i][j]+1;
-                  //First locate spot this view belongs to in reverse hash
-                  var spot = debug_ui_view_to_spot[vp];
-
-                  //Find it's index in the spot
-                  var idx = debug_ui_spot_to_views[spot].indexOf(vp);
-
-                  //Remove it from the spot => [view]
-                  debug_ui_spot_to_views[spot].splice(idx, 1);
-
-                  //Remove it from the reverse hash
-                  delete debug_ui_view_to_spot[vp];
-                <% end %>
-              }
-            }
-
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds = [];
             for (var i = 1; i < #{@controller.spots.count}; ++i) {

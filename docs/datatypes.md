@@ -10,7 +10,7 @@ be looked up as `ctable[controller_name]`.
 ctable_entry {
   root_view,     //A constant string of the name of the view this controller sets as it's root view.
   actions,       //A dictionary [String:action_info] that corresponds to a dictionary of action_info object's based on the action's name.
-  spots,         //An array fo spot names for this controller
+  spots,         //An array fo spot names for this controller, by default, the 'main' spot is counted as 1 spot.
   name,          //The name of the controller, useful for certain lookup operations, this is also the ctable key
   __init__,      //A function that is called when this controller is created. Signals service connection and the controller on_entry bits.
   Additionally, all interval timers are configured here based on their unique names. Actions that are not active will not receive these events (they

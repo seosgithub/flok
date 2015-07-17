@@ -7,7 +7,7 @@ controller :my_controller do
     }
 
     on "test_event", %{
-      Goto("my_other_action")
+      Push("my_other_action")
     }
   end
 

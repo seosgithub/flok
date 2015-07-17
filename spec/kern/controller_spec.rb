@@ -310,17 +310,40 @@ RSpec.describe "kern:controller_spec" do
     ctx = flok_new_user File.read('./spec/kern/assets/push.rb')
 
     #Run the embed function
-    ctx.eval %{
+    dump = ctx.evald %{
       //Call embed on main root view
       base = _embed("my_controller", 0, {}, null);
 
       //Drain queue with test event
       int_dispatch([3, "int_event", base, "test_event", {}]);
+
+      //The second action was entered
+      dump["my_other_action_on_entry_called"] = my_other_action_on_entry_called; 
+
+      //The controller's info
+      dump["controller_info"] = tel_deref(base);
+      dump["ctable_entry"] = dump["controller_info"]["cte"];
     }
 
-    #Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
-    #to be called
-    expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
+    #The controller's instance info `action` field was changed to the new action
+    expect(dump["controller_info"]["action"]).to eq("my_other_action")
+
+    #The controller's instance embeds array is the correct blank version
+    #Each blank array in embeds refers to one spot (not including the main spot)
+    spot_count = dump["ctable_entry"]["spots"].count-1
+    expect(dump["controller_info"]["embeds"]).to eq((1..spot_count).map{|e| []})
+
+    #Does not dealloc the controller (and kill views)
+    @driver.expect_not_to_contain "if_free_view"
+
+    #Controller's action was called
+    expect(dump["my_other_action_on_entry_called"]).to eq(true)
+
+    #Got a notification for the view hierarchy about the change
+    @driver.ignore_up_to "if_event" do |e|
+      next e[2] == {"from" => "my_action", "to" => "my_other_action"}
+    end
+    @driver.mexpect("if_event", [Integer, "action", {"from" => "my_action", "to" => "my_other_action"}])
   end
 
   it "Can receive 'test_event' and change actions via Push and then back with Pop" do

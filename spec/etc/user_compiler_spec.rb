@@ -11,6 +11,7 @@ RSpec.describe "User compiler" do
     compiler = Flok::UserCompiler
     js_src(fn)
     js_res = compiler.compile(js_src(fn))
+    File.write "/Users/Seo/Desktop/js_src.js", js_res
     ctx = V8::Context.new
     ctx.eval js_res
     return ctx, js_res
