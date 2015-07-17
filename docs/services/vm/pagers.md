@@ -57,3 +57,19 @@ This pager provides you with local memory that will be automatically cached to d
 
 ####Dummy pager | `pg_dummy0`
 This pager doesn't do anything. Used by some specs which manually write to the vm_cache in leu of the pager
+
+####Sockio pager | `pg_sockio0`
+This pager connects to a socket.io server via the `sockio` module.
+  * **Options**
+    * `url (required)` - The url of the socket.io server you are connecting to. Includes endpoint if that's required for your socket.io server. E.g.
+        `http://myapp.com/socket`
+  * **Functions**
+    * `init` - Will begin trying to establish a connection to the server. When pages are written, 
+    * `watch` - Signals to the socket.io server that a page is being watched via `/watch` with parameters `{page_id:}`
+    * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `/unwatch` with parameters `{page_id:}` 
+    * `write` - 
+      * If the page already exists:
+        * Commits unsynced changes to `vm_cache` and notifies the server of the changes if the page already existed via `/update` with `page_id:,
+            changes:`
+      * If the page does not exist:
+        * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
