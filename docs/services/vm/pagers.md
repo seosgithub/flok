@@ -63,6 +63,11 @@ This pager connects to a socket.io server via the `sockio` module.
   * **Options**
     * `url (required)` - The url of the socket.io server you are connecting to. Includes endpoint if that's required for your socket.io server. E.g.
         `http://myapp.com/socket`
+  * **Globals**
+    * `pg_sockio{N}_bp` - The base address that the socket exists at (`sp`) and the endpoint that events are sent to that are destined for forwarding.
+    * `pg_sockio{N}_xevent_handler` - Events received by the sockio driver are forwarded to the kernel at a certain event endpoint if they are
+        configured via `if_sockio_fwd`. This `xevent_handler`  is the destination for all forwarding requests for the `pg_sockio#{N}` socket. Note
+        that the endpoint shares the same value as the socket's base pointer.
   * **Functions**
     * `init` - Will begin trying to establish a connection to the server. When pages are written, 
     * `watch` - Signals to the socket.io server that a page is being watched via `watch` event with parameters `{page_id:}`
@@ -73,5 +78,8 @@ This pager connects to a socket.io server via the `sockio` module.
             changes:`
       * If the page does not exist:
         * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
+  * **Socket.IO Event Handlers **
+    * `update` - A page has been updated. This may either indicate an update or write. The page will be integrated into `vm_cache` via a rebased if it
+        already exists or a direct write if it dosen't already exist. Contains one field `page:` that contains the page.
   * **Spec**
     * If `@debug`, then `sockio{N}_spec_did_init` will be true

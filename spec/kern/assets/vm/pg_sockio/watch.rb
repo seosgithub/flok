@@ -10,5 +10,9 @@ controller :my_controller do
 
       Request("vm", "watch", watch_info);
     }
+
+    on "read_res", %{
+      read_res_params = params;
+    }
   end
 end
