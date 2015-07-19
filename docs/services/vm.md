@@ -97,39 +97,17 @@ you will want to copy your pager into a seperate piece of code and rename it so 
 ##Requests
 
 ###`watch`
-This is how you **read a page** and request notifications for any updates to a page. The following happens when you watch a page:
-```js
-if (page is resident in memory from previous cache write)
-  send the caller a read_res event *now*
-
-increment_page_ref()
-
-//Synchronously request disk load from cache; this will block
-//Even if we have a request in progress; the synchronous
-//may pre-empt that event because the disk queue might be loaded;
-//so we need to send this anyway
-if (page is not redisent in memory and synchronous) {
-  try_sync_load_from_disk_and_update_cache()
-}
-
-//Only notify if this is the first reference, other controllers who attempt a watch will not signal the pager because the pager already knows
-//about this page
-if first_reference {
-  pager_watch()
-}
-
-//Again, only attempt this if the page is not requested by anyone else and is not synchronous (because we would have already tried). The pager will be notified in the meantime, if the disk
-//comes after the pager notification; then the disk will not do anything.
-if (page is not resident in memory && not_synchronous) {
-  //This is an asynchronous request
-  try_load_from_disk_and_update_cache()
-}
-```
+This is how you **read a page** and **request notifications for any updates to a page**.
   * Parameters
     * `ns` - The namespace of the page, e.g. 'user'
     * `id` - Watching the page that contains this in the `_id` field
-    * `sync (optional)` - If set to `true` then the cache read will be performed synchronously; however, the disk read will still be performed
-        asynchronously. Additionally, all future cache reads / updates will be performed synchronously.
+    * `sync (optional)` - If set to `true` then the cache read will be performed synchronously and if the cache misses, the disk will be read
+        synchronously.  If the disk read fails, there will be no warning but this is an untested state and most likely, the next pager read will
+        dispatch asynchronously. This isn't awful but you should never set the `sync` flag to be true on data that you have not already cached at
+        some point. This is useful for profile loading, etc. so you don't have to delay on startup to display user name, etc. Multiple `watch`
+        requests dispatched with `sync` flag within the same frame will incur no performance penalty, they will be coalesced into one disk read.
+        Likewise, a `sync` watch request is perfectly acceptible to be called many times for a new controller needing the information. There is little
+        performance benefit in locally caching the data and many drawbacks like not getting updates of changes.
   * Event Responses
     * `read_res` - Whenever a change occurs to a page or the first read.
     * Returns an immutable page in params
@@ -182,6 +160,9 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
       like a synchronous high priority deferred queue. The *frontmost* of the array is the lowest index, and the *backmost* is the highest index. In
       javascript, this means that new requests are placed via `vm_read_sync_in_progress.unshift(new_bp)` and when requests are serviced, they are
       serviced via the `var bp = vm_read_sync_in_progress.pop()`.
+  * `vm_cache_write_sync_pending` - A hash mapping page_ids to controllers awaiting synchronous responeses, e.g.
+      `vm_cache_write_sync_pending[page_id][0..N] := bp`. Usually set via the `watch` request
+      during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
 
 ##Helper Methods
 
