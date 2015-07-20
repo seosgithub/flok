@@ -22,7 +22,7 @@ controller :my_controller do
       Request("vm", "read_sync", info2);
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       read_sync_res_params.push(params);
     }
   end

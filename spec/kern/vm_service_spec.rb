@@ -672,7 +672,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
 
     @driver.int "int_per_get_res", ["vm", "spec", {
-      "_id" => "default",
+      "_id" => "test",
       "_hash" => nil,
       "_next" => nil,
       "entries" => [],
@@ -681,23 +681,19 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
 
     @driver.int "int_per_get_res", ["vm", "spec", {
-      "_id" => "default",
+      "_id" => "test2",
       "_hash" => nil,
       "_next" => nil,
       "entries" => [],
     }]
 
     dump = ctx.evald %{
-      dump.vm_read_sync_in_progress = vm_read_sync_in_progress;
       dump.read_sync_res_params = read_sync_res_params;
     }
 
-    expect(dump["vm_read_sync_in_progress"]).to eq([])
     expect(dump["read_sync_res_params"].length).to eq(2)
-    expect(dump["read_sync_res_params"][0]["ns"]).to eq("spec")
-    expect(dump["read_sync_res_params"][0]["page"]["_id"]).to eq("default")
-    expect(dump["read_sync_res_params"][1]["ns"]).to eq("spec")
-    expect(dump["read_sync_res_params"][1]["page"]["_id"]).to eq("default")
+    expect(dump["read_sync_res_params"][0]["_id"]).to eq("test")
+    expect(dump["read_sync_res_params"][1]["_id"]).to eq("test2")
   end
 
   it "Calling read_sync on an entry that already exists in cache will not trigger a disk read" do

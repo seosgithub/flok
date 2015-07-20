@@ -15,14 +15,14 @@ service :vm do
 
     vm_bp_to_nmap = {};
 
-    vm_read_sync_in_progress = [];
-
     //Notification listeners, converts ns+key to an array of base pointers
     vm_notify_map = {
       <% @options[:pagers].each do |p| %>
         <%= p[:namespace] %>: {},
       <% end %>
     };
+
+    vm_cache_write_sync_pending = {};
 
     //Cache
     function vm_cache_write(ns, page) {
@@ -49,13 +49,41 @@ service :vm do
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
 
+      //List of controllers to notify synchronously
+      var sync_waiting_controllers = vm_cache_write_sync_pending[page._id];
+
+      if (sync_waiting_controllers !== undefined) {
+        //Map that holds all controllers synchronously sent (used to avoid sending
+        //those controllers that are also on vm_notify_map a second message)
+        var sync_sent_map = {}; 
+
+        for (var i = 0; i < sync_waiting_controllers.length; ++i) {
+          var c = sync_waiting_controllers[i];
+
+          //Save so we don't send the same controller during the async part if the controller
+          //also happends to be part of vm_notify_map (it watched)
+          sync_sent_map[c] = true;
+
+          //Notify controller synchronously
+          int_event(c, "read_res", page);
+        }
+      }
+
       //Try to lookup view controller(s) to notify
       var nbp = vm_notify_map[ns][page._id];
       if (nbp) {
         for (var i = 0; i < nbp.length; ++i) {
-          int_event_defer(nbp[i], "read_res", page);
+          var cbp = nbp[i];
+          //Only send if we didn't just send it above in the previous
+          //block synchronously
+          if (sync_sent_map[cbp] === undefined) {
+            int_event_defer(cbp, "read_res", page);
+          }
         }
       }
+
+      //Clear the sync_waiting_controllers
+      delete vm_cache_write_sync_pending[page._id];
     }
 
     function vm_pageout() {
@@ -83,22 +111,12 @@ service :vm do
     //Part of the persist module
     //res is page
     function int_per_get_res(s, ns, res) {
-      //Controller made a read_sync request, fulfull it
-      if (vm_read_sync_in_progress.length > 0) {
-        int_event(vm_read_sync_in_progress.pop(), "read_sync_res", {page: res, ns: ns});
+      if (res !== null) {
+        //Write out to the cache
+        vm_transaction_begin();
+        vm_cache_write(ns, res);
+        vm_transaction_end();
       }
-
-      //If the key didn't exist, ignore it
-      if (res === null) { return; }
-
-      //If there is already a cached entry, a pager beat us to it
-      //ignore this for now because the pager should be more up to
-      //date
-      if (vm_cache[ns][res._id]) { return };
-
-      vm_transaction_begin();
-      vm_cache_write(ns, res);
-      vm_transaction_end();
     }
 
     <% if @debug %>
@@ -601,7 +619,8 @@ service :vm do
     if (cache_entry !== undefined) {
       int_event(bp, "read_sync_res", {ns: params.ns, page: cache_entry});
     } else {
-      vm_read_sync_in_progress.unshift(bp);
+      //Set this controller as awaiting as synchronous response
+      vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || [bp]; 
       SEND("main", "if_per_get", "vm", params.ns, params.id);
     }
   }
