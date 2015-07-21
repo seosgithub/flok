@@ -40,7 +40,6 @@ controller :controller1 do
       }
       //get page A (again, read from cache)
       Request("vm", "read_sync", info);
-      throw "shit";
     }
 
     on "read_res", %{

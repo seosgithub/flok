@@ -15,6 +15,6 @@ It is expected that the kernel should manage the write-back cache and that the d
 it is convenient to do so.
 
 ###Kernel interrupts
-`int_per_get_res(s, ns, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. Currently,
+`int_per_get_res(s, ns, id, res)` - A response retrieved from `if_per_get` that contains the session key and result dictionary. Currently,
 the service `vm` owns this function; so session does not have an effect on the outcome; but the string `"vm"` should be used for now for any
 session keys involving persist.

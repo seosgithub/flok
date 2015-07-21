@@ -696,6 +696,34 @@ RSpec.describe "kern:vm_service" do
     expect(dump["read_sync_res_params"][1]["_id"]).to eq("test2")
   end
 
+  it "Does send a read request from disk cache when synchronously reading a key for the first time via read_sync, and returns a blank hash if the page does not exist" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19h.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Call pageout *now*
+      vm_pageout();
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
+
+    #Send back blank result
+    @driver.int "int_per_get_res", ["vm", "spec", nil]
+
+    dump = ctx.evald %{
+      dump.read_sync_res_params = read_sync_res_params;
+    }
+
+    expect(dump["read_sync_res_params"].length).to eq(1)
+    expect(dump["read_sync_res_params"][0]).to eq({})
+  end
+
+
   it "Calling read_sync on an entry that already exists in cache will not trigger a disk read" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19d.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
@@ -871,8 +899,8 @@ RSpec.describe "kern:vm_service" do
       dump.controller2_read_sync_res = controller2_read_sync_res;
     }
 
-    expect(dump["controller1_read_sync_res"]["page"]["_id"]).to eq("A")
-    expect(dump["controller2_read_sync_res"]["page"]["_id"]).to eq("B")
+    expect(dump["controller1_read_sync_res"]["_id"]).to eq("A")
+    expect(dump["controller2_read_sync_res"]["_id"]).to eq("B")
   end
 
   it "Does send a sync read request from disk cache when watching a key for the first time with sync: true" do

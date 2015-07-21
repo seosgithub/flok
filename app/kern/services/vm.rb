@@ -116,6 +116,22 @@ service :vm do
         vm_transaction_begin();
         vm_cache_write(ns, res);
         vm_transaction_end();
+      } else {
+        //Result was blank, signal all controllers that read synchronously
+        var sync_waiting_controllers = vm_cache_write_sync_pending[s];
+
+          throw s;
+        if (sync_waiting_controllers !== undefined) {
+          for (var i = 0; i < sync_waiting_controllers.length; ++i) {
+            var c = sync_waiting_controllers[i];
+
+            //Notify controller synchronously
+            int_event(c, "read_res", {});
+          }
+        }
+
+        //Remove all controllers from notification list
+        delete vm_cache_write_sync_pending[s];
       }
     }
 
@@ -617,7 +633,7 @@ service :vm do
 
     var cache_entry = vm_cache[params.ns][params.id];
     if (cache_entry !== undefined) {
-      int_event(bp, "read_sync_res", {ns: params.ns, page: cache_entry});
+      int_event(bp, "read_res", cache_entry);
     } else {
       //Set this controller as awaiting as synchronous response
       vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || []; 
