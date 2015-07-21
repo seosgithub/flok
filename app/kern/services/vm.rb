@@ -593,22 +593,24 @@ service :vm do
     }
 
     //Send a request now for disk read for sync
-    if (!cache_entry && params.sync) {
-      SEND("main", "if_per_get", "vm", params.ns, params.id);
+    if (!cache_entry) {
+      if (params.sync !== undefined && params.sync === true) {
+        //Add ourselves to synchronous read list so the next disk read will
+        //send a synchronous event to us (and then clear). We will not get the 
+        //normal asynhronous read. Additionally, we may also get a `{}` page indicating
+        //that the page is blank
+        vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || []; 
+        vm_cache_write_sync_pending[params.id].push(bp);
+        SEND("main", "if_per_get", "vm", params.ns, params.id);
+      } else {
+        SEND("disk", "if_per_get", "vm", params.ns, params.id);
+      }
     }
 
     //Do not signal pager if there is a watch request already in place
     //as pager already knows; if it's equal to 1, this is the 'first'
     //watch to go through as we have no info on it but just added it
     if (vm_notify_map[params.ns][params.id].length > 1) { return; }
-
-    //While we're waiting for the pager try loading from disk, if this
-    //disk request is slower than the pager response, that's ok...
-    //the disk response will double check to see if the cache got set
-    //somewhere and not set it itself.
-    if (!cache_entry && !params.sync) {
-      SEND("disk", "if_per_get", "vm", params.ns, params.id);
-    }
 
     //Now load the appropriate pager
     <% @options[:pagers].each do |p| %>

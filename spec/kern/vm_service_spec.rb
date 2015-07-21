@@ -940,45 +940,8 @@ RSpec.describe "kern:vm_service" do
     }.to raise_exception
   end
 
-  it "Only sends one disk read request when multiple watches are attempted, and the first watch is sync: true" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
-
-    ctx.eval %{
-      base = _embed("my_controller_sync", 1, {}, null);
-      base2 = _embed("my_controller", base+2, {}, null);
-
-      //Drain queue
-      int_dispatch([]);
-    }
-
-    @driver.ignore_up_to "if_per_get", 0
-    @driver.get "if_per_get", 0
-
-    #There should not be another request for the drive
-    expect {
-      @driver.ignore_up_to "if_per_get"
-    }.to raise_exception
-  end
-
-  it "Sends two disk read request when multiple watches are attempted, and the second watch is sync: true but the disk does not read back before it is requested" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
-
-    ctx.eval %{
-      base = _embed("my_controller", 1, {}, null);
-      base2 = _embed("my_controller_sync", base+2, {}, null);
-
-      //Drain queue
-      int_dispatch([]);
-    }
-
-    #The inner controller's on_entry is called before, so it's in reverse order
-    @driver.ignore_up_to "if_per_get", 0
-    @driver.get "if_per_get", 0
-    @driver.ignore_up_to "if_per_get", 2
-  end
-
-  it "Sends one disk read request when multiple watches are attempted, and the second watch is sync: true and the disk *does* read back before it is requested" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb");
+  it "A watch request with the sync flag enabled does trigger a synchronous read for a non-existant page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
@@ -987,49 +950,29 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
-    page0 = JSON.parse(ctx.eval("JSON.stringify(page0)"))
-    @driver.int "int_per_get_res", ["vm", "spec", page0["_id"], page0]
-
-    ctx.eval %{
-      base2 = _embed("my_controller_sync", base+2, {}, null);
-    }
-
-    #The inner controller's on_entry is called before, so it's in reverse order
-    @driver.ignore_up_to "if_per_get", 2
-    @driver.get "if_per_get", 2
-
-    #There should not be another request for the drive
-    expect {
-      @driver.ignore_up_to "if_per_get"
-    }.to raise_exception
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "my_key"], 0)
   end
 
-  it "Only sends one disk read request when multiple sync watches are attempted" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+  it "A watch request with the sync flag enabled does return null to read_res if the page does not exist (really an illegal condition, page should always be avaliable if you're doing a watch with sync)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
-      base = _embed("my_controller_sync", 1, {}, null);
+      base = _embed("my_controller", 1, {}, null);
 
       //Drain queue
       int_dispatch([]);
     }
 
     @driver.ignore_up_to "if_per_get", 0
-    @driver.get "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "my_key"], 0)
 
-    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
-    @driver.int "int_per_get_res", ["vm", "spec", page["_id"], page]
+    #Send back a blank page
+    @driver.int "int_per_get_res", ["vm", "spec", "my_key", nil]
 
-    ctx.eval %{
-      base2 = _embed("my_controller_sync", base+2, {}, null);
-    }
-
-    #There should not be another request for the drive
-    expect {
-      @driver.ignore_up_to "if_per_get"
-    }.to raise_exception
+    read_res_params = ctx.dump "read_res_params"
+    expect(read_res_params).to eq({})
   end
-
 
   it "Clears the dirty page when pageout runs" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 

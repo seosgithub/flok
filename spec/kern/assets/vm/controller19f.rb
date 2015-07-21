@@ -40,10 +40,13 @@ controller :controller1 do
       }
       //get page A (again, read from cache)
       Request("vm", "read_sync", info);
+      throw "shit";
     }
 
-    on "read_res", %{
+    on modifyread_res", %{
       controller1_read_sync_res = params;
+
+      expect()
     }
   end
 end
