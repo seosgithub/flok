@@ -1036,6 +1036,40 @@ RSpec.describe "kern:vm_service" do
     expect(read_res_params.length).to eq(1)
   end
 
+  it "A watch request with the sync flag enabled does return the page to read_res followed by all future changes being sent asynchronously" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "my_key"], 0)
+
+    #Send back a real page
+    @driver.int "int_per_get_res", ["vm", "spec", "my_key", {
+      "_id" => "my_key",
+      "entries" => [],
+      "_head" => nil,
+      "_next" => nil
+    }]
+
+    #Dispatch any pending async
+    #should not do anything here
+    @ctx.eval %{
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+    }
+
+    read_res_params = ctx.dump "read_res_params"
+    expect(read_res_params[0]["_id"]).to eq("my_key")
+    expect(read_res_params.length).to eq(1)
+  end
+
   it "Clears the dirty page when pageout runs" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 

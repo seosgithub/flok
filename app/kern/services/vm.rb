@@ -52,11 +52,10 @@ service :vm do
       //List of controllers to notify synchronously
       var sync_waiting_controllers = vm_cache_write_sync_pending[page._id];
 
+      //Map that holds all controllers synchronously sent (used to avoid sending
+      //those controllers that are also on vm_notify_map a second message)
+      var sync_sent_map = {}; 
       if (sync_waiting_controllers !== undefined) {
-        //Map that holds all controllers synchronously sent (used to avoid sending
-        //those controllers that are also on vm_notify_map a second message)
-        var sync_sent_map = {}; 
-
         for (var i = 0; i < sync_waiting_controllers.length; ++i) {
           var c = sync_waiting_controllers[i];
 
