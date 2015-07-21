@@ -1,7 +1,8 @@
 #Socket.io (sockio.js)
 
 ##Driver Functions
-`if_sockio_init(url, sp)` - Initialize a socketio socket with the given `url` and refer to it with `sp`.
+`if_sockio_init(url, sp)` - Initialize a socketio socket with the given `url` and refer to it with `sp`. Any messages received relating to this
+socket, like `if_sockio_fwd` or `if_sockio_send` should be queued if the socket is not instantly created and dispatched when the socket is created.
 
 `if_sockio_fwd(sp, event_name, ep)` - A request to forward messages from a socket.io socket that represents `id` to the `ep` address as an `if_event` where the event
 name is the same as the `socket.io` `event_name` and the information is passed as the `event` field for the `if_event`. Only forward messages matching
