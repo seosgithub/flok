@@ -620,7 +620,8 @@ service :vm do
       int_event(bp, "read_sync_res", {ns: params.ns, page: cache_entry});
     } else {
       //Set this controller as awaiting as synchronous response
-      vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || [bp]; 
+      vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || []; 
+      vm_cache_write_sync_pending[params.id].push(bp);
       SEND("main", "if_per_get", "vm", params.ns, params.id);
     }
   }

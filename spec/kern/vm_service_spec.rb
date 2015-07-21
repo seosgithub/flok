@@ -771,8 +771,8 @@ RSpec.describe "kern:vm_service" do
       dump.my_other_controller_read_sync_res = my_other_controller_read_sync_res;
     }
 
-    expect(dump["my_controller_read_sync_res"]["page"]["_id"]).to eq("test1")
-    expect(dump["my_other_controller_read_sync_res"]["page"]["_id"]).to eq("test2")
+    expect(dump["my_controller_read_sync_res"]["_id"]).to eq("test1")
+    expect(dump["my_other_controller_read_sync_res"]["_id"]).to eq("test2")
   end
 
   it "Calling read_sync on frame0 for page 'A' on controller0 and then on frame1 for page 'A' on controller1 and page 'B' on controller2 will result in all controllers receiving the correct pages" do
@@ -821,8 +821,8 @@ RSpec.describe "kern:vm_service" do
       dump.controller2_read_sync_res = controller2_read_sync_res;
     }
 
-    expect(dump["controller1_read_sync_res"]["page"]["_id"]).to eq("A")
-    expect(dump["controller2_read_sync_res"]["page"]["_id"]).to eq("B")
+    expect(dump["controller1_read_sync_res"]["_id"]).to eq("A")
+    expect(dump["controller2_read_sync_res"]["_id"]).to eq("B")
   end
 
   it "Calling read_sync on frame0 for page 'B' on controller0 and then on frame1 for page 'A' on controller1 and page 'B' on controller2 will result in all controllers receiving the correct pages (reversed order from above)" do

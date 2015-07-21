@@ -17,7 +17,7 @@ controller :controller0 do
       Embed("controller2", "second", {});
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       controller0_read_sync_res = params;
     }
   end
@@ -40,9 +40,10 @@ controller :controller1 do
       }
       //get page A (again, read from cache)
       Request("vm", "read_sync", info);
+      throw "shit";
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       controller1_read_sync_res = params;
     }
   end
@@ -68,7 +69,7 @@ controller :controller2 do
       Request("vm", "read_sync", info);
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       controller2_read_sync_res = params;
     }
   end

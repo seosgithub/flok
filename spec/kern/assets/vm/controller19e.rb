@@ -21,7 +21,7 @@ controller :my_controller do
       Embed("my_other_controller", "content", {});
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       my_controller_read_sync_res = params;
     }
   end
@@ -44,7 +44,7 @@ controller :my_other_controller do
       Request("vm", "read_sync", info);
     }
 
-    on "read_sync_res", %{
+    on "read_res", %{
       my_other_controller_read_sync_res = params;
     }
   end
