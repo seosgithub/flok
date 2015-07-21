@@ -109,7 +109,8 @@ This is how you **read a page** and **request notifications for any updates to a
         Likewise, a `sync` watch request is perfectly acceptible to be called many times for a new controller needing the information. There is little
         performance benefit in locally caching the data and many drawbacks like not getting updates of changes.
   * Event Responses
-    * `read_res` - Whenever a change occurs to a page or the first read.
+    * `read_res` - Whenever a change occurs to a page or the first read. If `sync` is true, the page may be `{}` which indicates that no page existed
+        when sync was called (really an illegal condition, you should never use sync unless it's cached)
     * Returns an immutable page in params
 
 ###`unwatch`
@@ -137,7 +138,7 @@ requested. This is because a cached page will be returned by the call stack whil
     * `id` - id of the page
   * Event Responses
     * `read_res`
-      * `entire params` - The page that was retrieved (or null if it dosen't exist)
+      * `entire params` - The page that was retrieved (or `{}` if it dosen't exist)
 
 ##Cache
 See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty. `vm_cache_write` notifies controllers asynchronously and is not effected by the `watch` flag on controllers.

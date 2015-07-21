@@ -1037,14 +1037,20 @@ RSpec.describe "kern:vm_service" do
   end
 
   it "A watch request with the sync flag enabled does return the page to read_res followed by all future changes being sent asynchronously" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws2.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
 
+      //We need another controller, plans to synchronously dispatch
+      //changes within the same controller
+      other_base = _embed("my_other_controller", base+2, {}, null);
+
       //Drain queue
       int_dispatch([]);
     }
+    base = ctx.eval("base")
+    other_base = ctx.eval("other_base")
 
     @driver.ignore_up_to "if_per_get", 0
     @driver.mexpect("if_per_get", ["vm", "spec", "my_key"], 0)
@@ -1068,6 +1074,24 @@ RSpec.describe "kern:vm_service" do
     read_res_params = ctx.dump "read_res_params"
     expect(read_res_params[0]["_id"]).to eq("my_key")
     expect(read_res_params.length).to eq(1)
+
+    #Signal controller to modify page
+    @driver.int "int_event", [other_base, "modify_page", {}]
+
+    #Expect nothing to show up yet (should be dispatched asynchrosouly and will show up after int_dispatch
+    read_res_params = ctx.dump "read_res_params"
+    expect(read_res_params.length).to eq(1)
+
+    #Dispatch any pending async
+    #(This should trigger an additional read_res)
+    @ctx.eval %{
+      for (var i = 0; i < 100; ++i) {
+        int_dispatch([]);
+      }
+    }
+
+    read_res_params = ctx.dump "read_res_params"
+    expect(read_res_params.length).to eq(2)
   end
 
   it "Clears the dirty page when pageout runs" do
