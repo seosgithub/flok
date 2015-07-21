@@ -29,7 +29,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [3, "int_per_get_res", "session", "my_ns", key, nil]
+    res = [4, "int_per_get_res", "session", "my_ns", key, nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 7.seconds)
   end
 
@@ -43,7 +43,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [3, "int_per_get_res", "session", "my_ns", key, value]
+    res = [4, "int_per_get_res", "session", "my_ns", key, value]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
   end
 
@@ -58,7 +58,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [3, "int_per_get_res", "session", "my_ns", key, nil]
+    res = [4, "int_per_get_res", "session", "my_ns", key, nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
   end
 
@@ -77,11 +77,11 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key2]].to_json
 
     #Results for first key
-    res = [3, "int_per_get_res", "session", "my_ns", key, nil]
+    res = [4, "int_per_get_res", "session", "my_ns", key, nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
 
     #Expect a response
-    res = [3, "int_per_get_res", "session", "my_ns", key2, value2]
+    res = [4, "int_per_get_res", "session", "my_ns", key2, value2]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
   end
 
@@ -96,7 +96,7 @@ RSpec.describe "iface:driver:persist" do
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
     #Expect a response
-    res = [3, "int_per_get_res", "session", "my_ns", key, nil]
+    res = [4, "int_per_get_res", "session", "my_ns", key, nil]
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
   end
 end
