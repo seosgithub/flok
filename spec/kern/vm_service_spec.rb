@@ -671,7 +671,7 @@ RSpec.describe "kern:vm_service" do
     @driver.ignore_up_to "if_per_get", 0
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
 
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test", {
       "_id" => "test",
       "_hash" => nil,
       "_next" => nil,
@@ -680,7 +680,7 @@ RSpec.describe "kern:vm_service" do
 
     @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
 
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test2", {
       "_id" => "test2",
       "_hash" => nil,
       "_next" => nil,
@@ -712,8 +712,9 @@ RSpec.describe "kern:vm_service" do
     @driver.ignore_up_to "if_per_get", 0
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
 
-    #Send back blank result
-    @driver.int "int_per_get_res", ["vm", "spec", nil]
+    #Send back blank result (Send two to make sure we only get one result back)
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
 
     dump = ctx.evald %{
       dump.read_sync_res_params = read_sync_res_params;
@@ -722,7 +723,6 @@ RSpec.describe "kern:vm_service" do
     expect(dump["read_sync_res_params"].length).to eq(1)
     expect(dump["read_sync_res_params"][0]).to eq({})
   end
-
 
   it "Calling read_sync on an entry that already exists in cache will not trigger a disk read" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19d.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
@@ -742,7 +742,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test"], 0)
 
     #Send the disk read response back controller19d:14
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test", {
       "_id" => "test",
       "_hash" => nil,
       "_next" => nil,
@@ -778,7 +778,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
 
     #Send the disk read response back for the first controller (my_controller)
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test1", {
       "_id" => "test1",
       "_hash" => nil,
       "_next" => nil,
@@ -786,7 +786,7 @@ RSpec.describe "kern:vm_service" do
     }]
 
     #Send the disk read response back for the second controller (my_other_controller)
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test2", {
       "_id" => "test2",
       "_hash" => nil,
       "_next" => nil,
@@ -820,7 +820,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "A"], 0)
 
     #Send the disk read response back for controller0 pageA
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "A", {
       "_id" => "A",
       "_hash" => nil,
       "_next" => nil,
@@ -836,7 +836,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "B"], 0)
 
     #Send the disk read response back for frame1 'B' for controller2
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "B", {
       "_id" => "B",
       "_hash" => nil,
       "_next" => nil,
@@ -870,7 +870,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "B"], 0)
 
     #Send the disk read response back for controller0 pageB
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "B", {
       "_id" => "B",
       "_hash" => nil,
       "_next" => nil,
@@ -886,7 +886,7 @@ RSpec.describe "kern:vm_service" do
     @driver.mexpect("if_per_get", ["vm", "spec", "A"], 0)
 
     #Send the disk read response back for frame1 'A' for controller2
-    @driver.int "int_per_get_res", ["vm", "spec", {
+    @driver.int "int_per_get_res", ["vm", "spec", "A", {
       "_id" => "A",
       "_hash" => nil,
       "_next" => nil,
@@ -988,7 +988,7 @@ RSpec.describe "kern:vm_service" do
     }
 
     page0 = JSON.parse(ctx.eval("JSON.stringify(page0)"))
-    @driver.int "int_per_get_res", ["vm", "spec", page0]
+    @driver.int "int_per_get_res", ["vm", "spec", page0["_id"], page0]
 
     ctx.eval %{
       base2 = _embed("my_controller_sync", base+2, {}, null);
@@ -1018,7 +1018,7 @@ RSpec.describe "kern:vm_service" do
     @driver.get "if_per_get", 0
 
     page = JSON.parse(ctx.eval("JSON.stringify(page)"))
-    @driver.int "int_per_get_res", ["vm", "spec", page]
+    @driver.int "int_per_get_res", ["vm", "spec", page["_id"], page]
 
     ctx.eval %{
       base2 = _embed("my_controller_sync", base+2, {}, null);
@@ -1158,7 +1158,7 @@ RSpec.describe "kern:vm_service" do
 
     #And then we let the cache from disk reply, which should be ignored
     #because the cache is already there from the pager
-    @driver.int "int_per_get_res", ["vm", "spec", page]
+    @driver.int "int_per_get_res", ["vm", "spec", page["_id"], page]
 
     res = JSON.parse(ctx.eval("JSON.stringify(read_res)"))
     expect(res).to eq([
@@ -1219,7 +1219,7 @@ RSpec.describe "kern:vm_service" do
 
     #And then we let the cache from disk reply, which should be ignored
     #because the cache is already there from the pager
-    @driver.int "int_per_get_res", ["vm", "spec", page]
+    @driver.int "int_per_get_res", ["vm", "spec", page["_id"], page]
 
     res = JSON.parse(ctx.eval("JSON.stringify(read_res)"))
     expect(res).to eq([

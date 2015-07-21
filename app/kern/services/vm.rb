@@ -110,7 +110,7 @@ service :vm do
 
     //Part of the persist module
     //res is page
-    function int_per_get_res(s, ns, res) {
+    function int_per_get_res(s, ns, id, res) {
       if (res !== null) {
         //Write out to the cache
         vm_transaction_begin();
@@ -118,9 +118,7 @@ service :vm do
         vm_transaction_end();
       } else {
         //Result was blank, signal all controllers that read synchronously
-        var sync_waiting_controllers = vm_cache_write_sync_pending[s];
-
-          throw s;
+        var sync_waiting_controllers = vm_cache_write_sync_pending[id];
         if (sync_waiting_controllers !== undefined) {
           for (var i = 0; i < sync_waiting_controllers.length; ++i) {
             var c = sync_waiting_controllers[i];
@@ -131,7 +129,7 @@ service :vm do
         }
 
         //Remove all controllers from notification list
-        delete vm_cache_write_sync_pending[s];
+        delete vm_cache_write_sync_pending[id];
       }
     }
 

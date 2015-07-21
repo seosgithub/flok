@@ -153,12 +153,6 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][id]` which yields an array of controller base pointers.
   * `vm_bp_to_nmap` - A dictionary that maps a `bp` key (usually from a controller) to a dictionary. This dictionary contains a mapping of `bp => ns => id` to an array that contains `[node, index]` where `node` is a reference to `vm_notify_map[ns][id]`. This inverted map must (a) provide a way for `unwatch` to quickly remove entries from itself and (b) provide a way for all entries in `vm_notify_map` to be removed when something (usually a controller) disconrnects.
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.
-  * `vm_read_sync_in_progress` - A queue of controller base pointers that are awaiting a response from `read_sync`. This may contain multiple
-      controllers if one controller makes multiple `read_sync` requests within one *frame* as `int_event` only queues the outbounds events
-      and dosen't immediately send them. Not that this makes it not synchronous, just the order of execution is not like a call stack and more
-      like a synchronous high priority deferred queue. The *frontmost* of the array is the lowest index, and the *backmost* is the highest index. In
-      javascript, this means that new requests are placed via `vm_read_sync_in_progress.unshift(new_bp)` and when requests are serviced, they are
-      serviced via the `var bp = vm_read_sync_in_progress.pop()`.
   * `vm_cache_write_sync_pending` - A hash mapping page_ids to controllers awaiting synchronous responeses, e.g.
       `vm_cache_write_sync_pending[page_id][0..N] := bp`. Usually set via the `watch` request
       during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
