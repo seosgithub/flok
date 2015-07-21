@@ -974,6 +974,26 @@ RSpec.describe "kern:vm_service" do
     expect(read_res_params).to eq({})
   end
 
+  it "A watch request with the sync flag enabled does not send two read_res back after int_dispatch" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller8ws.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.ignore_up_to "if_per_get", 0
+    @driver.mexpect("if_per_get", ["vm", "spec", "my_key"], 0)
+
+    #Send back a blank page
+    @driver.int "int_per_get_res", ["vm", "spec", "my_key", nil]
+
+    read_res_params = ctx.dump "read_res_params"
+    expect(read_res_params).to eq({})
+  end
+
   it "Clears the dirty page when pageout runs" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
