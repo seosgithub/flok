@@ -28,7 +28,7 @@
     pg_sockio<%= i %>_bp = tels(1);
     reg_evt(pg_sockio<%= i %>_bp, pg_sockio<%= i %>_xevent_handler);
 
-    SEND("net", "if_sockio_init", options.url, pg_sockio<%= i %>_bp);
+    SEND("main", "if_sockio_init", options.url, pg_sockio<%= i %>_bp);
 
     //Signal that the socket.io driver should forward all events to the socket defined by pg_sockio{N}_bp
     //to the endpoint (with the same reference)

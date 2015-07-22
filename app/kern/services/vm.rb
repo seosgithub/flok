@@ -487,7 +487,6 @@ service :vm do
       vm_did_wakeup = true;
     <% end %>
 
-
     //Call init functions
     <% @options[:pagers].each do |p| %>
       <%= p[:name] %>_init("<%= p[:namespace] %>", <%= (p[:options] || {}).to_json %>);
