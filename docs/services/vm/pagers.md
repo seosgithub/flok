@@ -80,6 +80,7 @@ This pager connects to a socket.io server via the `sockio` module.
         * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
   * **Socket.IO Event Handlers **
     * `update` - A page has been updated. This may either indicate an update or write. The page will be integrated into `vm_cache` via a rebased if it
-        already exists or a direct write if it dosen't already exist. Contains one field `page:` that contains the page.
+        already exists or a direct write if it dosen't already exist. Contains one field `page:` that contains the page and a possible `changes_id`
+        if the update is in response to some pages commited to the page.
   * **Spec**
     * If `@debug`, then `sockio{N}_spec_did_init` will be true
