@@ -59,5 +59,14 @@
   }
 
   function pg_sockio<%= i %>_write(page) {
+    vm_transaction_begin();
+      //If page exists in cache, then commit changes into the page
+      var cached_page = vm_cache[pg_sockio<%= i %>_ns][page._id];
+      if (cached_page !== undefined) {
+        vm_commit(cached_page, page);
+      }
+
+      vm_cache_write(pg_sockio<%= i %>_ns, page); 
+    vm_transaction_end();
   }
 <% end %>

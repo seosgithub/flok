@@ -535,7 +535,8 @@ service :vm do
   on "write", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
 
-    //We are going to fix the _hash on the page
+    //We are going to fix the _hash on the page and __index
+    vm_reindex_page(params.page);
     vm_rehash_page(params.page);
 
     <% if @debug %>

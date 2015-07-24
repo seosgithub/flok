@@ -451,4 +451,40 @@ RSpec.describe "kern:sockio_pager" do
       {"_id" => "foo", "_sig" => "foo", "value" => "bar"}
     ])
   end
+
+  it "Does accept writes of pages that don't currently exist in cache; they go into vm_cache as-is" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/write.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    dump = ctx.evald %{
+      //Call embed on main root view
+      dump.base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      dump.vm_cache = vm_cache;
+    }
+
+    #The vm_cache should now contain an entry for the page
+    expect(dump["vm_cache"]["sockio"]["test"]).not_to eq(nil)
+  end
+
+  it "Does accept writes of pages that **do** currently exist in cache; they go into vm_cache commited" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/write2.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    dump = ctx.evald %{
+      //Call embed on main root view
+      dump.base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      dump.vm_cache = vm_cache;
+    }
+
+    #The vm_cache should now contain an entry for the page
+    expect(dump["vm_cache"]["sockio"]["test"]).not_to eq(nil)
+
+    #And that entry contains commits
+    expect(dump["vm_cache"]["sockio"]["test"]["__changes"]).not_to eq(nil)
+    expect(dump["vm_cache"]["sockio"]["test"]["__changes_id"]).not_to eq(nil)
+  end
 end
