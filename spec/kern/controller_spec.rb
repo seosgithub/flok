@@ -404,58 +404,39 @@ RSpec.describe "kern:controller_spec" do
   end
 
   it "Does call __dealloc__ on all controllers within a multi-level controller hierarchy when that view hierarchy is dismissed" do
-    #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/multi_level_dealloc.rb')
-
-    #Run the embed function
+    ctx = flok_new_user File.read('./spec/kern/assets/multi_level_dealloc.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
     dump = ctx.evald %{
-      //Call embed on main root view
-      dump["base"] = _embed("my_controller", 0, {}, null);
+      base = _embed("nav", 0, {}, null);
 
-      //The controller's info
-      dump["controller_info"] = tel_deref(dump["base"]);
-      dump["ctable_entry"] = dump["controller_info"]["cte"];
+      //Drain queue
+      int_dispatch([]);
 
-      //Dump the embeds array before we switch anything around, this is the embeds for `my_action`
-      dump["my_action_embeds_original_array"] = JSON.parse(JSON.stringify(dump["controller_info"]["embeds"]));
+      //This is the nav controller
+      dump.bp = base;
 
-      //Push the controller to 'my_other_action'
-      int_dispatch([3, "int_event", dump["base"], "test_event", {}]);
+      //This is the 'content' controller of nav
+      dump.my_controller_bp = my_controller_bp;
 
-      //Pop the controller back to 'my_action'
-      int_dispatch([3, "int_event", dump["base"], "back", {}]);
-
-      //The second action was entered
-      dump["my_other_action_on_entry_called"] = my_other_action_on_entry_called; 
-
-      //The first action was not entered twice
-      dump["my_action_entered_count"] = my_action_entered_count;
-
-      //The poped controller's base pointer for the main view
-      dump["my_controller3_main_view_bp"] = my_controller3_main_view_bp;
+      //This is the 'pushed' controller of the content's controller
+      dump.other_bp = other_bp;
     }
 
-    #The controller's instance info `action` field was changed back to the old action
-    expect(dump["controller_info"]["action"]).to eq("my_action")
+    #This is like the controller embedded in a nav pushing a dialog ontop of itself
+    @driver.int "int_event", [
+      dump["my_controller_bp"], "next", {}
+    ]
 
-    #The controller's instance info embeds is now restored back to the original embeds from 'my_action'
-    expect(dump["controller_info"]["embeds"]).to eq(dump["my_action_embeds_original_array"])
+    #This is like the nav moving to another action (while the 'content' controller has something pushed on it)
+    @driver.int "int_event", [
+      dump["bp"], "other_action", {}
+    ]
 
-    #The controller's instance info stack is now blank
-    expect(dump["controller_info"]["stack"]).to eq([])
+    test_service_connected = ctx.dump "test_service_connected"
 
-    #Does dealloc the pushed controller, we can check to see if the view was destroyed
-    @driver.ignore_up_to "if_free_view"
-    @driver.mexpect("if_free_view", [dump["my_controller3_main_view_bp"]])
-
-    #Do not get a notification for any more removals, or creations
-    @driver.expect_not_to_contain "if_free_view"
-    @driver.expect_not_to_contain "if_init_view"
-
-    #Do not get a notification for the view hierarchy about the change
-    @driver.expect_not_to_contain "if_event" do |e|
-      next e[2] == {"from" => "my_other_action", "to" => "my_action"}
-    end
+    ctx.dump_log
+    expect(test_service_connected).to eq({
+      dump["other_bp"].to_s => true,
+    })
   end
 
 

@@ -1,25 +1,38 @@
-controller :my_controller do
-  spots "hello", "world"
+controller :nav do
+  spots "content"
 
-  on_entry %{
-    my_action_entered_count = 0;
-  }
+  action :index do
+    on_entry %{
+      Embed("my_controller", "content", {});
+    }
+
+    on "next_nav", %{
+      Goto("other_action");
+    }
+  end
+
+  action :other_action do
+
+  end
+end
+
+controller :my_controller do
+  spots "content"
 
   action :my_action do
     on_entry %{
-      Embed("my_controller2", "hello", {});
-      my_action_entered_count += 1;
+      my_controller_bp = __base__;
+      Embed("other", "content", {});
     }
 
-    on "test_event", %{
+    on "next", %{
       Push("my_other_action")
     }
   end
 
   action :my_other_action do
     on_entry %{
-      Embed("my_controller3", "hello", {});
-      my_other_action_on_entry_called = true;
+      Embed("other2", "content", {});
     }
 
     on "back", %{
@@ -28,17 +41,22 @@ controller :my_controller do
   end
 end
 
-controller :my_controller2 do
-  action :my_action do
+controller :other do
+  services :test
+
+  action :index do
     on_entry %{
+      other_bp = __base__;
     }
   end
 end
 
-controller :my_controller3 do
-  action :my_action do
+controller :other2 do
+  services :test
+
+  action :index do
     on_entry %{
-      my_controller3_main_view_bp = __base__+1;
+      other_bp2 = __base__;
     }
   end
 end
