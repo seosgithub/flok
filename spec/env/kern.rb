@@ -36,6 +36,14 @@ shared_context "kern" do
 
       return DumpHelper.new(_dump)
     end
+
+    def dump_log
+      out = self.eval "kern_log_stdout"
+      self.eval "kern_log_stdout = \"\""
+      if out != ""
+        $stderr.puts out
+      end
+    end
   end
 
   class DumpHelper

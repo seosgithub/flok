@@ -158,6 +158,7 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
+            kern_log(__info__);
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
@@ -168,6 +169,7 @@ module Flok
 
                 //Call dealloc on the controller
                 tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
+
 
                 <% if @debug %>
                   var vp = embeds[i][j]+1;

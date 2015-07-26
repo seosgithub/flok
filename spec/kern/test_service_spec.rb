@@ -98,9 +98,11 @@ RSpec.describe "kern:test_service" do
     ]
     other_bp2 = ctx.eval "other_bp2"
 
+    ctx.dump_log
     expect(dump["test_service_connected"]).to eq({
       dump["bp"].to_s => true,
       other_bp2.to_s => true,
     })
+
   end
 end

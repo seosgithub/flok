@@ -20,6 +20,23 @@ RSpec.describe "kern:global_function_spec" do
       dump.kern_log_stdout = kern_log_stdout;
     }
 
-    expect(dump["kern_log_stdout"]).to eq("foo\nbar\n")
+    expect(dump["kern_log_stdout"][0]).to eq("foo")
+    expect(dump["kern_log_stdout"][1]).to eq("bar")
   end
+
+  it "Can use the kern_log_json function which writes to kern_log_stdout" do
+    #Compile the controller
+    ctx = flok_new_user File.read('./spec/kern/assets/controller0.rb')
+
+    dump = ctx.evald %{
+      kern_log_json({
+        "foo": "bar"
+      })
+
+      dump.kern_log_stdout = kern_log_stdout;
+    }
+
+    expect(dump["kern_log_stdout"][0]).to eq({"foo" => "bar"})
+  end
+
 end

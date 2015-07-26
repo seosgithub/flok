@@ -1,7 +1,15 @@
 #Kernel API
 
 ##Debugging (only enabled in DEBUG)
-  * `kern_log(str)` - Accepts a string that is written to `kern_log_stodut` with a newline
+  * kernel logging
+      All kernel logging goes to `kern_log_stdout`, an array of values.
+      array
+      * Based on `type` field:
+          * `string`
+            * `kern_log(str)` - Writes an entry to `kern_log_stdout` like `"string"`
+          * `json`
+            * `kern_log_json(json)` - Writes an entry to `kern_log_stdout` like `{"foo": "bar"}` which has been serialized and deserialized (to
+                prevent reference)
 
 ##Telepointer (Mapped I/O)
   * `tels(n)` - Returns one number that represents the base index of the telepointer.  See [Messaging](Messaging.md) for details on telepointers.
