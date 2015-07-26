@@ -38,10 +38,10 @@ shared_context "kern" do
     end
 
     def dump_log
-      out = self.eval "kern_log_stdout"
-      self.eval "kern_log_stdout = \"\""
-      if out != ""
-        $stderr.puts out
+      out = self.dump "kern_log_stdout"
+      self.eval "kern_log_stdout = []"
+      out.each_with_index do |e, i|
+        $stderr.puts e
       end
     end
   end
