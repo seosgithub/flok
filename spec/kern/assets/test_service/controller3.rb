@@ -25,6 +25,7 @@ controller :other do
   action :index do
     on_entry %{
       other_bp = __base__;
+      kern_log("My bp is: " + __base__)
     }
   end
 end

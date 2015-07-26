@@ -1,6 +1,7 @@
-require './spec/env/global.rb'
 require 'therubyracer'
+require 'awesome_print'
 require './spec/lib/temp_dir'
+require './spec/env/global.rb'
 
 shared_context "kern" do
   before(:each) do
@@ -41,7 +42,7 @@ shared_context "kern" do
       out = self.dump "kern_log_stdout"
       self.eval "kern_log_stdout = []"
       out.each_with_index do |e, i|
-        $stderr.puts e
+        ap e
       end
     end
   end

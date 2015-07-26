@@ -1,11 +1,11 @@
 #The test service
 
 Dir.chdir File.join File.dirname(__FILE__), '../../'
+require 'zlib'
 require './spec/env/kern.rb'
 require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
-require 'zlib'
 
 RSpec.describe "kern:test_service" do
   include Zlib
@@ -88,7 +88,6 @@ RSpec.describe "kern:test_service" do
       //Drain queue
       int_dispatch([]);
 
-      dump.test_service_connected = test_service_connected;
       dump.bp = base;
       dump.other_bp = other_bp;
     }
@@ -97,12 +96,12 @@ RSpec.describe "kern:test_service" do
       dump["bp"], "next", {}
     ]
     other_bp2 = ctx.eval "other_bp2"
+    test_service_connected = ctx.dump "test_service_connected"
 
     ctx.dump_log
-    expect(dump["test_service_connected"]).to eq({
+    expect(test_service_connected).to eq({
       dump["bp"].to_s => true,
       other_bp2.to_s => true,
     })
-
   end
 end
