@@ -80,4 +80,27 @@ RSpec.describe "kern:test_service" do
     })
   end
 
+  it "Does keep track of connected clients via test_service_bp" do
+    ctx = flok_new_user File.read('./spec/kern/assets/test_service/controller3.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      dump.test_service_connected = test_service_connected;
+      dump.bp = base;
+      dump.other_bp = other_bp;
+    }
+
+    @driver.int "int_event", [
+      dump["bp"], "next", {}
+    ]
+    other_bp2 = ctx.eval "other_bp2"
+
+    expect(dump["test_service_connected"]).to eq({
+      dump["bp"].to_s => true,
+      other_bp2.to_s => true,
+    })
+  end
 end

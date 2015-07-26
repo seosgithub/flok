@@ -1,6 +1,9 @@
 #Test Service
 This is the test service. Used for various specs
 
+#Useful variables
+  * `test_service_connected` - A hash containing all the base pointers of *connected* controllers `{bp => true, ...}`.
+
 #Requests
   * `test_sync` - Will send you a synchronous response via the event `test_sync_res` that contains
     the same parameters that you sent

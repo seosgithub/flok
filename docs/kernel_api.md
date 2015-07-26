@@ -1,5 +1,8 @@
 #Kernel API
 
+##Debugging (only enabled in DEBUG)
+  * `kern_log(str)` - Accepts a string that is written to `kern_log_stodut` with a newline
+
 ##Telepointer (Mapped I/O)
   * `tels(n)` - Returns one number that represents the base index of the telepointer.  See [Messaging](Messaging.md) for details on telepointers.
   * `tel_reg(f)` - Returns a number that represents the base pointer of a function callback.
