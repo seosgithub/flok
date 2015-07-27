@@ -169,7 +169,6 @@ module Flok
                 //Call dealloc on the controller
                 tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
 
-
                 <% if @debug %>
                   var vp = embeds[i][j]+1;
                   //First locate spot this view belongs to in reverse hash

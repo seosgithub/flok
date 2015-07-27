@@ -28,9 +28,19 @@ ctable = {
           var __info__ = tel_deref(__base__);
 
           //Recursively call dealloc
-          for (var i = 0; i < __info__.embeds.length; ++i) {
-            for (var x = 0; x < __info__.embeds[i].length; ++x) {
-              tel_deref(__info__.embeds[i][x]).cte.__dealloc__(__info__.embeds[i][x]);
+          var embeds = __info__.embeds;
+          while (true) {
+            for (var i = 0; i < embeds.length; ++i) {
+              for (var x = 0; x < embeds[i].length; ++x) {
+                tel_deref(embeds[i][x]).cte.__dealloc__(embeds[i][x]);
+              }
+            }
+
+            if (__info__.stack.length > 0) {
+              var slice = __info__.stack.pop();
+              embeds = slice.embeds;
+            } else {
+              break;
             }
           }
 

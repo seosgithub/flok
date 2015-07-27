@@ -428,14 +428,13 @@ RSpec.describe "kern:controller_spec" do
 
     #This is like the nav moving to another action (while the 'content' controller has something pushed on it)
     @driver.int "int_event", [
-      dump["bp"], "other_action", {}
+      dump["bp"], "next_nav", {}
     ]
 
     test_service_connected = ctx.dump "test_service_connected"
 
     ctx.dump_log
     expect(test_service_connected).to eq({
-      dump["other_bp"].to_s => true,
     })
   end
 
