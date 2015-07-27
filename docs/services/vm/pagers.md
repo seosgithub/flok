@@ -56,7 +56,11 @@ This pager provides you with local memory that will be automatically cached to d
   * `write` - Writes the given page to `vm_cache_write`
 
 ####Dummy pager | `pg_dummy0`
-This pager doesn't do anything. Used by some specs which manually write to the vm_cache in leu of the pager
+This pager doesn't do anything beyond save data during calls. Used by some specs which manually write to the vm_cache in leu of the pager
+  * `init` - Does nothing
+  * `watch` - Does nothing
+  * `unwatch` - Does nothing
+  * `write` - Pushes `vm_cache` (deep clone) into `pg_dummyN_write_vm_cache_clone` array
 
 ####Sockio pager | `pg_sockio0`
 This pager connects to a socket.io server via the `sockio` module.
