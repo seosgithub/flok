@@ -157,6 +157,8 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * `vm_cache_write_sync_pending` - A hash mapping page_ids to controllers awaiting synchronous responeses, e.g.
       `vm_cache_write_sync_pending[page_id][0..N] := bp`. Usually set via the `watch` request
       during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
+  * `vm_pager_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a page write request that was stalled because the disk
+      needed to be read before notifying the pager. Multiple write attempts on the same page before the disk response will undefined behavior.
 
 ##Helper Methods
 
