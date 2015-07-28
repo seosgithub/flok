@@ -13,7 +13,15 @@ service :vm do
       <% end %>
     };
 
+    //See 'Datatypes & Structures' in ./docs/services/vm.md  
+    ////////////////////////////////////////////////////////////////////////////////////////////
     vm_bp_to_nmap = {};
+    vm_pager_waiting_read = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
+    vm_cache_write_sync_pending = {};
 
     //Notification listeners, converts ns+key to an array of base pointers
     vm_notify_map = {
@@ -21,8 +29,7 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
-
-    vm_cache_write_sync_pending = {};
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     //Cache
     function vm_cache_write(ns, page) {
@@ -115,6 +122,7 @@ service :vm do
         vm_transaction_begin();
         vm_cache_write(ns, res);
         vm_transaction_end();
+
       } else {
         //Result was blank, signal all controllers that read synchronously
         var sync_waiting_controllers = vm_cache_write_sync_pending[id];
@@ -129,6 +137,25 @@ service :vm do
 
         //Remove all controllers from notification list
         delete vm_cache_write_sync_pending[id];
+      }
+
+      //Check if a pager is waiting for this read to complete a write request
+      var page_awaiting_write = vm_pager_waiting_read[ns][id];
+      if (page_awaiting_write !== undefined) {
+        <% @options[:pagers].each_with_index do |p, i| %>
+          <% if i == 0 %>
+            if ("<%= p[:namespace] %>" === ns) {
+              <%= p[:name] %>_write(page_awaiting_write);
+            }
+          <% else %>
+            else if ("<%= p[:namespace] %>" === ns) {
+              <%= p[:name] %>_write(page_awaiting_write);
+            }
+          <% end %>
+        <% end %>
+
+        //Clear waiting entry
+        delete vm_pager_waiting_read[ns][id];
       }
     }
 
@@ -543,11 +570,26 @@ service :vm do
       vm_write_list.push(params.page);
     <% end %>
 
-    <% @options[:pagers].each do |p| %>
-      if (params.ns === "<%= p[:namespace] %>") {
-        <%= p[:name] %>_write(params.page);
+    //If the page does not exist, we need to send a disk request for a read because we may
+    //need to commit to the page
+    if (vm_cache[params.ns][params.page._id] === undefined) {
+      //Save the page into the waiting list or throw an exception if there's already a write
+      //queued, at this time, we do not support multiple writes in the same frame
+      if (vm_pager_waiting_read[params.ns][params.page._id] !== undefined) {
+        throw "vm on_write was called multiple times within the same frame (I.e. page did not exist, so we read it from disk, but that disk read didn't come back before the page was attempted to written again). This is not terribly illegal but it can lead to undefined behavior.";
       }
-    <% end %>
+      vm_pager_waiting_read[params.ns][params.page._id] = params.page;
+
+      //Notify the disk
+      SEND("disk", "if_per_get", "vm", params.ns, params.page._id);
+    } else {
+      //Else, just notify the pager right away
+      <% @options[:pagers].each do |p| %>
+        if (params.ns === "<%= p[:namespace] %>") {
+          <%= p[:name] %>_write(params.page);
+        }
+      <% end %>
+    }
   }
 
   on "watch", %{

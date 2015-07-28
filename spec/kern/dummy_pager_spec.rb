@@ -1,4 +1,4 @@
-#The dummy service
+#The dummy pager
 
 Dir.chdir File.join File.dirname(__FILE__), '../../'
 require 'zlib'
@@ -7,11 +7,11 @@ require './spec/lib/helpers.rb'
 require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
-RSpec.describe "kern:dummy_service" do
+RSpec.describe "kern:dummy_pager" do
   include Zlib
   include_context "kern"
 
-  it "Writes to the dummy service end up in the pg_dummyN_write_vm_cache_clone array" do
+  it "Writes to the dummy pager end up in the pg_dummyN_write_vm_cache_clone array" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_dummy/controller0.rb'), File.read("./spec/kern/assets/vm/pg_dummy/config.rb") 
     dump = ctx.evald %{
       dump.base = _embed("my_controller", 0, {}, null);

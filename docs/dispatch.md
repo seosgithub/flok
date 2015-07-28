@@ -14,7 +14,8 @@ There are various stages of message processing so it can be confusing as to what
   1. The disptach mechanism, `int_dispatch`, is always called by the client synchronously, and the javascript core will always respond synchronously to `if_disptach`. 
   2. The client `if_dispatch` handler will then process the main queue on it's same synchronous thread and then dispatch, asynchronously, the remaining queues; the queues may either each dispatch messages asynchronously or synchronously w.r.t to the original queue. (out of order and parallel are supported)
 
-Additionally, it is always ok, but not suggested, to downgrade an asynchronous request to a synchronous request.  But you can **never** downgrade a synhcronous request to an asynchronous request. Synchronous requests must be done in order and on a single thread; additionally, they can be UI requests which are typically handled on the main thread.
+Additionally, it is **never** ok to downgrade an asynchronous request to a synchronous request.  Some functions, particularly the `vm` and
+`controller` systems rely on ordering. You can also **never** downgrade a synhcronous request to an asynchronous request. Synchronous requests must be done in order and on a single thread; additionally, they can be UI requests which are typically handled on the main thread.
 
 For example, if we dispatch on the `main` queue a disk read request, flok would expect that the disk read would block the javascript core and return execution as soon as the disk read completed. Flok would also presume that the disk read was done at the fastest
 and highest priority of IO and CPU.

@@ -39,11 +39,13 @@ shared_context "kern" do
     end
 
     def dump_log
+      $stderr.puts "---------------------------------------------------"
       out = self.dump "kern_log_stdout"
       self.eval "kern_log_stdout = []"
       out.each_with_index do |e, i|
         ap e
       end
+      $stderr.puts "---------------------------------------------------"
     end
   end
 

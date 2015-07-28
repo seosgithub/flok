@@ -1390,4 +1390,129 @@ RSpec.describe "kern:vm_service" do
       "options" => {"foo" => "bar"}
     })
   end
+
+  it "Does send a disk read request when attempting to write to a page that dosen't exist in vm_cache (that page may exist on disk and will need to be commited over)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller23.rb'), File.read("./spec/kern/assets/vm/config5b.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect a if_per_get request attempt
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.mexpect "if_per_get", [
+      "vm",
+      "dummy",
+      "test"
+    ], 2
+  end
+
+  it "Does *not* send a disk read request when attempting to write to a page that dosen't exist in vm_cache (that page may exist on disk and will need to be commited over)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller23.rb'), File.read("./spec/kern/assets/vm/config5b.rb") 
+    ctx.eval %{
+      //Fake existance of a page
+      var page = vm_create_page("test");
+      vm_rehash_page(page);
+      vm_reindex_page(page);
+      vm_cache["dummy"]["test"] = page;
+
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect not to get an if_per_get request attempt (it's already cached)
+    @driver.expect_not_to_contain "if_per_get"
+  end
+
+
+  it "Does notify the pager of a write when a controller originally made a write request for a non-cached entry when that disk read returns without a page (null)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller23.rb'), File.read("./spec/kern/assets/vm/config5b.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect a if_per_get request attempt
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.mexpect "if_per_get", [
+      "vm",
+      "dummy",
+      "test"
+    ], 2
+
+    #Respond with a blank page (page does not exist on disk)
+    @driver.int "int_per_get_res", [
+      "vm",
+      "dummy",
+      "test",
+      nil
+    ]
+
+    #Expect the pager to have received a write request by now
+    dump = ctx.evald %{
+      dump.pg_dummy0_write_vm_cache_clone = pg_dummy0_write_vm_cache_clone 
+    }
+
+    expect(dump["pg_dummy0_write_vm_cache_clone"]).to eq([
+      {"dummy" => {}}
+    ])
+  end
+
+  it "Does notify the pager of a write when a controller originally made a write request for a non-cached entry when that disk read returns with a page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller23.rb'), File.read("./spec/kern/assets/vm/config5b.rb") 
+    ctx.eval %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Expect a if_per_get request attempt
+    @driver.ignore_up_to "if_per_get", 2
+    @driver.mexpect "if_per_get", [
+      "vm",
+      "dummy",
+      "test"
+    ], 2
+
+    #Respond with a blank page (page does not exist on disk)
+    @driver.int "int_per_get_res", [
+      "vm",
+      "dummy",
+      "test",
+      {
+        "_id" => "test",
+        "_next" => nil,
+        "_head" => nil,
+        "entries" => []
+      }
+    ]
+
+    #Expect the pager to have received a write request by now, and the dummy pager saves everything
+    #it gets into a special variable queue (copied via deep clone of vm_cache)
+    dump = ctx.evald %{
+      dump.pg_dummy0_write_vm_cache_clone = pg_dummy0_write_vm_cache_clone 
+    }
+    expect(dump["pg_dummy0_write_vm_cache_clone"].length).to eq(1)
+    expect(dump["pg_dummy0_write_vm_cache_clone"][0]["dummy"]["test"]).not_to eq(nil)
+    expect(dump["pg_dummy0_write_vm_cache_clone"][0]["dummy"]["test"]["_id"]).to eq("test")
+  end
+
+  it "Does throw an exception if two writes are attempted in the same frame for a non-cached page" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller23b.rb'), File.read("./spec/kern/assets/vm/config5b.rb") 
+    expect {
+      ctx.eval %{
+        base = _embed("my_controller", 0, {}, null);
+
+        //Drain queue
+        int_dispatch([]);
+      }
+    }.to raise_error(/.*multiple.*/)
+  end
 end
