@@ -4,7 +4,10 @@ controller :my_controller do
   on_entry %{
     read_res_params = [];
 
+    /////////////////////////////////////////////////////////////////////////
     //Create a page and commit it to the sockio cache (cheating)
+    //This way we know a commit should be performed when a write goes through
+    /////////////////////////////////////////////////////////////////////////
     var page = vm_create_page("test");
     page.entries.push(
       {"_id": "test", "_sig": "test", "val": "test"}
@@ -12,6 +15,7 @@ controller :my_controller do
     vm_reindex_page(page);
     vm_rehash_page(page);
     vm_cache["sockio"]["test"] = page;
+    /////////////////////////////////////////////////////////////////////////
   }
 
   action :my_action do

@@ -66,11 +66,13 @@
         vm_commit(cached_page, page);
       }
 
-      //Write
+      //Write (Which will *not* copy the page)
       vm_cache_write(pg_sockio<%= i %>_ns, page); 
-
-      //Notify sockio
-      
     vm_transaction_end();
+
+    //Clone page and send a copy to the server
+    var copied = vm_copy_page(page);
+    var info = {page: copied, changes: page.__changes, changes_id: page.__changes_id};
+    SEND("net", "if_sockio_send", pg_sockio<%= i %>_bp, "write", info);
   }
 <% end %>

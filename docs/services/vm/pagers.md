@@ -77,11 +77,9 @@ This pager connects to a socket.io server via the `sockio` module.
     * `watch` - Signals to the socket.io server that a page is being watched via `watch` event with parameters `{page_id:}`
     * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `unwatch` event with parameters `{page_id:}` 
     * `write` - 
-      * If the page already exists:
-        * Commits unsynced changes to `vm_cache` and notifies the server of the changes if the page already existed via `update` with `page_id:,
-            changes:`
-      * If the page does not exist:
-        * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
+       * Sends the sockio server the `write` event with a hash containing `page`, and optionally (`changes`, and `changes_id`). The `page` contains only the basic
+           page, `changes` is the vm_diff array (originally `page.__changes`) and `changes_id` was originally `page.__changes_id`. The page is a copy
+           of the original request (without __changes ([vm_diff] or __changes_id (string) in the hash if they exist)
   * **Socket.IO Event Handlers **
     * `update` - A page has been updated. This may either indicate an update or write. The page will be integrated into `vm_cache` via a rebased if it
         already exists or a direct write if it dosen't already exist. Contains one field `page:` that contains the page and a possible `changes_id`
