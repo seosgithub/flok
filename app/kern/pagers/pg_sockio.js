@@ -66,7 +66,11 @@
         vm_commit(cached_page, page);
       }
 
+      //Write
       vm_cache_write(pg_sockio<%= i %>_ns, page); 
+
+      //Notify sockio
+      
     vm_transaction_end();
   }
 <% end %>

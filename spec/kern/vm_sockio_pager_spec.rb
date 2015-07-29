@@ -452,7 +452,7 @@ RSpec.describe "kern:sockio_pager" do
     ])
   end
 
-  it "Does accept writes of pages that don't currently exist in cache; they go into vm_cache as-is" do
+  it "Does accept writes of pages that don't currently exist in cache; they go into vm_cache as-is and are sent to the sockio driver" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/write.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
     dump = ctx.evald %{
       //Call embed on main root view
@@ -464,8 +464,22 @@ RSpec.describe "kern:sockio_pager" do
       dump.vm_cache = vm_cache;
     }
 
+    #Driver response
+    @driver.int "int_per_get_res", [
+      "vm",
+      "sockio",
+      "test"
+    ], 2
+
     #The vm_cache should now contain an entry for the page
     expect(dump["vm_cache"]["sockio"]["test"]).not_to eq(nil)
+
+    @driver.ignore_up_to "if_sockio_send", 1
+    @driver.mexpect "if_sockio_send", [
+      Integer,
+      "page_write",
+       dump["vm_cache"]["sockio"]["test"] 
+    ], 1
   end
 
   it "Does accept writes of pages that **do** currently exist in cache; they go into vm_cache commited" do

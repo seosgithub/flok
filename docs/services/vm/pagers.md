@@ -78,7 +78,7 @@ This pager connects to a socket.io server via the `sockio` module.
     * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `unwatch` event with parameters `{page_id:}` 
     * `write` - 
       * If the page already exists:
-        * Commits unsynced changes to `vm_cache` and notifies the server of the changes if the page already existed via `/update` with `page_id:,
+        * Commits unsynced changes to `vm_cache` and notifies the server of the changes if the page already existed via `update` with `page_id:,
             changes:`
       * If the page does not exist:
         * writes directly to `vm_cache` and notifies the server of the creation via `/create` with `page:`
