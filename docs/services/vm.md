@@ -169,7 +169,7 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
   * `vm_cache_write_sync_pending` - A hash mapping page_ids to controllers awaiting synchronous responeses, e.g.
       `vm_cache_write_sync_pending[page_id][0..N] := bp`. Usually set via the `watch` request
       during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
-  * `vm_pg_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a the page that was trying to be written.
+  * `vm_pager_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a the page that was trying to be written.
       needed to be read before notifying the pager. Multiple write attempts on the same page before the disk response will undefined behavior.
   * `vm_unsynced_*`
     * `vm_unsynced` - A hash that maps `vm_unsynced_fresh[ns][page_id]` to an integer that is either `0` or `1`. the vm sync daemon reads over this
