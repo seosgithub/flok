@@ -199,6 +199,7 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
 ###Non functional
 ####Pager specific
   * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
+  * `vm_pager_mark_needs_sync(ns, page_id)` - Marks that a page in memory is needing to be synced to the pager.
 
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers
