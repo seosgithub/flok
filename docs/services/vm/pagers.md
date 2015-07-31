@@ -11,6 +11,9 @@ If you haven't already, read [VM Service](../vm.md) for context on pagers.
   * `$NAME_unwatch(id)` - There are no controllers that are watching the page with a page that contains this in the `_id` field
   * `$NAME_write(page)` - You should write this page, e.g. to network, and/or write to `vm_cache_write`.  Alternatively, you can write the page over the network and then let the response from that call `vm_cache_write` in what ever listening code you have.
     * `page` - A fully constructed page with correctly calculated `_hash` and _sigs on entries.
+  * `$NAME_sync(page_id)` - A page is requested to be synchronized. This was requested by the pager itself by `vm_pg_mark_needs_sync`.  Usually,
+      in `write`, a pager will call `vm_pg_mark_needs_sync` which will then invoke `$NAME_sync(page_id)` immediately and on a scheduled interval
+      via the synchronization vm daemon until this pager removes the page from the unsynchronized queues via `vm_pg_unmark_needs_sync`.
 
 ##When are pagers invoked?
 Pagers handle all requests from controllers except for the following conditions:

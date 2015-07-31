@@ -143,10 +143,22 @@ requested. This is because a cached page will be returned by the call stack whil
 ##Cache
 See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty. `vm_cache_write` notifies controllers asynchronously and is not effected by the `watch` flag on controllers.
 
-###Pageout & Cache Synchronization
-Cache will periodically be synchronized to disk via the `pageout` service. When flok reloads itself, and the `vm` service gets a `watch` or `watch_sync` request, the `vm` service will attempt to read from the `vm_cache` first and then read the page from disk (write that disk read to cache). The only difference between `watch_sync` and `watch` is that `watch_sync` will synchronously pull from disk and panic if there is no cache available for the page). (Both `watch` and `watch_sync` will always call the pager's after the cache read as well.)
+###Pageout, Cache Synchronization, and Pager Synchronization
+####Pageout Daemon
+Cache will periodically be synchronized to disk via the `pageout` service. When flok reloads itself, and the `vm` service gets a `watch` the `vm` service will attempt to read from the `vm_cache` first and then read the page from disk (write that disk read to cache).
 
 Pageout is embodied in the function named `vm_pageout()`. This will asynchronously write `vm_dirty` to disk and clear `vm_dirty` once the write has been commited. `vm_pageout()` is called every minute by the interval timer in this service.
+
+####Pager Synchronization Daemon
+When pagers get a write request, many pagers (as in all of them atm) mark the pages via `vm_pg_mark_needs_sync` which first calls the pagers `sync`
+routine immediately and writes to the `vm_unsynced` hash. The hash is used like `vm_unsynced[ns][page_id]` which yields an integer value. The integer
+value is either `0` or `1`. When `vm_pg_mark_needs_sync` is first called, the value is set to `0`. When the pager synchronization daemon
+goes over the list in `vm_unsynced`; the daemon checks the integer field. If the integer is `0`, then the daemon only increments the integer. If the
+integer is `1`, then the daemon notifies the pager with the `sync` action. The reason this is done is to avoid calling a pagers `sync` function too
+soon as it is immediately called the first time when the pager calls `vm_pg_mark_needs_sync` on the page (usually at the end of the `write` action
+for the pager). The pager de-registers the page via `vm_pg_unmark_needs_sync`.
+
+The pager synchronization daemon is embodied in the function called `vm_pg_sync_wakeup`
 
 ###Datatypes & Structures (Opaque, do not directly modify)
   * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`. Contains all namespaces by default with blank hashes.
@@ -157,8 +169,13 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
   * `vm_cache_write_sync_pending` - A hash mapping page_ids to controllers awaiting synchronous responeses, e.g.
       `vm_cache_write_sync_pending[page_id][0..N] := bp`. Usually set via the `watch` request
       during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
-  * `vm_pager_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a the page that was trying to be written.
+  * `vm_pg_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a the page that was trying to be written.
       needed to be read before notifying the pager. Multiple write attempts on the same page before the disk response will undefined behavior.
+  * `vm_unsynced_*`
+    * `vm_unsynced` - A hash that maps `vm_unsynced_fresh[ns][page_id]` to an integer that is either `0` or `1`. the vm sync daemon reads over this
+        queue and `0` means that it was just requested via `vm_pg_mark_needs_sync` and needs to be incremented to `1`. `1` means that the vm sync
+        daemon must contact the pager for the `sync` action. This will happend until the pager calls `vm_pg_unmark_needs_sync` which will remove it
+        from this hash
 
 ##Helper Methods
 
@@ -196,10 +213,14 @@ Pageout is embodied in the function named `vm_pageout()`. This will asynchronous
         `__changes_id` of the page matches `changes_id`. If the page is based (implying the base page has changes and the page has changes as all base
         pages have changes), then if the `changes_id` matches the **base** `__changes_id` , the `__base` is removed from the page. If `changes_id`
         does not match in either of the cases, then nothing happends. This may happend if a synchronization errousouly comes in.
-###Non functional
+###Non functional (functional as is in lambda calculus, or lisp (no **global** state changes but may modify parameters)
 ####Pager specific
   * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
-  * `vm_pager_mark_needs_sync(ns, page_id)` - Marks that a page in memory is needing to be synced to the pager.
+  * `vm_pg_mark_needs_sync(ns, page_id)` - Marks that a page **in memory** is needing to be synced to the pager. This does a few things:
+    * The page_id is added to the `vm_unsynced` with the value of 0; see above in `Datatypes & Structures` for details. i.e.
+        `vm_unsynced[$PAGER_NS][page_id] = 0`
+    *  the pager's routine of `sync` is called immediately. The page must exist in cache at this point.
+  * `vm_pg_unmark_needs_sync(ns, page_id)` - Removes the page from the pending synchronization queue `delete vm_unsynced[$PAGER_NS][page_id]`)
 
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers
