@@ -99,7 +99,7 @@ shared_context "kern" do
         }
         $stderr.puts "env/kern File.read... dumping directory"
         $stderr.puts "pwd = #{Dir.pwd}"
-        $stderr.puts Dir["*"].inspect
+        $stderr.puts Dir["**/*"].select{|e| e.split("/").length < 4}.inspect
 
         v8.eval File.read('./products/chrome/application_user.js')
         return v8
