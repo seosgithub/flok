@@ -18,11 +18,7 @@ RSpec.describe "kern:rest_service" do
 
       //Drain queue
       int_dispatch([]);
-
-      dump["rest_base_url"] = rest_base_url;
     }
-
-    expect(dump["rest_base_url"]).to eq("http://localhost:8080/")
   end
 
   it "Can make a request on the rest service" do
