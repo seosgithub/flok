@@ -12,18 +12,14 @@ controller :my_controller do
       }
 
 
-      page = NewPage("array", "test");
-      SetPageHead(page, "head");
-      SetPageNext(page, "next");
-      EntryInsert(page, 0, entry);
+      page = vm_create_page("test");
 
       var write_info = {
         ns: "local0",
         page: page
       };
 
-      page2 = CopyPage(page);
-      EntryInsert(page2, 0, entry);
+      page2 = vm_copy_page(page);
 
       var write_info2 = {
         ns: "local1",
