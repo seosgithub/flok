@@ -1,5 +1,7 @@
 service :vm do
   global %{
+    //Some of the shared datatypes
+    ////////////////////////////////////////////////////////////////////////////////////////////
     //Cache contains a blank hash for each namespace
     vm_cache = {
       <% @options[:pagers].each do |p| %>
@@ -13,8 +15,6 @@ service :vm do
       <% end %>
     };
 
-    //See 'Datatypes & Structures' in ./docs/services/vm.md  
-    ////////////////////////////////////////////////////////////////////////////////////////////
     vm_bp_to_nmap = {};
     vm_pager_waiting_read = {
       <% @options[:pagers].each do |p| %>
@@ -29,6 +29,7 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
+
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     //Cache
@@ -503,6 +504,41 @@ service :vm do
           //throw JSON.stringify(pieces);
         }
       }
+    }
+    ///////////////////////////////////////////////////////////////////////////
+
+    //vm unsynced
+    ///////////////////////////////////////////////////////////////////////////
+    //Unsynced page ids to integer vm_unsynced[bp][page_id] = '0' or '1'
+    //where 0 is freshly added and ignored on the first pass of the daemon
+    vm_unsynced = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
+
+    function vm_pg_mark_needs_sync(ns, page_id) {
+      //Add to list
+      vm_unsynced[ns][page_id] = 0;
+
+      //Notify pager immediately (daemon will not notify pager on first tick to avoid calling pager's sync to soon)
+      <% @options[:pagers].each do |p| %>
+        <% @options[:pagers].each_with_index do |p, i| %>
+          <% if i == 0 %>
+            if ("<%= p[:namespace] %>" === ns) {
+              <%= p[:name] %>_sync(page_id);
+            }
+          <% else %>
+            else if ("<%= p[:namespace] %>" === ns) {
+              <%= p[:name] %>_sync(page_id);
+            }
+          <% end %>
+        <% end %>
+      <% end %>
+    }
+
+    function vm_pg_unmark_needs_sync(ns, page_id) {
+      delete vm_unsynced[ns][page_id];
     }
     ///////////////////////////////////////////////////////////////////////////
   }

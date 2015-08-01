@@ -6,6 +6,7 @@
       pg_spec<%= i %>_unwatchlist = [];
       pg_spec<%= i %>_init_params = {ns: ns, options: options};
       pg_spec<%= i %>_ns = ns;
+      pg_spec<%= i %>_sync_requests = [];
     }
 
     function pg_spec<%= i %>_watch(id, page) {
@@ -20,6 +21,10 @@
       vm_transaction_begin();
       vm_cache_write(pg_spec<%= i %>_ns, page);
       vm_transaction_end();
+    }
+
+    function pg_spec<%= i %>_sync(page_id) {
+      pg_spec<%= i %>_sync_requests.push(page_id);
     }
   <% end %>
 <% end %>
