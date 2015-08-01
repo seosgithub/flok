@@ -13,7 +13,9 @@ function pg_net_sim_init(ns, options) {
 function pg_net_sim_tick_handler(ep, ename, info) {
   while (pg_net_sim_waiting_for_response.length > 0) {
     var e = pg_net_sim_waiting_for_response.shift();
-    vm_cache_write(pg_net_sim_ns, pg_net_sim_stored_pages[e.id]);
+    vm_transaction_begin();
+      vm_cache_write(pg_net_sim_ns, pg_net_sim_stored_pages[e.id]);
+    vm_transaction_end();
   }
 }
 
