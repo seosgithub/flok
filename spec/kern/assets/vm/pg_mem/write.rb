@@ -3,14 +3,7 @@ controller :my_controller do
 
   action :my_action do
     on_entry %{
-      var entry = {
-        hello: "world"
-      }
-
-      page = NewPage("array", "test");
-      SetPageHead(page, "head");
-      SetPageNext(page, "next");
-      EntryInsert(page, 0, entry);
+      page = vm_create_page("test");
 
       var write_info = {
         ns: "local",
@@ -18,6 +11,7 @@ controller :my_controller do
       };
 
       Request("vm", "write", write_info);
+      kern_log("hey");
     }
   end
 end

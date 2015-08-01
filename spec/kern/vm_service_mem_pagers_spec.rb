@@ -35,9 +35,15 @@ RSpec.describe "kern:vm_service_mem_pagers" do
       int_dispatch([]);
     }
 
-    page = ctx.dump "page"
-    vm_cache = ctx.dump("vm_cache")
-    expect(page).to eq(vm_cache["local"]["test"])
+    #Disk must return cache copy
+    @driver.int "int_per_get_res", [
+      Integer,
+      "local",
+      "test",
+      nil
+    ]
+
+    expect(ctx.dump("vm_cache")["local"]["test"]).not_to eq(nil)
   end
 
   it "Can initialize the pg_mem1 pager" do
