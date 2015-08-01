@@ -460,26 +460,22 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
-
-      dump.vm_cache = vm_cache;
     }
 
     #Driver response
     @driver.int "int_per_get_res", [
       "vm",
       "sockio",
-      "test"
-    ], 2
+      "test",
+      nil
+    ]
 
     #The vm_cache should now contain an entry for the page
-    expect(dump["vm_cache"]["sockio"]["test"]).not_to eq(nil)
+    expect(ctx.dump("vm_cache")["sockio"]["test"]).not_to eq(nil)
 
     @driver.ignore_up_to "if_sockio_send", 1
-    @driver.mexpect "if_sockio_send", [
-      Integer,
-      "page_write",
-       dump["vm_cache"]["sockio"]["test"] 
-    ], 1
+    res = @driver.get "if_sockio_send", 1
+    expect(res[1]).to eq("write")
   end
 
   it "Does accept writes of pages that **do** currently exist in cache; they go into vm_cache commited" do
