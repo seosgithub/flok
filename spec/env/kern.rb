@@ -97,9 +97,6 @@ shared_context "kern" do
             if_dispatch_json(JSON.stringify(q));
           }
         }
-        $stderr.puts "env/kern File.read... dumping directory"
-        $stderr.puts "pwd = #{Dir.pwd}"
-        $stderr.puts Dir["**/*"].select{|e| e.split("/").length < 4}.inspect
 
         v8.eval File.read('./products/chrome/application_user.js')
         return v8
