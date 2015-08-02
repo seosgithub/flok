@@ -732,20 +732,20 @@ RSpec.describe "kern:controller_spec" do
 
   it "Does allow service macros in the global on_entry function" do
     #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/global_on_entry5.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    ctx = flok_new_user File.read('./spec/kern/assets/test_service/controller1b.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
 
     #Run the embed function
-    secret = SecureRandom.hex
-    ctx.eval %{
+    dump = ctx.evald %{
       global_on_entry_called_count = 0;
 
       //Call embed on main root view
       base = _embed("my_controller", 0, {}, null);
 
       int_dispatch([]);
+      dump.test_async_res_params = test_async_res_params;
     }
 
-    expect(ctx.eval("read_res_called")).to eq(true)
+    expect(dump["test_async_res_params"]).to eq({"foo" => "bar"})
   end
 
   it "Does allow interval (every) events" do
@@ -980,8 +980,8 @@ RSpec.describe "kern:controller_spec" do
   end
 
   it "Not setting a Goto will result in an exception" do
-    ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync_no_goto.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
     expect {
+      ctx = flok_new_user File.read('./spec/kern/assets/choose_action_sync_no_goto.rb'), File.read("./spec/kern/assets/test_service/config0.rb") 
       ctx.evald %{
         base = _embed("my_controller", 0, {}, null);
 

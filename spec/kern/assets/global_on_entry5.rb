@@ -1,5 +1,5 @@
 controller :my_controller do
-  services "vm"
+  services "test"
 
   on_entry %{
     context.secret = "foo";
