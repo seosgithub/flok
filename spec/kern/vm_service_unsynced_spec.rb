@@ -100,25 +100,38 @@ RSpec.describe "kern:vm_service" do
   end
 
   it "vm_pg_sync_wakeup is called every 20 seconds" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    ctx.eval %{
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5c.rb") 
+
+    #Mark page as needing sync
+    dump = ctx.evald %{
+      //Needed to initialize pagers
       base = _embed("my_controller", 0, {}, null);
 
-      //Drain queue
-      int_dispatch([]);
+      vm_pg_mark_needs_sync("spec", "test");
     }
 
-    vm_cache = ctx.dump("vm_cache")
-    vm_dirty = ctx.dump("vm_dirty")
-    vm_notify_map = ctx.dump("vm_notify_map")
+    #Call the timer for 1 shot
+    (20*4).times do
+      @driver.int "int_timer", []
+    end
 
-    res = {
-      "spec0" => {}, 
-      "spec1" => {}
-    }
+    #First time, the vm_pg_sync_wakeup should not have triggered anything (vm_unsynced still set to 0)
+    expect(ctx.dump("pg_spec0_sync_requests")).to eq(["test"])
 
-    expect(vm_cache).to eq(res)
-    expect(vm_dirty ).to eq(res)
-    expect(vm_notify_map).to eq(res)
+    #Call the timer for 1 more shot
+    (20*4).times do
+      @driver.int "int_timer", []
+    end
+
+    #Second time, vm_pg_sync_wakeup should call pager's sync function
+    expect(ctx.dump("pg_spec0_sync_requests")).to eq(["test", "test"])
+
+    #Call the timer for 1 more shot
+    (20*4).times do
+      @driver.int "int_timer", []
+    end
+
+    #Third time, vm_pg_sync_wakeup should call pager's sync function
+    expect(ctx.dump("pg_spec0_sync_requests")).to eq(["test", "test", "test"])
   end
 end

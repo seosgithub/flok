@@ -764,5 +764,6 @@ service :vm do
 
   every 20.seconds, %{
     vm_pageout();
+    vm_pg_sync_wakeup();
   }
 end
