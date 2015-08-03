@@ -540,6 +540,20 @@ service :vm do
     function vm_pg_unmark_needs_sync(ns, page_id) {
       delete vm_unsynced[ns][page_id];
     }
+
+    function vm_pg_sync_wakeup() {
+      //Iterate through all the unsynced entries an increment any entries that are 0 to 1
+      <% @options[:pagers].each do |p| %>
+        //Get all page ids in a namespace
+        var page_ids = Object.keys(vm_unsynced.<%= p[:namespace] %>);
+
+        for (var i = 0; i < page_ids.length; ++i) {
+          if (vm_unsynced.<%= p[:namespace] %>[page_ids[i]] === 0) {
+            vm_unsynced.<%= p[:namespace] %>[page_ids[i]] = 1;
+          }
+        }
+      <% end %>
+    }
     ///////////////////////////////////////////////////////////////////////////
   }
 
