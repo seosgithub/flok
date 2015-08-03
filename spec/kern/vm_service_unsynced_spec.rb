@@ -62,6 +62,7 @@ RSpec.describe "kern:vm_service" do
       vm_pg_sync_wakeup();
 
       dump.vm_unsynced = vm_unsynced;
+      dump.pg_spec0_sync_requests = pg_spec0_sync_requests;
     }
 
     expect(dump["vm_unsynced"]).to eq({
@@ -70,30 +71,32 @@ RSpec.describe "kern:vm_service" do
       }
     })
 
+    #Only expect one entry, wakeup should have skipped the first try
     expect(dump["pg_spec0_sync_requests"]).to eq(["test"])
   end
 
-  it "vm_pg_sync_wakeup does *not* increment any entries that are currently *does* invoke pager's sync for those entries" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
-    ctx.eval %{
+  it "vm_pg_sync_wakeup does *not* increment any entries that are currently 1 and *does* invoke pager's sync for those entries" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5c.rb") 
+    dump = ctx.evald %{
+      //Needed to initialize pagers
       base = _embed("my_controller", 0, {}, null);
 
-      //Drain queue
-      int_dispatch([]);
+      vm_pg_mark_needs_sync("spec", "test");
+      vm_pg_sync_wakeup();
+      vm_pg_sync_wakeup();
+
+      dump.vm_unsynced = vm_unsynced;
+      dump.pg_spec0_sync_requests = pg_spec0_sync_requests;
     }
 
-    vm_cache = ctx.dump("vm_cache")
-    vm_dirty = ctx.dump("vm_dirty")
-    vm_notify_map = ctx.dump("vm_notify_map")
+    expect(dump["vm_unsynced"]).to eq({
+      "spec" => {
+        "test" => 1
+      }
+    })
 
-    res = {
-      "spec0" => {}, 
-      "spec1" => {}
-    }
-
-    expect(vm_cache).to eq(res)
-    expect(vm_dirty ).to eq(res)
-    expect(vm_notify_map).to eq(res)
+    #This time, we expect two entries because the second vm_sync_wakeup should have triggered it.
+    expect(dump["pg_spec0_sync_requests"]).to eq(["test", "test"])
   end
 
 

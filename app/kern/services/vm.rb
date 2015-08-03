@@ -550,6 +550,9 @@ service :vm do
         for (var i = 0; i < page_ids.length; ++i) {
           if (vm_unsynced.<%= p[:namespace] %>[page_ids[i]] === 0) {
             vm_unsynced.<%= p[:namespace] %>[page_ids[i]] = 1;
+          } else {
+            //Notify pager
+            <%= p[:name] %>_sync(page_ids[i]);
           }
         }
       <% end %>
