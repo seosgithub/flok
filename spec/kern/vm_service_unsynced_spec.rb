@@ -99,7 +99,6 @@ RSpec.describe "kern:vm_service" do
     expect(dump["pg_spec0_sync_requests"]).to eq(["test", "test"])
   end
 
-
   it "vm_pg_sync_wakeup is called every 20 seconds" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     ctx.eval %{
