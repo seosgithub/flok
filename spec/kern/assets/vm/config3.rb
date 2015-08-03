@@ -2,7 +2,7 @@
 service_instance :vm, :vm, {
   :pagers => [
     {
-      :name => "spec2",
+      :name => "pg_spec0",
       :namespace => "user",
       :options => {
         "hello" => "world"
