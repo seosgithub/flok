@@ -39,21 +39,12 @@ RSpec.describe "kern:vm_service" do
 
     #Run the check
     res = ctx.eval %{
-      //Manually construct a page
-      page = {
-        _head: "a",
-        _next: "b",
-        _type: "array",
-        _id: "hello",
-        entries: [
-          {_id: "hello2", _sig: "nohteunth"},
-        ]
-      }
-
-      vm_rehash_page(page);
+      var page = vm_create_page("test");
 
       //Save page
+      vm_transaction_begin();
       vm_cache_write("user", page);
+      vm_transaction_end();
     }
 
     vm_cache = JSON.parse(ctx.eval("JSON.stringify(vm_cache)"))
@@ -114,20 +105,12 @@ RSpec.describe "kern:vm_service" do
       //which receives a call to watch with the hash of this page so the 
       //watch function can tell if the page has changed (e.g. if you are connecting)
       //to a remote server
-      page = {
-        _head: "a",
-        _next: "b",
-        _id: "my_key",
-        _type: "array",
-        entries: [
-          {_id: "hello2", _sig: "nohteunth"},
-        ]
-      }
-
-      vm_rehash_page(page);
+      var page = vm_create_page("test");
 
       //Save page for the spec pager
+      vm_transaction_begin();
       vm_cache_write("spec", page);
+      vm_transaction_end();
     }
 
     #This hash was calculated during vm_rehash_page
@@ -144,10 +127,7 @@ RSpec.describe "kern:vm_service" do
     pg_spec0_watchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_watchlist)"))
 
     #Expect options and ns to match in config4
-    expect(pg_spec0_watchlist).to eq([{
-      "id" => "my_key",
-      "page" => page
-    }])
+    expect(pg_spec0_watchlist[0]["id"]).to eq("my_key")
   end
 
   it "does not throw an exception if multiple watches are attempted" do
@@ -351,6 +331,8 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+
     #Expect the page to be written to cache
     vm_cache = JSON.parse(ctx.eval("JSON.stringify(vm_cache)"));
     vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list[0])"));
@@ -367,8 +349,17 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    #Write will attempt to read disk first
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+
+    #Read is asynchronous
+    ctx.eval %{
+      //Drain queue
+      int_dispatch([]);
+    }
+
     vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list[0])"));
+    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
     expect(read_res_params).to eq(vm_write_list)
   end
 

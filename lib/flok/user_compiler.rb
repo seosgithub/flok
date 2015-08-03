@@ -494,7 +494,7 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller, :name, :ons, :every_handlers, :on_entry_has_goto
+    attr_accessor :controller, :name, :ons, :every_handlers
     include UserCompilerMacro
 
     def initialize controller, name, ctx, &block
@@ -504,7 +504,6 @@ module Flok
       @_on_entry_src = ""
       @ons = [] #Event handlers
       @every_handlers = []
-      @on_entry_has_goto = false
 
       self.instance_eval(&block)
     end
@@ -512,8 +511,6 @@ module Flok
     def on_entry js_src
       #returns a string
       @_on_entry_src = _macro(js_src)
-
-      @on_entry_has_goto = (js_src =~ /Goto/) != nil
     end
 
     def on_entry_src
@@ -585,8 +582,6 @@ module Flok
 
     def choose_action &block
       @ctx.action self, :choose_action, &block
-
-      raise "choose_action must contain Goto" unless @ctx.actions.detect{|e| e.name == :choose_action}.on_entry_has_goto
     end
 
     #Names of spots
