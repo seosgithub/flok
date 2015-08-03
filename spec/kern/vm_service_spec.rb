@@ -331,6 +331,8 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+
     #Expect the page to be written to cache
     vm_cache = JSON.parse(ctx.eval("JSON.stringify(vm_cache)"));
     vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list[0])"));
@@ -347,8 +349,17 @@ RSpec.describe "kern:vm_service" do
       int_dispatch([]);
     }
 
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    #Write will attempt to read disk first
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+
+    #Read is asynchronous
+    ctx.eval %{
+      //Drain queue
+      int_dispatch([]);
+    }
+
     vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list[0])"));
+    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
     expect(read_res_params).to eq(vm_write_list)
   end
 
