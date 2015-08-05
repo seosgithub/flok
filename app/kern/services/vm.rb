@@ -29,7 +29,6 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
-
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     //Cache
@@ -118,6 +117,22 @@ service :vm do
     //Part of the persist module
     //res is page
     function int_per_get_res(s, ns, id, res) {
+      if (ns === "__reserved__") {
+        if (id === "vm_unsynced") {
+          var old_vm_unsynced = vm_unsynced;
+          vm_unsynced = res;
+
+          <% @options[:pagers].each do |p| %>
+            var old_vm_unsynced_ns = old_vm_unsynced.<%= p[:namespace] %>;
+            var ids = Object.keys(old_vm_unsynced_ns);
+            for (var i = 0; i < ids.length; ++i) {
+              vm_unsynced.<%= p[:namespace] %>[ids[i]] = old_vm_unsynced_ns[ids[i]];
+            }
+          <% end %>
+        }
+        return;
+      }
+
       if (res !== null) {
         //Write out to the cache
         vm_transaction_begin();
@@ -517,7 +532,12 @@ service :vm do
       <% end %>
     };
 
+    //Does it need to be written to disk?
+    vm_unsynced_is_dirty = false;
+
     function vm_pg_mark_needs_sync(ns, page_id) {
+      vm_unsynced_is_dirty = true;
+
       //Add to list
       vm_unsynced[ns][page_id] = 0;
 
@@ -538,6 +558,8 @@ service :vm do
     }
 
     function vm_pg_unmark_needs_sync(ns, page_id) {
+      vm_unsynced_is_dirty = true;
+
       delete vm_unsynced[ns][page_id];
     }
 
@@ -556,6 +578,25 @@ service :vm do
           }
         }
       <% end %>
+    }
+
+    vm_unsynced_paged_in = false;
+    function vm_pg_sync_pagein() {
+      //Only pages-in if necessary
+      if (vm_unsynced_paged_in === false) {
+        vm_unsynced_paged_in = true;
+
+        //Send a disk read request
+        SEND("disk", "if_per_get", "vm", "__reserved__", "vm_unsynced");
+      }
+    }
+
+    function vm_pg_sync_pageout() {
+      //Only page-out if necessary
+      if (vm_unsynced_is_dirty === true) {
+        vm_unsynced_is_dirty = false;
+        SEND("disk", "if_per_set", "__reserved__", "vm_unsynced", JSON.stringify(vm_unsynced));
+      }
     }
     ///////////////////////////////////////////////////////////////////////////
   }
@@ -765,5 +806,10 @@ service :vm do
   every 20.seconds, %{
     vm_pageout();
     vm_pg_sync_wakeup();
+    vm_pg_sync_pageout();
+  }
+
+  every 2.seconds, %{
+    vm_pg_sync_pagein();
   }
 end

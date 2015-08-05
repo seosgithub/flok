@@ -7,7 +7,7 @@ require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 require 'zlib'
 
-RSpec.describe "kern:vm_service" do
+RSpec.describe "kern:vm_service unsynced" do
   include Zlib
   include_context "kern"
 
@@ -110,7 +110,7 @@ RSpec.describe "kern:vm_service" do
       vm_pg_mark_needs_sync("spec", "test");
     }
 
-    #Call the timer for 1 shot
+    #Call the timer for 1 shot of vm_sync_wakeup
     (20*4).times do
       @driver.int "int_timer", []
     end
@@ -118,7 +118,7 @@ RSpec.describe "kern:vm_service" do
     #First time, the vm_pg_sync_wakeup should not have triggered anything (vm_unsynced still set to 0)
     expect(ctx.dump("pg_spec0_sync_requests")).to eq(["test"])
 
-    #Call the timer for 1 more shot
+    #Call the timer for 1 more shot of vm_sync_wakeup 
     (20*4).times do
       @driver.int "int_timer", []
     end
