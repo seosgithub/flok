@@ -171,15 +171,24 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
       during a sync call for disk reads or the synchronous `read_sync` request. The format for each element in the array is `{"page_id": [bp1, bp2], ...}`
   * `vm_pager_waiting_read` - A hash that maps `[ns][page_id]` into a hash that represents a the page that was trying to be written.
       needed to be read before notifying the pager. Multiple write attempts on the same page before the disk response will undefined behavior.
-  * `vm_unsynced_*`
-    * `vm_unsynced` - A hash that maps `vm_unsynced_fresh[ns][page_id]` to an integer that is either `0` or `1`. the vm sync daemon reads over this
+  * `vm_unsynced`
+    * `vm_unsynced` - A hash that maps `vm_unsynced[ns][page._id]` to an integer that is either `0` or `1`. the vm sync daemon reads over this
         queue and `0` means that it was just requested via `vm_pg_mark_needs_sync` and needs to be incremented to `1`. `1` means that the vm sync
         daemon must contact the pager for the `sync` action. This will happend until the pager calls `vm_pg_unmark_needs_sync` which will remove it
-        from this hash
+        from this hash.
+    * `vm_unsynced_is_dirty` - A boolean value that indicates whether the `vm_unsynced` needs to be paged-out to disk.
+    * `vm_unsynced_paged_in` - A boolean that indicates whether the `vm_unsynced` needs to be paged in from disk (used once on wakeup)
 
 ##Helper Methods
 
 ###Functional
+####Periodically called (daemons)
+  * `vm_pg_sync_wakeup` - for all pages in `vm_unsynced`, the pagers are notified of a `sync` request
+  * `vm_pg_sync_pagein` - If has not happend yet, the `vm_unsynced` table is loaded from disk via the the special namespace `__reserved__` and key
+      `vm_unsynced`
+  * `vm_pg_sync_pageout` - If the `vm_unsynced_is_dirty` is set, the `vm_unsynced` is written out to special namespace `__reserved__` and key
+      `vm_unsynced`
+
 ####Page modification (assuming inputs are modifiable)
   * **Generic Page**
     * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**.
