@@ -5,7 +5,9 @@
     if (ename === "update") {
       //If changes_id was given
       if (einfo.changes_id !== undefined) {
-        vm_mark_changes_synced(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.changes_id)
+          vm_mark_changes_synced(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.changes_id);
+          vm_pg_unmark_needs_sync(pg_sockio<%= i %>_ns, einfo.page._id);
+        }
       }
 
       //If page exists, then we need to rebase the page, this will actually
@@ -70,6 +72,12 @@
       vm_cache_write(pg_sockio<%= i %>_ns, page); 
     vm_transaction_end();
 
+    //Mark pages as needing a synchronization
+    vm_pg_mark_needs_sync(pg_sockio<%= i %>_ns, page._id);
+  }
+
+  function pg_sockio<%= i %>_sync(page_id) {
+    var page = vm_cache[pg_sockio<%= i %>_ns][page_id];
     //Clone page and send a copy to the server
     var copied = vm_copy_page(page);
     var info = {page: copied, changes: page.__changes, changes_id: page.__changes_id};
