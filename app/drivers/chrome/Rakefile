@@ -11,10 +11,16 @@ require '../../../spec/lib/helpers.rb'
 
 #Compile all the *.js files into one file
 task :build do
+  #Get build path (Where we are going to output our js file)
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
   build_path = File.expand_path(build_path)
 
+  #Ensure the FLOK_ENV exists
   raise "FLOK_ENV must be debug or release got #{ENV['FLOK_ENV']}" unless ["DEBUG", "RELEASE"].include? ENV["FLOK_ENV"]
+
+  #Read our configuration
+  raise "CONF_PATH was not set" unless conf_path=ENV["CONF_PATH"]
+  conf_path = File.expand_path(conf_path)
 
   my_path = File.expand_path(File.dirname(__FILE__))
   Dir.mktmpdir(SecureRandom.hex) do |dir|
