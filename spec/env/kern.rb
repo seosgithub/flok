@@ -31,8 +31,7 @@ shared_context "kern" do
 
     #Will return everything put into the 'dump' dictionary (pre-defined for your convenience)
     def evald str
-      self.eval "dump = {}"
-      self.eval str
+      self.eval "dump = {}; #{str}"
       _dump = self.dump("dump")
 
       return DumpHelper.new(_dump)
@@ -154,10 +153,6 @@ shared_context "kern" do
       expect(priority).to eq(@cp)
 
       return args
-    end
-
-    def dump
-      $stderr.puts @q.inspect
     end
 
     #Ignore all messages until this one is received, then keep that one in the queue
