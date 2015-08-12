@@ -222,6 +222,15 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
         `__changes_id` of the page matches `changes_id`. If the page is based (implying the base page has changes and the page has changes as all base
         pages have changes), then if the `changes_id` matches the **base** `__changes_id` , the `__base` is removed from the page. If `changes_id`
         does not match in either of the cases, then nothing happends. This may happend if a synchronization errousouly comes in.
+    * **Why do we have both `vm_rebase` and `vm_mark_changes_synced`?**
+      * They are used under similar circumstances. You always `vm_mark_changes_synced` before calling `vm_rebase` on a page. The reasoning is that
+          `vm_rebase` will assume that the cached page does not contain changes if they are present in `older`. If you didn't do this, then the
+          cached page would be rebased and could contain changes even though it's already been rebased on an older page. E.g. `newer[changes, nobase]`
+          rebased would be `older[changes, nobase]` where `changes` are equal on the `newer` and `older` but clearly that's incorrect. Another way of
+          looking at it is that `vm_rebase` is saying that you are rebasing **on an authority** page and therefore needs no evidence that the page was
+          an authority (which is why the `changes_id` can be stripped).  Method 3 of looking at it is that `vm_rebase` on a `newer[changes,
+          based[changes, nobase]]` with `older` where `older` contains the changes of `newer.__base.__changes`, would result in `older` having
+          `newer.__base.__changes` fast-forwarded over it, which it would already contain those changes.
 ###Non functional (functional as is in lambda calculus, or lisp (no **global** state changes but may modify parameters)
 ####Pager specific
   * `vm_cache_write(ns,  page)` - Save a page to cache memory. This will not recalculate the page hash. The page will be stored in `vm_cache[ns][id]` by.
@@ -229,7 +238,8 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
     * The page_id is added to the `vm_unsynced` with the value of 0; see above in `Datatypes & Structures` for details. i.e.
         `vm_unsynced[$PAGER_NS][page_id] = 0`
     *  the pager's routine of `sync` is called immediately. The page must exist in cache at this point.
-  * `vm_pg_unmark_needs_sync(ns, page_id)` - Removes the page from the pending synchronization queue `delete vm_unsynced[$PAGER_NS][page_id]`)
+  * `vm_pg_unmark_needs_sync(ns, page_id)` - Removes the page from the pending synchronization queue `delete vm_unsynced[$PAGER_NS][page_id]`). If
+      it's not in the synchronization queue, then nothing will happend
 
 ### <a name='user_page_modification_helpers'></a>User page modification helpers (Controller Macros)
 You should never directly edit a page in user land; if you do; the pager has no way of knowing that you made modifications. Additionally, if you have multiple controllers watching a page, and it is modified in one controller, those other controllers

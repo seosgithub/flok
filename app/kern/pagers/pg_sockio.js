@@ -5,9 +5,8 @@
     if (ename === "update") {
       //If changes_id was given
       if (einfo.changes_id !== undefined) {
-          vm_mark_changes_synced(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.changes_id);
-          vm_pg_unmark_needs_sync(pg_sockio<%= i %>_ns, einfo.page._id);
-        }
+        //This is a friendly function that will ignore mis-matches of changes_id
+        vm_mark_changes_synced(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.changes_id);
       }
 
       //If page exists, then we need to rebase the page, this will actually
@@ -15,6 +14,11 @@
       //is done.
       if (vm_cache[pg_sockio<%= i %>_ns][einfo.page._id] !== undefined) {
         vm_rebase(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.page);
+      }
+
+      //Mark page as synced if it contains no changes
+      if (einfo.page.__changes === undefined) {
+        vm_pg_unmark_needs_sync(pg_sockio<%= i %>_ns, einfo.page._id)
       }
 
       //Write out page
