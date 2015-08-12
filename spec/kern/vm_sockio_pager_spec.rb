@@ -77,6 +77,89 @@ RSpec.describe "kern:sockio_pager" do
     }], 1
   end
 
+  it "Does send a watch request at periodic intervals of all pages that are currently watched and then does not send pages that have been unwatched" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/watch3.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    #Get through the first two watches triggered by the original watch
+    @driver.ignore_up_to "if_sockio_send", 1
+    @driver.mexpect "if_sockio_send", [Integer, "watch", {
+      "page_id" => "test0"
+    }], 1
+    @driver.ignore_up_to "if_sockio_send", 1
+    @driver.mexpect "if_sockio_send", [Integer, "watch", {
+      "page_id" => "test1"
+    }], 1
+
+    #Now we wait 15 seconds
+    (15*4).times { @driver.int "int_timer" }
+
+    #Now we should have a message for the synhronization of watchlist
+    @driver.ignore_up_to("if_sockio_send", 1) { |e| next e[1] == "resync" }
+    resync_res = @driver.get "if_sockio_send", 1
+    resync_info = resync_res[2] #Hash on end contains the actual data from the message
+    expect(resync_info.keys).to include("watch_list"); #Should have a watch list
+
+    #Check the watchlist we got, first get the hash values for the pages
+    expected_watch_list = []
+    expected_watch_list += ["test0", nil]
+    expected_watch_list += ["test1", nil]
+    expect(resync_info["watch_list"]).to eq(expected_watch_list)
+
+    #Test 2 - Now we are changing a page, so test1 should have a hash value
+    #######################################################################################################
+    #Update test1, which will try to read from disk, respond with a blank page
+    @driver.int "int_event", [ @ctx.eval("base"), "write_test1", {} ]
+    @driver.ignore_up_to "if_per_get", 2 do |e|
+      next e[2] == "test1"
+    end
+    @driver.int "int_per_get_res", ["vm", "sockio", "test1", nil]
+
+    #Now we wait 15 seconds (again)
+    (15*4).times { @driver.int "int_timer" }
+
+    #Now we should have a message for the synhronization of watchlist
+    @driver.ignore #it's incomplete... so
+    @driver.ignore_up_to("if_sockio_send", 1) { |e| next e[1] == "resync" }
+    resync_res = @driver.get "if_sockio_send", 1
+    resync_info = resync_res[2] #Hash on end contains the actual data from the message
+    expect(resync_info.keys).to include("watch_list"); #Should have a watch list
+
+    #Check the watchlist we got, first get the hash values for the pages
+    expected_watch_list = []
+    expected_watch_list += ["test0", nil]
+    expected_watch_list += ["test1", @ctx.eval("vm_cache.sockio.test1._hash")]
+    expect(resync_info["watch_list"]).to eq(expected_watch_list)
+    #######################################################################################################
+
+    #Test 3 - Now we unwatch a page
+    #######################################################################################################
+    #Unwatch test1
+    @driver.int "int_event", [ @ctx.eval("base"), "unwatch_test1", {} ]
+
+    #Now we wait 15 seconds (again)
+    (15*4).times { @driver.int "int_timer" }
+
+    #Now we should have a message for the synhronization of watchlist
+    @driver.ignore #it's incomplete... so
+    @driver.ignore_up_to("if_sockio_send", 1) { |e| next e[1] == "resync" }
+    resync_res = @driver.get "if_sockio_send", 1
+    resync_info = resync_res[2] #Hash on end contains the actual data from the message
+    expect(resync_info.keys).to include("watch_list"); #Should have a watch list
+
+    #Check the watchlist we got, first get the hash values for the pages
+    expected_watch_list = []
+    expected_watch_list += ["test0", nil]
+    expect(resync_info["watch_list"]).to eq(expected_watch_list)
+    #######################################################################################################
+  end
+
   it "Does write a page to vm_cache that **does** already exist as <unbased, nochanges> the page receives an 'update' response from the external socket.io without a changes id (server result should be written into cache as-is); should no longer exist in unsynced" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/watch2.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
     dump = ctx.evald %{

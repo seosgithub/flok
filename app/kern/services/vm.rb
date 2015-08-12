@@ -793,6 +793,9 @@ service :vm do
     }
 
     vm_notify_map[params.ns][params.id].splice(midx, 1);
+    
+    //Remove from notify map if no entries exist
+    if (vm_notify_map[params.ns][params.id].length === 0) { delete vm_notify_map[params.ns][params.id]; }
 
     delete vm_bp_to_nmap[bp][params.ns][params.id];
 

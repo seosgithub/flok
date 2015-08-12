@@ -2,6 +2,9 @@
 <% [0].each do |i| %>
   //Destination for events sent from the sockio driver
   function __pg_sockio<%= i %>_xevent_handler(ep, ename, einfo) {
+    //Events
+    //update - From the sockio interface, an update refers to a page update
+    //interval - Every 15 seconds, from the callout timer.
     if (ename === "update") {
       //If changes_id was given
       if (einfo.changes_id !== undefined) {
@@ -25,6 +28,29 @@
       vm_transaction_begin();
         vm_cache_write(pg_sockio<%= i %>_ns, einfo.page);
       vm_transaction_end();
+    } else if (ename === "interval") {
+
+      //Create watch_list
+      var watch_list = [];
+      var watched_keys = Object.keys(vm_notify_map[pg_sockio<%= i %>_ns]);
+      for (var i = 0; i < watched_keys.length; ++i) {
+        var key = watched_keys[i];
+        watch_list.push(key);
+
+        //If entry exists, put in the hash value
+        if (vm_cache[pg_sockio<%= i %>_ns][key] === undefined) {
+          watch_list.push(null);
+        } else {
+          watch_list.push(vm_cache[pg_sockio<%= i %>_ns][key]._hash);
+        }
+      }
+
+      //Synchronize the watchlist with the server
+      var resync_info = {
+        watch_list: watch_list
+      };
+
+      SEND("net", "if_sockio_send", pg_sockio<%= i %>_bp, "resync", resync_info);
     } else {
       <% if @debug %>
         throw "pg_sockio<%= i %>_xevent_handler received an event called: " + ename + "that it does not know how to handle. This event should never have even been forwarded, but you may have missed adding the handler code if you did request a forward"
@@ -52,6 +78,9 @@
     //Signal that the socket.io driver should forward all events to the socket defined by pg_sockio{N}_bp
     //to the endpoint (with the same reference)
     SEND("net", "if_sockio_fwd", pg_sockio<%= i %>_bp, "update", pg_sockio<%= i %>_bp);
+
+    //Request a timer every 15 seconds
+    reg_interval(pg_sockio<%= i %>_bp, "interval", 15*4);
   }
 
   function pg_sockio<%= i %>_watch(id, page) {

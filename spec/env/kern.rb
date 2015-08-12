@@ -156,6 +156,10 @@ shared_context "kern" do
       return args
     end
 
+    def dump
+      $stderr.puts @q.inspect
+    end
+
     #Ignore all messages until this one is received, then keep that one in the queue
     #There may be a lot going on and you're only interested in a part.
     #If priority is nil, it won't matter what the priority is, useful for checking exceptions
@@ -202,6 +206,10 @@ shared_context "kern" do
           break
         end
       end
+    end
+
+    def ignore
+      @q.shift
     end
 
     #Expect the queue to not contain a message matching

@@ -39,6 +39,9 @@ instead.
       0 is the master root view. Returns base pointer. `event_gw` is a pointer to a `vc`. If it is null, then any events coming in will not be sent to
       somewhere else if they do not match any 'on' for the current action.
 
+##Timers
+  * See [./callout.md](Callout) for how to register a timer
+
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
 `PLATFORM` - The platform that this kernel was compiled with

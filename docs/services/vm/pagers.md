@@ -78,7 +78,10 @@ This pager connects to a socket.io server via the `sockio` module.
         that the endpoint shares the same value as the socket's base pointer.
   * **Functions**
     * `init` - Will begin trying to establish a connection to the server. When pages are written, 
-    * `watch` - Signals to the socket.io server that a page is being watched via `watch` event with parameters `{page_id:}`
+    * `watch` - Signals to the socket.io server that a page is being watched via `watch` event with parameters `{page_id:}`. Additionally, at a periodic interval (10 seconds) by default,
+      the server will be notified of the entire watch-list via the event `resync` which contains the key `watch_list` which will return an array of [page_id, page_hash, page_id, page_hash...] where page_id is the pages `_id` and
+      `page_hash` is the page's `__hash`. If the page does not exist, the hash value is null.
+      
     * `unwatch` - Signals to the socket.io server that a page is no longer being watched via `unwatch` event with parameters `{page_id:}` 
     * `write` - 
        * Sends the sockio server the `write` event with a hash containing `page`, and optionally (`changes`, and `changes_id`). The `page` contains only the basic
