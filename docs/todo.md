@@ -10,6 +10,8 @@
   2. The pager synchronization daemon and functions associated with marking paging as needing synchronization will attempt to sync at one time and not
   store the data if there is a crash or exit before synchronization completes. Furethermore, too many unsynced pages will wreck havok as they wil be
   dispatched at the same time via the synchronization daemon.
+  3. A `watch` request on a page does technically asynchronously dispatch a disk read request at the same time the pager's request goes through. If a pager was to write
+     a page before this disk read, directly via `vm_cache_write`, then the cached page would not be loaded in time.
 
 ###Ideas for improvement
   0. The `Raise` function should not actually signal the controller, it could just inline that

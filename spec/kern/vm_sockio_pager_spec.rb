@@ -60,6 +60,26 @@ RSpec.describe "kern:sockio_pager" do
     @driver.mexpect "if_sockio_fwd", [Integer, "update", dump["pg_sockio0_bp"]], 1
   end
 
+  it "Does send an unwatch request via socket.io when a page is unwatched" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/watch.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    ctx.eval %{
+      //Call embed on main root view
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+
+    @driver.int "int_event", [ @ctx.eval("base"), "unwatch", {} ]
+
+    #Expect an unwatch request
+    @driver.ignore_up_to "if_sockio_send", 1 do |e|
+      e[1] == "unwatch"
+    end
+    unwatch_msg = @driver.get "if_sockio_send", 1
+    expect(unwatch_msg[2]).to eq({"page_id" => "test"})
+  end
+
   it "Does send a watch request via socket.io when a page is watched" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/watch.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
     ctx.eval %{

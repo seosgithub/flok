@@ -19,7 +19,8 @@
         vm_rebase(vm_cache[pg_sockio<%= i %>_ns][einfo.page._id], einfo.page);
       }
 
-      //Mark page as synced if it contains no changes
+      //Mark page as synced if it contains no changes, we don't need to check base
+      //here because if it has base, it has __changes as well
       if (einfo.page.__changes === undefined) {
         vm_pg_unmark_needs_sync(pg_sockio<%= i %>_ns, einfo.page._id)
       }
@@ -91,6 +92,10 @@
   }
 
   function pg_sockio<%= i %>_unwatch(id) {
+    var info = {
+      page_id: id
+    }
+    SEND("net", "if_sockio_send", pg_sockio<%= i %>_bp, "unwatch", info);
   }
 
   function pg_sockio<%= i %>_write(page) {
