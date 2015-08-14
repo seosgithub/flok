@@ -98,7 +98,8 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
     })
   end
 
-  it "vm_pg_sync_pagein should write out the read to vm_unsynced and merge if there are any existing elements" do
+
+  it "vm_pg_sync_pagein should not modify vm_unsynced if the read comes back with nothing" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5d.rb")
     dump = ctx.evald %{
       //Needed to initialize pagers
@@ -133,11 +134,67 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
       "vm",
       "__reserved__",
       "vm_unsynced",
+      nil
+    ]
+
+    #Expect vm_unsynced to have loaded the data
+    res = @ctx.dump("vm_unsynced")
+    expect(res).to eq({
+        "spec" => {
+          "foo" => 0,
+        },
+        "spec1" => {
+          "bar" => 1
+        }
+    })
+  end
+
+  it "vm_pg_sync_pagein should write out the read to vm_unsynced and merge if there are any existing elements" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5d.rb")
+    dump = ctx.evald %{
+      //Needed to initialize pagers
+      base = _embed("my_controller", 0, {}, null);
+
+      vm_pg_sync_pagein();
+
+      vm_unsynced = {
+        "spec": {
+          "foo": 0
+        },
+
+        "spec1": {
+          "bar": 1
+        },
+        "spec2": {
+          "hello": "world"
+        }
+      }
+
+      int_dispatch([]);
+    }
+
+    #Should be loaded (manually called)
+    expect(ctx.eval("vm_unsynced_paged_in")).to eq(true)
+
+    #Expect a request for the special page that holds vm_unsynced
+    @driver.ignore_up_to "if_per_get", 2
+    res = @driver.get "if_per_get", 2
+    expect(res[1]).to eq("__reserved__")
+    expect(res[2]).to eq("vm_unsynced")
+
+    #Return the vm_unsynced, spec3 no longer exists
+    @driver.int "int_per_get_res", [
+      "vm",
+      "__reserved__",
+      "vm_unsynced",
       {
         "spec" => {
           "holah" => 1,
         },
         "spec1" => {
+        },
+        "spec3" => {
+          "foo" => "bar"
         }
       }
     ]
@@ -146,11 +203,14 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
     res = @ctx.dump("vm_unsynced")
     expect(res).to eq({
         "spec" => {
-          "foo" => 0,
           "holah" => 1,
+          "foo" => 0,
         },
         "spec1" => {
           "bar" => 1
+        },
+        "spec2" => {
+          "hello" => "world"
         }
     })
   end

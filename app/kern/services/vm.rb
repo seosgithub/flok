@@ -119,14 +119,17 @@ service :vm do
     function int_per_get_res(s, ns, id, res) {
       if (ns === "__reserved__") {
         if (id === "vm_unsynced") {
-          var old_vm_unsynced = vm_unsynced;
-          vm_unsynced = res;
+          if (res === null) { return; }
+          var cached_vm_unsynced = res;
 
           <% @options[:pagers].each do |p| %>
-            var old_vm_unsynced_ns = old_vm_unsynced.<%= p[:namespace] %>;
-            var ids = Object.keys(old_vm_unsynced_ns);
-            for (var i = 0; i < ids.length; ++i) {
-              vm_unsynced.<%= p[:namespace] %>[ids[i]] = old_vm_unsynced_ns[ids[i]];
+            //Make sure disk has the old namespace
+            if (cached_vm_unsynced.<%= p[:namespace] %> !== undefined) {
+              //Get all the ids from the old namespace
+              var ids = Object.keys(cached_vm_unsynced.<%= p[:namespace] %>)
+              for (var i = 0; i < ids.length; ++i) {
+                vm_unsynced.<%= p[:namespace] %>[ids[i]] = cached_vm_unsynced.<%= p[:namespace] %>[ids[i]];
+              }
             }
           <% end %>
         }
