@@ -363,32 +363,35 @@ RSpec.describe "kern:vm_service" do
     expect(read_res_params).to eq(vm_write_list)
   end
 
-  it "non-sync watch does send two watch callbacks to a controller if there is cached content" do
+  it "non-sync watch does send two watch callbacks to a controller if there is cached content followed by a write" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller12.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
     }
 
-    #Should not have read anything at this point in time
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
-    expect(read_res_params.length).to eq(0)
+    #Step 1. Write a page into cache
+    ################################################################################
+    #Trigger controller 'write_first'
+    @driver.int "int_event", [ ctx.eval("base"), "write_first", {} ]
 
-    ctx.eval("int_dispatch([])")
+    #Write should have trigger a disk read (to ensure there is no page in cache) vhich we respond
+    #with nothing
+    @driver.ignore_up_to "if_per_get"
+    @driver.int "int_per_get_res", ["vm", "spec", "test", nil]
+    ################################################################################
 
-    #Now we read the first after it de-queued
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
-    expect(read_res_params.length).to eq(1)
+    #Step 2. Watch that page
+    ################################################################################
+    #Trigger controller 'watch_first'
+    @driver.int "int_event", [ ctx.eval("base"), "watch_first", {} ]
 
-    ctx.eval("int_dispatch([])")
+    #Asynchronous dispatch
+    100.times { @ctx.eval("int_dispatch()")}
 
-    #And now the second
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
-    expect(read_res_params.length).to eq(2)
-
-    #And they should have been read in order
-    vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list)"));
-    expect(read_res_params).to eq(vm_write_list)
+    #Should have triggered the read_res
+    expect(@ctx.dump("read_res_params").count).to eq(1)
+    ################################################################################
   end
 
   it "vm_cache_write does not tell controllers an update has occurred if the page requested to cache was already cached" do
