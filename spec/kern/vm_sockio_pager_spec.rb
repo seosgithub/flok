@@ -854,6 +854,27 @@ RSpec.describe "kern:sockio_pager" do
     expect(res[2]["changes_id"].class).to eq(String)
   end
 
+  it "Does write to sockio interface when a page is requested to be written with changes with a page and changes (and the cached page is based)" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/write2d.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
+    dump = ctx.evald %{
+      //Call embed on main root view
+      dump.base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      dump.vm_cache = vm_cache;
+    }
+
+    #The kernel should have signaled to the driver to send a sockio request with the changes
+    @driver.ignore_up_to "if_sockio_send", 1
+    res = @driver.get "if_sockio_send", 1
+    expect(res[2]["page"]["_id"]).to eq("test")
+    expect(res[2]["changes"]).to eq([])
+    expect(res[2]["changes_id"]).to eq("my_changes_id")
+  end
+
+
   it "Does write to sockio interface when a page is requested to be written without changes with a page: and no changes: field" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/pg_sockio/write3.rb'), File.read("./spec/kern/assets/vm/pg_sockio/config.rb") 
     dump = ctx.evald %{

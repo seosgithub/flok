@@ -20,7 +20,8 @@
       }
 
       //Mark page as synced if it contains no changes, we don't need to check base
-      //here because if it has base, it has __changes as well
+      //here because if it has base, it has __changes as well, we're using einfo
+      //at this point, because it was rebased
       if (einfo.page.__changes === undefined) {
         vm_pg_unmark_needs_sync(pg_sockio<%= i %>_ns, einfo.page._id)
       }
@@ -118,7 +119,13 @@
     var page = vm_cache[pg_sockio<%= i %>_ns][page_id];
     //Clone page and send a copy to the server
     var copied = vm_copy_page(page);
-    var info = {page: copied, changes: page.__changes, changes_id: page.__changes_id};
+
+    //Depending on whether the page is based, send the changes id
+    if (page.__base !== undefined) {
+      var info = {page: copied, changes: page.__base.__changes, changes_id: page.__base.__changes_id};
+    } else {
+      var info = {page: copied, changes: page.__changes, changes_id: page.__changes_id};
+    }
     SEND("net", "if_sockio_send", pg_sockio<%= i %>_bp, "write", info);
   }
 <% end %>
