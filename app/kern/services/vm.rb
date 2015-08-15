@@ -545,17 +545,15 @@ service :vm do
       vm_unsynced[ns][page_id] = 0;
 
       //Notify pager immediately (daemon will not notify pager on first tick to avoid calling pager's sync to soon)
-      <% @options[:pagers].each do |p| %>
-        <% @options[:pagers].each_with_index do |p, i| %>
-          <% if i == 0 %>
-            if ("<%= p[:namespace] %>" === ns) {
-              <%= p[:name] %>_sync(page_id);
-            }
-          <% else %>
-            else if ("<%= p[:namespace] %>" === ns) {
-              <%= p[:name] %>_sync(page_id);
-            }
-          <% end %>
+      <% @options[:pagers].each_with_index do |p, i| %>
+        <% if i == 0 %>
+          if ("<%= p[:namespace] %>" === ns) {
+            <%= p[:name] %>_sync(page_id);
+          }
+        <% else %>
+          else if ("<%= p[:namespace] %>" === ns) {
+            <%= p[:name] %>_sync(page_id);
+          }
         <% end %>
       <% end %>
     }
