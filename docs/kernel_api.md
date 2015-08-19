@@ -42,6 +42,9 @@ instead.
 ##Timers
   * See [./callout.md](Callout) for how to register a timer
 
+##Time
+  * `time()` - Returns the time in seconds since 1970 (unix epoch). Must have a compatible module, [`rtc`]
+
 ##Things that are compiled into the kernel from user given data
 `MODS` - A list of modules that was specified in `./app/drivers/$PLATFORM/config.yml`
 `PLATFORM` - The platform that this kernel was compiled with

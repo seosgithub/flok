@@ -5,7 +5,7 @@ require './spec/lib/io_extensions.rb'
 require './spec/lib/rspec_extensions.rb'
 
 RSpec.describe "iface:driver:timer" do
-  module_dep "net"
+  module_dep "timer"
   include_context "iface:driver"
 
   it "Can call initiate a timer" do

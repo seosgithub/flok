@@ -1,6 +1,6 @@
 function timer_callback() {
   //Call timer interrupt
-  int_dispatch([0, "int_timer"]);
+  int_dispatch([0, "int_timer"])
 }
 
 function if_timer_init(tps) {

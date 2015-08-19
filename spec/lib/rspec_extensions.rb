@@ -97,7 +97,21 @@ RSpec::Matchers.define :readline_and_equal_json_x_within_y_seconds do |json, sec
     begin
       Timeout::timeout(seconds) do
         @res = JSON.parse(pipe.readline.strip)
-        return true if @res == json
+
+        if json.class != Array
+          return true if @res == json
+        else
+          expect(@res.length).to eq(json.length)
+          @res.each_with_index do |r, i|
+            if json[i] == Fixnum
+              expect(r.class).to eq(Fixnum)
+            else
+              expect(r).to eq(json[i])
+            end
+          end
+          return true
+        end
+
       end
     rescue Timeout::Error #Time out
     rescue EOFError #Couldn't read pipe
