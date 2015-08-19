@@ -1,6 +1,6 @@
 function rtc_callback() {
   //Call timer interrupt
-  int_dispatch([0, "int_rtc", Math.floor(new Date() / 1000)]);
+  int_dispatch([1, "int_rtc", Math.floor(new Date() / 1000)]);
 }
 
 function if_rtc_init(tps) {
