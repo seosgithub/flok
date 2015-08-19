@@ -641,8 +641,8 @@ service :vm do
       for (var x = 0; x < nnk.length; ++x) {
         //Array contains [node (pointer to vm_notify_map[ns][key]), index] where index points to base pointer of this
         //controller in the array
-        var arr = nn[nnk[i]][0]
-        var idx = nn[nnk[i]][1]
+        var arr = nn[nnk[x]][0]
+        var idx = nn[nnk[x]][1]
 
         //Remove
         arr.splice(idx, 1);

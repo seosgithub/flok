@@ -531,7 +531,7 @@ RSpec.describe "kern:vm_service" do
   end
 
   it "Erases entries in vm_bp_to_nmap and vm_notify_map for a controller that disconnects" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16q.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
       base = _embed("my_controller", 1, {}, null);
@@ -550,7 +550,8 @@ RSpec.describe "kern:vm_service" do
     vm_notify_map = JSON.parse(ctx.eval("JSON.stringify(vm_notify_map)"));
     expect(vm_notify_map).to eq({
       "spec" => {
-        "test" => []
+        "test" => [],
+        "test2" => []
       }
     })
   end
