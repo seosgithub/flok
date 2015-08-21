@@ -49,12 +49,10 @@ function if_dispatch(qq) {
             var q0 = q.shift();
             var q1 = q.splice(0, argc);
             async_call = function() {
-              console.log("call for async");
               this[q0].apply(null, q1);
             }
 
-            setTimeout(async_call, 100);
-              console.log("scheduled call for async");
+            setTimeout(async_call, 0);
           })();
         }
     }
@@ -71,11 +69,9 @@ function if_dispatch(qq) {
     if_dispatch_call_int_end = false;
 
     var call = function() {
-      console.log("called for incomplete")
       int_dispatch([]);
     };
-    console.log("scheduled call for incomplete");
-    setTimeout(call, 100);
+    setTimeout(call, 0);
   }
 }
 
