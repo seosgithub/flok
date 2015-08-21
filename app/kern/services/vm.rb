@@ -103,7 +103,7 @@ service :vm do
       
       //Now execute the synthronous int_events
       for (var i = 0; i < sync_read_res_waiting.length; ++i) {
-        sync_read_res_waiting(sync_read_res_waiting[i], "read_res", page);
+        int_event(sync_read_res_waiting[i], "read_res", page);
       }
     }
 
