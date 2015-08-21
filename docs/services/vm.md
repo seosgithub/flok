@@ -198,6 +198,8 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
         a reference if the entry if it is found. The reference is **not** modifiable unless you call `vm_copy_page` first. Additionally, entries you
         added recently will not be available by this untli they are written to disk via `vm_cache_write`
     * `vm_del_entry_with_id(page, entry_id)` - Removes the entry from the page. If entry_id doesn't exist, nothing happends.
+    * `vm_set_entry_with_id_key_val(page, key, entry_id, value)` - Set a particular key of an entry. This will also change the entries `_sig` field to
+        a new random signature. If an entry with the id does not exist, it will be created.
     * `vm_rehash_page(page)` - Calculates the hash for a page and modifies that page with the new `_hash` field. If the `_hash` field does not exist, it
       will create it. Multiple calls are supported as it will recalculate the index as needed.
     * `vm_reindex_page(page)` - Recalculates the `__index` field of the page. If `__index` does not exist, it is added.
@@ -226,7 +228,7 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
         `__changes_id` of the page matches `changes_id`. If the page is based (implying the base page has changes and the page has changes as all base
         pages have changes), then if the `changes_id` matches the **base** `__changes_id` , the `__base` is removed from the page. If `changes_id`
         does not match in either of the cases, then nothing happends. This may happend if a synchronization errousouly comes in.
-    * **Why do we have both `vm_rebase` and `vm_mark_changes_synced`?**
+   * **Why do we have both `vm_rebase` and `vm_mark_changes_synced`?**
       * They are used under similar circumstances. You always `vm_mark_changes_synced` before calling `vm_rebase` on a page. The reasoning is that
           `vm_rebase` will assume that the cached page does not contain changes if they are present in `older`. If you didn't do this, then the
           cached page would be rebased and could contain changes even though it's already been rebased on an older page. E.g. `newer[changes, nobase]`

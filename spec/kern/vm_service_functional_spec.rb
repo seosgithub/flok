@@ -104,6 +104,58 @@ RSpec.describe "kern:vm_service_functional" do
     ])
   end
 
+  it "Can can use vm_set_entry_with_id_key_val" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    dump = ctx.evald %{
+      dump.new_page = vm_create_page("my_id")
+      dump.new_page.entries.push({
+        _sig: "test",
+        _id: "test",
+        value: "test",
+      });
+      dump.new_page.entries.push({
+        _sig: "test2",
+        _id: "test2",
+        value: "test2",
+      });
+      dump.new_page.entries.push({
+        _sig: "test3",
+        _id: "test3",
+        value: "test3",
+      });
+      dump.new_page.entries.push({
+        _sig: "test4",
+        _id: "test4",
+        value: "test4",
+      });
+
+      vm_reindex_page(dump.new_page);
+      vm_rehash_page(dump.new_page);
+
+      vm_set_entry_with_id_key_val(dump.new_page, "test3", "value", "foo");
+      vm_set_entry_with_id_key_val(dump.new_page, "test3", "value2", "foo2"); 
+
+      //Also test some ids that do not currently exist
+      vm_set_entry_with_id_key_val(dump.new_page, "test5", "foo", "bar");
+      vm_set_entry_with_id_key_val(dump.new_page, "test5", "foo2", "bar2");
+    }
+
+    expect(dump["new_page"]["entries"][0]).to eq("_sig" => "test", "_id" => "test", "value" => "test")
+    expect(dump["new_page"]["entries"][1]).to eq("_sig" => "test2", "_id" => "test2", "value" => "test2")
+
+    expect(dump["new_page"]["entries"][2]["_id"]).to eq("test3")
+    expect(dump["new_page"]["entries"][2]["_sig"]).not_to eq(nil)
+    expect(dump["new_page"]["entries"][2]["value"]).to eq("foo")
+    expect(dump["new_page"]["entries"][2]["value2"]).to eq("foo2")
+
+    expect(dump["new_page"]["entries"][3]).to eq("_sig" => "test4", "_id" => "test4", "value" => "test4")
+
+    expect(dump["new_page"]["entries"][4]["_id"]).to eq("test5")
+    expect(dump["new_page"]["entries"][4]["_sig"]).not_to eq(nil)
+    expect(dump["new_page"]["entries"][4]["foo"]).to eq("bar")
+    expect(dump["new_page"]["entries"][4]["foo2"]).to eq("bar2")
+   end
+
   it "Can can use vm_copy_page" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     dump = ctx.evald %{

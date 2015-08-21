@@ -265,6 +265,24 @@ service :vm do
       }
       vm_reindex_page(page);
     }
+
+    function vm_set_entry_with_id_key_val(page, eid, key, val) {
+      var _idx = page.__index[eid];
+
+      //Do we have the entry?
+      if (_idx > -1) {
+        //Great, then set the id and _sig
+        page.entries[_idx][key] = val;
+        page.entries[_idx]._sig = gen_id();
+      } else {
+        //Nope, create the entry
+        var entry = {_sig: gen_id(), _id: eid}
+        entry[key] = val;
+        page.entries.push(entry);
+        vm_reindex_page(page);
+      }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     //vm_diff helpers
