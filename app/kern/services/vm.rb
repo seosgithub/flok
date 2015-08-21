@@ -61,7 +61,17 @@ service :vm do
 
       //Map that holds all controllers synchronously sent (used to avoid sending
       //those controllers that are also on vm_notify_map a second message)
-      var sync_sent_map = {}; 
+      var sync_sent_map = {};
+		
+      //You *cannot* int_event in the middle of this function, it must be deferred
+      //to the end of the function as all the code here is critical. int_event will
+      //synchronously execute and can cause side effects if say the int_event causes
+      //a controller to be embedded which then watches a page, it will get hit in the
+      //block that looks for a vm_notify_map (which it is now apart of)
+      var sync_read_res_waiting = [];
+	  
+      //Notify all controllers that requested to be notified synchronously
+      //typically via watch(sync:)
       if (sync_waiting_controllers !== undefined) {
         for (var i = 0; i < sync_waiting_controllers.length; ++i) {
           var c = sync_waiting_controllers[i];
@@ -71,7 +81,7 @@ service :vm do
           sync_sent_map[c] = true;
 
           //Notify controller synchronously
-          int_event(c, "read_res", page);
+          sync_read_res_waiting.push(c);
         }
       }
 
@@ -90,6 +100,11 @@ service :vm do
 
       //Clear the sync_waiting_controllers
       delete vm_cache_write_sync_pending[page._id];
+      
+      //Now execute the synthronous int_events
+      for (var i = 0; i < sync_read_res_waiting.length; ++i) {
+        sync_read_res_waiting(sync_read_res_waiting[i], "read_res", page);
+      }
     }
 
     function vm_pageout() {
