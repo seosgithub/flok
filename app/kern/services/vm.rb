@@ -53,6 +53,8 @@ service :vm do
         vm_transaction_changed_ids.push(page._id);
       }
 
+      vm_reindex_page(page);
+
       vm_dirty[ns][page._id] = page;
       vm_cache[ns][page._id] = page;
 
