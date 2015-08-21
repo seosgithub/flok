@@ -193,7 +193,7 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
   * **Generic Page**
     * `vm_create_page(id)` - **this does not write anything to memory. It has no side effects except returning a hash**.
     * `vm_create_page()` -  Same as vm_create_page, but generates an id fore you.
-    * `vm_copy_page(page)` - Creates a copy of the page. Only copies the `_head`, `_next`, `_id`, `entries`, `_hash`
+    * `vm_copy_page(page)` - Creates a copy of the page. Only copies the `_head`, `_next`, `_id`, deep copy of `entries`, `_hash` and recalculates the `__index`
     * `vm_entry_with_id(page, entry_id)` - Searches a page for an entry with a particular id via the `__index` table. retruns `nil` if the entry is not found or
         a reference if the entry if it is found. The reference is **not** modifiable unless you call `vm_copy_page` first. Additionally, entries you
         added recently will not be available by this untli they are written to disk via `vm_cache_write`

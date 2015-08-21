@@ -173,9 +173,18 @@ RSpec.describe "kern:vm_service_functional" do
       dump.new_page.entries[0]["value"] = "Circle";
       dump.head_z_next_triangle_entry_circle = vm_copy_page(dump.new_page);
 
-      //Modify the new_page's entry again in-place
+      //Modify the new_page's entry again in-place to make sure it dosen't affect the copies
       dump.new_page.entries[0]["_sig"] = "Triangle"
       dump.new_page.entries[0]["value"] = "Triangle"
+
+      //Force a re-index, copy the page
+      vm_reindex_page(dump.new_page);
+      dump.head_z_next_triangle_entry_triangle_indexed = vm_copy_page(dump.new_page);
+
+      //Adjust the page's index array container and an element itself to make sure nothing
+      //is referenced.
+      dump.new_page.__index["id0"] = -1 //This shouldn't modify our copied pages index at id0
+      dump.new_page.__index["id1"] = 2  //Non-existant, just checking to make sure arrays are not referenced
     }
 
     expect(dump["no_head_no_next_no_entry"]).to eq({
@@ -184,6 +193,7 @@ RSpec.describe "kern:vm_service_functional" do
       "_id" => "Q",
       "_hash" => nil,
       "entries" => [],
+      "__index" => {}
     })
 
     expect(dump["head_z_next_triangle_entry_square"]).to eq({
@@ -194,6 +204,7 @@ RSpec.describe "kern:vm_service_functional" do
       "entries" => [
         {"_id" => "id0", "_sig" => "Square", "value" => "Square"},
       ],
+      "__index" => {"id0" => 0}
     })
 
     expect(dump["head_z_next_triangle_entry_circle"]).to eq({
@@ -204,6 +215,18 @@ RSpec.describe "kern:vm_service_functional" do
       "entries" => [
         {"_id" => "id0", "_sig" => "Circle", "value" => "Circle"},
       ],
+      "__index" => {"id0" => 0}
+    })
+
+    expect(dump["head_z_next_triangle_entry_triangle_indexed"]).to eq({
+      "_head" => "Z",
+      "_next" => "Triangle",
+      "_id" => "Q",
+      "_hash" => nil,
+      "entries" => [
+        {"_id" => "id0", "_sig" => "Triangle", "value" => "Triangle"},
+      ],
+      "__index" => { "id0" => 0, }
     })
 
     expect(dump["new_page"]).to eq({
@@ -214,7 +237,10 @@ RSpec.describe "kern:vm_service_functional" do
       "entries" => [
         {"_id" => "id0", "_sig" => "Triangle", "value" => "Triangle"},
       ],
-      "__index" => {}
+      "__index" => {
+        "id0" => -1,
+        "id1" => 2
+      }
     })
   end
 

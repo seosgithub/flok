@@ -217,7 +217,7 @@ service :vm do
     }
 
     function vm_copy_page(page) {
-      var page = {
+      var copy = {
         _id: page._id,
         _head: page._head,
         _next: page._next,
@@ -225,7 +225,9 @@ service :vm do
         entries: JSON.parse(JSON.stringify(page.entries)),
       };
 
-      return page;
+      vm_reindex_page(copy);
+
+      return copy;
     }
 
     function vm_rehash_page(page) {
