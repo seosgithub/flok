@@ -36,6 +36,74 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["new_anon_page"]["entries"]).to eq []
   end
 
+  it "Can can use vm_entry_with_id" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    dump = ctx.evald %{
+      dump.new_page = vm_create_page("my_id")
+      dump.new_page.entries.push({
+        _sig: "test",
+        _id: "test",
+        value: "test",
+      });
+
+      vm_reindex_page(dump.new_page);
+      vm_rehash_page(dump.new_page);
+
+      dump.test_entry = vm_entry_with_id(dump.new_page, "test");
+      dump.no_such_entry = vm_entry_with_id(dump.new_page, "test2");
+    }
+
+    expect(dump["test_entry"]).to eq({
+      "_id" => "test",
+      "_sig" => "test",
+      "value" => "test",
+    })
+
+    expect(dump["test_entry2"]).to eq(nil)
+  end
+
+  it "Can can use vm_del_entry_with_id" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
+    dump = ctx.evald %{
+      dump.new_page = vm_create_page("my_id")
+      dump.new_page.entries.push({
+        _sig: "test",
+        _id: "test",
+        value: "test",
+      });
+      dump.new_page.entries.push({
+        _sig: "test2",
+        _id: "test2",
+        value: "test2",
+      });
+      dump.new_page.entries.push({
+        _sig: "test3",
+        _id: "test3",
+        value: "test3",
+      });
+      dump.new_page.entries.push({
+        _sig: "test4",
+        _id: "test4",
+        value: "test4",
+      });
+
+      vm_reindex_page(dump.new_page);
+      vm_rehash_page(dump.new_page);
+
+      vm_del_entry_with_id(dump.new_page, "test3");
+      vm_del_entry_with_id(dump.new_page, "test4");
+      vm_del_entry_with_id(dump.new_page, "test");
+      vm_del_entry_with_id(dump.new_page, "testX");
+    }
+
+    expect(dump["new_page"]["entries"]).to eq([{
+        "_sig" => "test2",
+        "_id" => "test2",
+        "value" => "test2",
+      }
+    ])
+  end
+
   it "Can can use vm_copy_page" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5.rb") 
     dump = ctx.evald %{

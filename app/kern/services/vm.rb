@@ -252,6 +252,19 @@ service :vm do
         page.__index[page.entries[i]._id] = i;
       }
     }
+
+    function vm_entry_with_id(page, eid) {
+      var _idx = page.__index[eid];
+      return page.entries[_idx];
+    }
+
+    function vm_del_entry_with_id(page, eid) {
+      var _idx = page.__index[eid];
+      if (_idx > -1) {
+        page.entries.splice(_idx, 1);
+      }
+      vm_reindex_page(page);
+    }
     ///////////////////////////////////////////////////////////////////////////
 
     //vm_diff helpers
