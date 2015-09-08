@@ -631,6 +631,9 @@ service :vm do
       <% end %>
     }
 
+    //This only pages-in the unsynced information
+    //not the actual data itself, its still stored
+    //in the cache
     vm_unsynced_paged_in = false;
     function vm_pg_sync_pagein() {
       //Only pages-in if necessary
