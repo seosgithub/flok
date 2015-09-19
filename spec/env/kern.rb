@@ -69,7 +69,32 @@ shared_context "kern" do
 
   #Create a new flok project, add the given user_file (an .rb file containing controllers, etc.)
   #and then retrieve a V8 instance from this project's application_user.js
-  def flok_new_user user_controllers_src, service_config=nil, service_src=nil
+  def flok_new_user user_controllers_src, service_config=nil, service_src=nil, hooks_src=nil
+    return flok_new_user_with_src(user_controllers_src, service_config, service_src, hooks_src)[:ctx]
+  end
+
+  #Returns a v8 instance with modifications like handling dispatch of flok
+  #And sets some members (not the greatest)
+  def v8_flok
+    #Execute
+    @driver = FakeDriverContext.new
+    v8 = V8::Context.new(:with => @driver)
+    @ctx = v8
+    @driver.ctx = v8
+    v8.eval %{
+      //We must convert this to JSON because the fake driver will receive
+      //a raw v8 object otherwise
+      function if_dispatch(q) {
+        if_dispatch_json(JSON.stringify(q));
+      }
+    }
+
+    return v8
+  end
+
+  #Create a new flok project, add the given user_file (an .rb file containing controllers, etc.)
+  #and then retrieve a V8 instance from this project's application_user.js
+  def flok_new_user_with_src user_controllers_src, service_config=nil, service_src=nil, hooks_src=nil
     temp_dir = new_temp_dir
     Dir.chdir temp_dir do
       flok "new test"
@@ -78,30 +103,21 @@ shared_context "kern" do
         File.write './app/controllers/user_controller.rb', user_controllers_src
         File.write './config/services.rb', service_config if service_config
         File.write './app/services/service0.rb', service_src if service_src
+        File.write './config/hooks.rb', hooks_src if hooks_src
 
         #Build
         unless flok "build" #Will generate drivers/ but we will ignore that
           raise "Build failed"
         end
 
-        #Execute
-        @driver = FakeDriverContext.new
-        v8 = V8::Context.new(:with => @driver)
-        @ctx = v8
-        @driver.ctx = v8
-        v8.eval %{
-          //We must convert this to JSON because the fake driver will receive
-          //a raw v8 object otherwise
-          function if_dispatch(q) {
-            if_dispatch_json(JSON.stringify(q));
-          }
-        }
-
-        v8.eval File.read('./products/chrome/application_user.js')
-        return v8
+        v8 = v8_flok
+        src = File.read('./products/chrome/application_user.js') 
+        v8.eval src
+        return {:ctx => v8, :src => src}
       end
     end
   end
+
 
   #This supports if_dispatch interface and allows for sending information back via 
   #int_dispatch to the kernel. It is embededd into the v8 context environment

@@ -158,6 +158,8 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
+            //HOOK_ENTRY[#{@controller.name}_will_goto]
+
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;

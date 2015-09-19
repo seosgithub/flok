@@ -36,7 +36,8 @@ You create and build projects via the `flok` command. You must set the `$FLOK_EN
   `./products/$PLATFORM/services/combined_services.rb`. The output of this file is moved to `./products/$PLATFORM/glob/services.js`
   6. `./products/$PLATFORM/application.js` is moved to `./products/$PLATFORM/glob/application.js`
   7. The local project `./products/$PLATFORM/glob/application.js` and `./products/$PLATFORM/glob/user_compiler.js` and `./products/$PLATFORM/glob/services.js` and `./products/$PLATFORM/glob/scripts.js`  are merged into `./products/$PLATFORM/glob/application_user.js.erb`.
-  8. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
+  9. The `hooks` compiler then runs over the source injecting any necessary hook code into the special comments.
+  10. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
 
 ####Supported variables
   * `@debug` - Set to `true` when FLOK_ENV=DEBUG

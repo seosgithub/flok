@@ -18,7 +18,7 @@ as necessary.*
  6. All js files are globbed from `./products/$PLATFORM/glob` and combined into `./products/$PLATFORM/glob/application.js.erb`
  7. Auto-generated code is placed at the end (like PLATFORM global)
  8. The module specific code in `./kern/mod/.*js` are added when the name of the file (without the js part) is mentioned in the `./app/drivers/$PLATFORM/config.yml` `mods` section and appended to `glob/application.js.erb`
- 9. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`
+ 9. The compiled `glob/application.js.erb` file is run through the ERB compiler and formed into `application.js`. This adds things like static debug variables, and hooks.
 
 ##Erb variables
 All kernel source files support embedded ERB code like `<% if DEBUG %>Code<% end %>`. These files include:

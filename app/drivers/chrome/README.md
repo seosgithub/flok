@@ -64,7 +64,12 @@ var TestController = function() {
 $(document).ready(function() {
   regController("__test__", TestController);
 });
+
 ```
+
+### Handling hook events
+onHookEvent("test", function(params) {
+});
 
 ### DOM helpers
 ```html

@@ -9,6 +9,7 @@ require "flok/interactive"
 require "flok/user_compiler"
 require "flok/services_compiler"
 require "flok/transition_compiler"
+require "flok/hooks_compiler"
 
 module Flok
 end

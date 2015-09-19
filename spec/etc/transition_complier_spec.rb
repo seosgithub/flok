@@ -22,6 +22,10 @@ RSpec.describe "Transition compiler" do
     end
   end
 
+  it "Can insert a hook into ${controller_name}_will_goto and this hook is invoked" do
+
+  end
+
   it "Can load the ruby module" do
     compiler = Flok::TransitionCompiler
   end

@@ -11,6 +11,7 @@ DEBUG:
     - persist
     - timer
     - rtc
+    - hook
   defines:
     - mem_pager
     - sockio_pager
@@ -25,6 +26,7 @@ RELEASE:
     - persist
     - timer
     - rtc
+    - hook
   defines:
     - mem_pager
     - sockio_pager
