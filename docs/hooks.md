@@ -13,9 +13,18 @@ Whether a hook is synchronous or not synchronous depends entirely on the type of
 ##Hooking check points
 Each controller has a plethora of functions that determine it's lifetime and behaviours. These functions include the actions of creation, destruction, embedding, pushing actions, talking to services, etc.
 These functions are built into the ctable entry for each controller and possible controller related functions like _embed. Each controller entry point is marked with a special comment marker that has
-the following format `//HOOK_ENTRY[event_name]`. The available parameters in the context of the hook detection point are described in each hook detection point below
+the following JSON format:
 
-  * `${controller_name}_will_goto` - The controller is about to invoke the Goto macro and switch actions or it has just entered the first action from choose_action (which is a Goto).
+```ruby 
+//HOOK_ENTRY[my_name] {foo: "bar"}...
+```
+The name is the hook name and the params is context specific inforamtion the compiler has embedded. Live variables that are in the context of the hook detection point are described in each hook detection point below.
+
+  * `controller_will_goto` - The controller is about to invoke the Goto macro and switch actions or it has just entered the first action from choose_action (which is a Goto).
+    * params
+      * `controller_name` - The controller name that this entry effects
+      * `might_respond_to` - An array of listing of all events that this controller could in theory respond to, it's all actions
+      * `actions_responds_to` - A hash where all the keys are the action names and the value is an array of all the events the action responds to (has on 'xxx' for) e.g. {"my_action" => ["back_clicked"], "other" => [...]}
     * Useful variables
       * `old_action` - The previous action. If there is no action, this is set to `choose_action`
       * `__info__.action` - The name of the new action

@@ -22,7 +22,7 @@ module Flok
   end
 end
 
-#Compiler executes all rb code inside this context
+#Compiler executes all rb code (ERB) inside this context
 module Flok
   class UserCompilerContext
     attr_accessor :controllers, :actions, :ons
@@ -31,6 +31,19 @@ module Flok
       @controllers = []
       @actions = []
       @ons = []
+    end
+
+    #Returns a list of events that this controller 'might' respond to
+    #Used for things like hook event handlers to provide queryable 
+    #information.
+    def might_respond_to
+      @actions.map{|e| e.ons}.flatten.map{|e| e[:name]}
+    end
+
+    #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+    #where each action list contains all the events this action responds to
+    def actions_respond_to
+      @actions.map{|e| [e.name.to_s, e.ons.map{|e| e[:name].to_s}]}.to_h
     end
 
     def get_binding
@@ -158,7 +171,7 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
-            //HOOK_ENTRY[#{@controller.name}_will_goto]
+            //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to}.to_json}
 
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
@@ -496,7 +509,7 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller, :name, :ons, :every_handlers
+    attr_accessor :controller, :name, :every_handlers
     include UserCompilerMacro
 
     def initialize controller, name, ctx, &block
@@ -504,7 +517,7 @@ module Flok
       @name = name
       @ctx = ctx
       @_on_entry_src = ""
-      @ons = [] #Event handlers
+      @_ons = [] #Event handlers
       @every_handlers = []
 
       self.instance_eval(&block)
@@ -520,7 +533,30 @@ module Flok
     end
 
     def on name, js_src
-      @ons << {:name => name, :src => _macro(js_src)}
+      #We need this guard because we run a two pass compile on the ons. When 'ons' is accessed, it is assumed that we are now
+      #in the compilation phase and we build all the entries. This is because some macros in the ons source code requires
+      #prior-knowledge of controller-level information like all possible events in all actions for hooks
+      raise "Uh oh, you tried to add an event handler but we already assumed that compilation took place so we cached everything..." if @__ons_did_build or @__ons_is_building
+
+      @_ons << {:name => name, :src => js_src}
+    end
+
+    def ons 
+      #Return the un-compiled version as some macros access this data and the real ons
+      #would cause infinite recursion
+      return @_ons if @__ons_is_building
+      @__ons_is_building = true
+
+      #We need this guard because we run a two pass compile on the ons. When 'ons' is accessed, it is assumed that we are now
+      #in the compilation phase and we build all the entries. This is because some macros in the ons source code requires
+      #prior-knowledge of controller-level information like all possible events in all actions for hooks
+      unless @__ons_did_build
+        @__ons_did_build = true
+        @__ons = @_ons.map{|e| {:name => e[:name], :src => _macro(e[:src])}}
+      end
+
+      @__ons_is_building = false
+      return @__ons
     end
 
     def every seconds, str

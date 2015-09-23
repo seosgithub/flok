@@ -54,6 +54,9 @@ class FlokCLI < Thor
     #4. Move ./app/scripts/*.js into `./products/$PLATFORM/./glob/scripts.js`
     Flok.src_glob("js", './app/scripts', File.join(local_products_path, platform, "./glob/scripts.js"))
 
+    #Save the current local user's project directory to reference
+    user_project_dir = Dir.pwd
+
     #We are now inside the platform folder
     Dir.chdir File.join(local_products_path, platform) do
       #3. Put user_compiler_js in glob folder and services into ./services/user_services.rb
@@ -70,15 +73,21 @@ class FlokCLI < Thor
       FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
 
-      #7. Combine application.js and user_compiler.js.erb and services.js and scripts.js
-      File.open "glob/application_user.js.erb", "w" do |f|
+      #7. The local project `./products/$PLATFORM/glob/application.js` and `./products/$PLATFORM/glob/user_compiler.js` and `./products/$PLATFORM/glob/services.js` and `./products/$PLATFORM/glob/scripts.js`  are merged into `./products/$PLATFORM/glob/application_user.js.erb.hooks`.
+      File.open "glob/application_user.js.erb.hooks", "w" do |f|
         f.puts File.read("glob/application.js")
         f.puts File.read("glob/user_compiler.js")
         f.puts File.read("glob/services.js")
         f.puts File.read("glob/scripts.js")
       end
 
-      #8. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
+      #9. The `hooks` compiler then runs over the source injecting any necessary hook code into the special comments by going through `./config/hooks.rb` in the user's project.
+      erb_hooks_src = File.read "glob/application_user.js.erb.hooks"
+      manifest = Flok::UserHooksToManifestOrchestrator.convert_hooks_to_manifest File.read("#{user_project_dir}/config/hooks.rb")
+      erb_src = Flok::HooksCompiler.compile erb_hooks_src, manifest
+      File.write "glob/application_user.js.erb", erb_src
+
+      #9. The `erb` files is then sent to `./products/$PLATFORM/glob/application_user.js` with the below `ERB` variables allowable.
       erb_src = File.read "glob/application_user.js.erb"
       renderr = ERB.new(erb_src)
       context = ERBUserApplicationContext.new()
