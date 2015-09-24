@@ -101,11 +101,13 @@ eof
 
     manifest = Flok::HooksManifest.new
     will_gotos_found = 0
+    from_to_action_pairs_found = []
     entry = Flok::HooksManifestEntry.new("controller_will_goto") do |hook_info|
       will_gotos_found += 1
       #Static parameters
       expect(hook_info["controller_name"]).to eq("my_controller")
       expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
 
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
@@ -127,6 +129,9 @@ eof
     #Expect to have found two will_goto entries given that there is one Goto request
     #and one implicit Goto from the entry
     expect(will_gotos_found).to eq(2)
+
+    #Expect to have gotten all the goto to/from action pairs
+    expect(from_to_action_pairs_found.to_set).to eq([{"other" => "index"}, {"choose_action" => "index"}].to_set)
 
     #Re-evaluate the v8 instance
     ctx = v8_flok

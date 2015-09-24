@@ -171,7 +171,7 @@ module Flok
             var old_action = __info__.action;
             __info__.action = "#{action_name}";
 
-            //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to}.to_json}
+            //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
 
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.

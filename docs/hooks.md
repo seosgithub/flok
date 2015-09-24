@@ -25,6 +25,8 @@ The name is the hook name and the params is context specific inforamtion the com
       * `controller_name` - The controller name that this entry effects
       * `might_respond_to` - An array of listing of all events that this controller could in theory respond to, it's all actions
       * `actions_responds_to` - A hash where all the keys are the action names and the value is an array of all the events the action responds to (has on 'xxx' for) e.g. {"my_action" => ["back_clicked"], "other" => [...]}
+      * `from_action` - The name of the action we are coming from
+      * `to_action` - The name of the action we are going to
     * Useful variables
       * `old_action` - The previous action. If there is no action, this is set to `choose_action`
       * `__info__.action` - The name of the new action
