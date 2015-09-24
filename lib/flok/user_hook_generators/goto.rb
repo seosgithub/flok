@@ -2,7 +2,7 @@ require_relative 'helpers'
 
 module Flok
   class GotoHooksDSLEnv
-    attr_accessor :selectors, :from_action_responds_to, :to_action_responds_to
+    attr_accessor :selectors
 
     def initialize
       @selectors = []
@@ -15,13 +15,39 @@ module Flok
     #The previous / next action contains an event handler for...
     #################################################################################
     def from_action_responds_to? responds
-      @from_action_responds_to = responds
-      @selectors << ->(p) { p["might_respond_to"] and p["might_respond_to"].include? responds }
+      @selectors << lambda do |params|
+        from_action = params["from_action"]
+        actions_respond_to = params["actions_responds_to"] #This is a hash that maps all actions to sensetivity lists
+
+        #Get the sensetivity list if possible for this action (this is the list of events this action responds to)
+        if actions_respond_to[from_action]
+          sensetivity_list = actions_respond_to[from_action]
+
+          #Does the sensetivity list include the event we are interested in?
+          next sensetivity_list.include? responds
+        end
+
+        #The action wasn't even listed on the list, i.e. it has no sensetivity list
+        next false
+      end
     end
 
     def to_action_responds_to? responds
-      @to_action_responds_to = responds
-      @selectors << ->(p) { p["might_respond_to"] and p["might_respond_to"].include? responds }
+      @selectors << lambda do |params|
+        to_action = params["to_action"]
+        actions_respond_to = params["actions_responds_to"] #This is a hash that maps all actions to sensetivity lists
+
+        #Get the sensetivity list if possible for this action (this is the list of events this action responds to)
+        if actions_respond_to[to_action]
+          sensetivity_list = actions_respond_to[to_action]
+
+          #Does the sensetivity list include the event we are interested in?
+          next sensetivity_list.include? responds
+        end
+
+        #The action wasn't even listed on the list, i.e. it has no sensetivity list
+        next false
+      end
     end
     #################################################################################
   end
@@ -38,43 +64,11 @@ module Flok
     #Inject into HOOK_ENTRY[controller_will_goto] that match the given selectors from the DSL
     #based on the hook entry static parameters
     entry = HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
-
-      #Evaluated expression to see if event should fire, the max term in POS where a bunch of
-      #terms are ANDED togeather
-      ands = JSTermGroup.new
-
-      #Use the actions_responds_to to lookup qualifying actions and then check to see if we are going to/from
-      #those qualifying actions
-      if dsl_env.from_action_responds_to
-        qualifying_from_actions = entry_hook_params["actions_responds_to"].select{|k, v| v.include? dsl_env.from_action_responds_to}.map{|k, v| k}
-
-        #Get or terms
-        ors = JSTermGroup.new
-        qualifying_from_actions.each do |action_name|
-          ors << "old_action === '#{action_name}'"
-        end
-
-        ands << ors.to_or_js
-      end
-
-      if dsl_env.to_action_responds_to
-        qualifying_to_actions = entry_hook_params["actions_responds_to"].select{|k, v| v.include? dsl_env.to_action_responds_to}.map{|k, v| k}
-
-        #Get or terms
-        ors = JSTermGroup.new
-        qualifying_to_actions.each do |action_name|
-          ors << "__info__.action === '#{action_name}'"
-        end
-
-        ands << ors.to_or_js
-      end
-
       next %{
-        if (#{ands.to_and_js}) {
-          SEND("main", "if_hook_event", "#{hook_event_name}", {});
-        }
+        SEND("main", "if_hook_event", "#{hook_event_name}", {});
       }
     end
+
     manifest << entry
   end
 end
