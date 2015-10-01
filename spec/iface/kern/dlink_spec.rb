@@ -10,8 +10,6 @@ RSpec.describe "iface:kern:net" do
 
   #A callback was registered in the kernel for testing purposes
   it "A mock URL notify does receive the correct information" do
-    @secret = SecureRandom.hex
-
     #Wait for response
     @pipe.puts [0, "ping"].to_json; @pipe.readline_timeout
 
@@ -19,7 +17,7 @@ RSpec.describe "iface:kern:net" do
     @pipe.puts [0, "get_int_dlink_spec"].to_json
 
     res = [
-      [0, 1, "get_int_dlink_spec", ["http://test.com/foo", {"secret"=>@secret}]]
+      [0, 1, "get_int_dlink_spec", ["http://test.com/foo", {"foo"=>"bar"}]]
     ]
 
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 5.seconds)
