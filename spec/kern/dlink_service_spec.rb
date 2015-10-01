@@ -34,9 +34,13 @@ RSpec.describe "kern:dlink_service" do
       "http://google.com/test", {"foo" => "bar"}
     ]
 
-    dump = ctx.evald %{
-      dump.dlink_res_params = dlink_res_params;
-    }
+    #Should not exist yet because of defered event
+    dump = ctx.evald %{ dump.dlink_res_params = dlink_res_params; }
+    expect(dump["dlink_res_params"]).to eq(nil)
+
+    #Drain the defered queue and check again
+    ctx.eval %{ for (var i = 0; i < 100; ++i) { int_dispatch([]); } }
+    dump = ctx.evald %{ dump.dlink_res_params = dlink_res_params; }
 
     expect(dump["dlink_res_params"]).to eq({
       "url" => "http://google.com/test",
