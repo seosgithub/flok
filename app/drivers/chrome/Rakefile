@@ -40,6 +40,7 @@ task :spec do
   #Build the driver
   ENV['BUILD_PATH'] = "../../../products/chrome/drivers/"
   ENV['FLOK_ENV'] = 'DEBUG'
+  ENV['FLOK_CHROME_SPEC'] = 'TRUE'
   system('rake build')
 
   recipe = Cakery.new("./cakery/spec.js.erb") do |f|

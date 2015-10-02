@@ -85,6 +85,7 @@ onHookEvent("test", function(params) {
 ### ERB Compliation
 The final `chrome.js` file is run through an `ERB` compiler that contains the variables:
   * `@debug` - True if `FLOK_ENV=DEBUG`
+  * `@spec` - True if you are running the spec task in the Rakefile
   * `@release` - True if `FLOK_ENV=RELEASE`
   * `@mods` - A list of active kernel modules listed from `config.yml`
 
