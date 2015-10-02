@@ -14,4 +14,5 @@ most clients have native ways of decoding URI's.
 
 #### Driver
 There is no requests the driver must handle. However, the driver should dispatch the message for the `int_dlink_notify` off the main queue. It should never be dispatched
-before the application has fully started up. A pause of +500ms or more is acceptable and often expected.
+before the application has fully started up. It is internally asynchronously dispatched, but for safety's sake, it should be dispatched at the soonest, immediately after
+the system has loaded.

@@ -6,11 +6,13 @@ service :dlink do
       var cbps = Object.keys(dlink_sessions);
       var einfo = {url: url, params: params};
       for (var i = 0; i < cbps.length; ++i) {
+        int_event_defer(cbps, "dlink_req", einfo);
+      }
     }
   }
 
   on_wakeup %{
-  }
+ }
 
   on_sleep %{
   }
