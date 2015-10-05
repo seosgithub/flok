@@ -69,6 +69,10 @@ ctable = {
                 handlers: {
                   <% a.ons.each do |e| %>
                     <%= e[:name] %>: function(__base__, params) {
+                        <% if @debug %>
+                          if (__base__.constructor !== Number) { throw "on('<%= e[:name] %>') for the controller: <%= c.name %>:<%= a.name %> was not given a number for it's __base__ pointer, but of type: " + __base__.constructor + "with the value: " + __base__};
+                        <% end %>
+
                       var __info__ = tel_deref(__base__);
                       var context = __info__.context;
                       var current_action = __info__.action;

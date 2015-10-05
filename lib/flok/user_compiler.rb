@@ -31,6 +31,8 @@ module Flok
       @controllers = []
       @actions = []
       @ons = []
+
+      @debug = ENV["FLOK_ENV"] ? true : false
     end
 
     #Returns a list of events that this controller 'might' respond to
@@ -98,8 +100,18 @@ module Flok
 
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
-          res = %{
-            
+          res = ""
+
+          if @debug
+            res += %{
+            }
+          end
+
+          res += %{
+            <% if @debug %>
+              if (__base__.constructor !== Number) { throw "Embed for the controller: #{@controller.name} was not given a number for it's __base__ pointer, but of type: " + __base__.constructor + "with the value: " + __base__};
+            <% end %>
+
             var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
             __info__.embeds[#{spot_index-1}].push(ptr);
           }
