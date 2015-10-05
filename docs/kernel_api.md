@@ -27,7 +27,7 @@ instead.
   * `gen_id()` - Will return a random unique id (8 character string).
 
 ##Events
-  * `reg_evt(ep, f)` - Register a function to be called when an event is processed by `int_event`. The function will receive `(ep, event_name, info)`.
+  * `reg_evt(ep, f)` - Register a function to be called when an event is processed by `int_event`. The function will receive `(ep, event_name, info)`. ep must be either a string or number.
 
   * `dereg_evt(ep)` - Do not do anything if ep is received as an `int_event`
 
