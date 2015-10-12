@@ -10,6 +10,11 @@ function dlink_init() {
   //Get URL portion
   var url = <%= @spec ? "dlink_spec_window" : "window" %>.location.protocol + '//' + <%= @spec ? "dlink_spec_window" : "window" %>.location.host + <%= @spec ? "dlink_spec_window" : "window" %>.location.pathname;
 
+  //Reset our URL to blank (this dosen't work inside phantomJS)
+<% if not @spec %>
+  window.history.replaceState({}, "", "/");
+<% end %>
+
   //Notify dlink
   int_dispatch([2, "int_dlink_notify", url, params]);
 }
@@ -25,4 +30,3 @@ function dlink_init() {
     }
   };
 <% end %>
-

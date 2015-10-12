@@ -5,6 +5,9 @@ This driver supports an internet browser.
 At the completion of the build, the driver directory, typically `products/$PLATFORM/driver` will contain a `chrome.js` file.  This must be included
 before your `application.js` file.
 
+# Quirks
+The `dlink` module which handles inbound URL's will clear the URL when the page loads.
+
 ### HTML conventions
 There is excatly (1) divider that is used to place everything inside of that is visible.  This divider *must* have the following HTML code:
 ```html
