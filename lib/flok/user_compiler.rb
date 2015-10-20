@@ -589,7 +589,7 @@ module Flok
           self.instance_eval(&macro)
         @current_action = nil
       else
-        raise "No macro found named: #{method}"
+        raise "No macro found named: #{method} for controller #{@controller.name} in action #{@name}"
       end
     end
   end
