@@ -2,10 +2,8 @@ require 'fileutils'
 require_relative '../../../lib/flok'
 require 'securerandom'
 require 'tmpdir'
-require 'phantomjs'
 require 'tempfile'
 require 'erb'
-require File.join(File.dirname(__FILE__), "./build_context")
 require 'cakery'
 require '../../../spec/lib/helpers.rb'
 
@@ -27,24 +25,7 @@ task :spec do
   include SpecHelpers
   $stderr.puts "Starting APPLE spec test"
   $stderr.puts "-----------------------------------------------------"
-  sh2("boojs #{f.path}") do |stdin, stdout|
-    loop do
-      begin
-        Timeout::timeout(10) do
-          res = stdout.readline
-          $stderr.puts "\t"+res
-          if res =~ /__SUCCESS/
-            exit 0
-          elsif res =~ /__FAILED/
-            exit 1
-          end
-        end
-      rescue => e
-        $stderr.puts e.inspect
-        exit 1
-      end
-    end
-  end
+  puts "hi"
 end
 
 #Establish an environment with a pipe assuming the world is built
@@ -52,8 +33,5 @@ task :pipe => :build do
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
 
   exec "ruby", "-e", %{
-    require './pipe'
-    server = InteractiveServer.new "../../../products/chrome/drivers/chrome.js"
-    server.begin_pipe
   }
 end
