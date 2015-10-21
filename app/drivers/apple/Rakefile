@@ -9,10 +9,17 @@ require '../../../spec/lib/helpers.rb'
 
 #Compile all the *.js files into one file
 task :build do
+  puts ENV["BUILD_PATH"]
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
   build_path = File.expand_path(build_path)
 
   raise "FLOK_ENV must be debug or release got #{ENV['FLOK_ENV']}" unless ["DEBUG", "RELEASE"].include? ENV["FLOK_ENV"]
+
+  #Compile via xcodebuild
+  FileUtils.mkdir_p "./flok-pod/tmp"
+  system(%{
+   xcodebuild -workspace flok-pod/Example/flok.xcworkspace -scheme "flok-Example" -sdk "iphonesimulator9.0" -destination "OS=9.0,name=iPhone 6s" -configuration Debug ONLY_ACTIVE_ARCH=NO CONFIGURATION_BUILD_DIR=$PWD/flok-pod/tmp build | xcpretty -c
+  })
 end
 
 #Make sure it runs
@@ -31,6 +38,9 @@ end
 #Establish an environment with a pipe assuming the world is built
 task :pipe => :build do
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
+
+  system "xcrun simctl install booted ./flok-pod/tmp/flok_Example.app"
+  system "xcrun simctl launch booted org.cocoapods.demo.flok-Example"
 
   exec "ruby", "-e", %{
   }
