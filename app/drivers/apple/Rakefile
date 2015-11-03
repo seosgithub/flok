@@ -19,7 +19,7 @@ task :build do
   FileUtils.mkdir_p "./flok-pod/tmp"
 
   #You should compile it by hand with XCode if you're using it interactively
-  unless ENV["XCODE_INTERACTIVE"]
+  unless ENV["INTERACTIVE"] == "true"
     system(%{
    xcodebuild -workspace flok-pod/Example/flok.xcworkspace -scheme "flok-Example" -sdk "iphonesimulator" -destination "OS=9.1,name=iPhone 4s" -configuration Debug ONLY_ACTIVE_ARCH=NO CONFIGURATION_BUILD_DIR=$PWD/flok-pod/tmp build | xcpretty -c 1>&2
   })
@@ -43,7 +43,7 @@ task :pipe => :build do
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
 
   #Using xcode interactively, expecting it to be run from xcode
-  unless ENV["XCODE_INTERACTIVE"]
+  unless ENV["INTERACTIVE"] == "true"
     system "xcrun simctl install booted ./flok-pod/tmp/flok_Example.app 1>&2"
     system "xcrun simctl launch booted org.cocoapods.demo.flok-Example 1>&2"
   end

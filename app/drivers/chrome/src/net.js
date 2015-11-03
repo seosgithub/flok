@@ -11,8 +11,8 @@ if_net_req = function(verb, url, params, tp_base) {
     success: function(data) {
       int_dispatch([3, "int_net_cb", tp_base, true, data]);
     },
-    error: function(xhr, textStatus, err) {
-      int_dispatch([3, "int_net_cb", tp_base, false, textStatus]);
-    }
-  })
+  error: function(xhr, textStatus, err) {
+    int_dispatch([3, "int_net_cb", tp_base, false, textStatus]);
+  }
+})
 }

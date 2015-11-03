@@ -56,7 +56,11 @@ import JavaScriptCore
     var inPipeMode: Bool = false
     public weak var pipeDelegate: FlokEnginePipeDelegate?
     
-    lazy var modules: [FlokModule] = [FlokPingModule(), FlokUIModule()]
+    lazy var modules: [FlokModule] = [
+        FlokPingModule(),
+        FlokUIModule(),
+        FlokNetModule(),
+    ]
     lazy var runtime: FlokRuntime = FlokRuntime()
     
     public weak var rootView: UIView!

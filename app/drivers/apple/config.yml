@@ -3,6 +3,7 @@ DEBUG:
   mods:
     - event
     - ui
+    - net
   defines:
     - mem_pager
     - sockio_pager
