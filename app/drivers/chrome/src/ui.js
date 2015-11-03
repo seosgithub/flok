@@ -1,5 +1,6 @@
 //Create a new surface based on a prototype name and information.
 //Store that view in our own pointer table that uses selectors
+
 //Both spots and views
 if_ui_tp_to_selector = {};
 

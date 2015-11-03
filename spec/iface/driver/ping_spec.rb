@@ -6,7 +6,7 @@ RSpec.describe "iface:driver:ping_spec" do
 
   it "supports ping" do
     @pipe.puts [[0, 0, "ping"]].to_json
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 6.seconds)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "pong"], 10.seconds)
   end
 
   it "supports ping1" do

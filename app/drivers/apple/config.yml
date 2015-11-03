@@ -2,6 +2,7 @@ DEBUG:
   debug_attach: socket_io
   mods:
     - event
+    - ui
   defines:
     - mem_pager
     - sockio_pager

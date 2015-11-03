@@ -8,14 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		16A9BCE3808DECCF52BA4800 /* Pods_flok_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6DEC3F70EC0E05828DF146 /* Pods_flok_Tests.framework */; };
-		3CB03E99C03FAC77D8220A25 /* Pods_flok_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AFC61A5E5F1D7FD43461D55 /* Pods_flok_Example.framework */; };
+		3CB03E99C03FAC77D8220A25 /* Pods_flok_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AFC61A5E5F1D7FD43461D55 /* Pods_flok_Example.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		AA1B60751BD8104000FB1EE4 /* pipe.png in Resources */ = {isa = PBXBuildFile; fileRef = AA1B60741BD8104000FB1EE4 /* pipe.png */; settings = {ASSET_TAGS = (); }; };
+		AA1B60751BD8104000FB1EE4 /* pipe.png in Resources */ = {isa = PBXBuildFile; fileRef = AA1B60741BD8104000FB1EE4 /* pipe.png */; };
+		AA1B60771BD8152700FB1EE4 /* PipeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */; };
+		AA1B60791BD82AA600FB1EE4 /* app.js in Resources */ = {isa = PBXBuildFile; fileRef = AA1B60781BD82AA600FB1EE4 /* app.js */; };
+		AA4950331BDEF5F600FE70C7 /* SpecViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4950321BDEF5F600FE70C7 /* SpecViews.swift */; };
+		AA4950491BE0254800FE70C7 /* lab-512.png in Resources */ = {isa = PBXBuildFile; fileRef = AA4950481BE0254800FE70C7 /* lab-512.png */; };
+		AA49504B1BE041A000FE70C7 /* SpecBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA49504A1BE041A000FE70C7 /* SpecBlank.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +50,17 @@
 		8AFC61A5E5F1D7FD43461D55 /* Pods_flok_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_flok_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C7E10B06C3E1FC0381D7CE9 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		AA1B60741BD8104000FB1EE4 /* pipe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pipe.png; sourceTree = "<group>"; };
+		AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PipeViewController.swift; path = flok/PipeViewController.swift; sourceTree = "<group>"; };
+		AA1B60781BD82AA600FB1EE4 /* app.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = app.js; sourceTree = "<group>"; };
+		AA1B607A1BD82E2400FB1EE4 /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = "Pods/../build/Debug-iphoneos/CocoaAsyncSocket.framework"; sourceTree = "<group>"; };
+		AA1B607B1BD82E2400FB1EE4 /* flok.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = flok.framework; path = "Pods/../build/Debug-iphoneos/flok.framework"; sourceTree = "<group>"; };
+		AA1B607C1BD82E2400FB1EE4 /* Nimble.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Nimble.framework; path = "Pods/../build/Debug-iphoneos/Nimble.framework"; sourceTree = "<group>"; };
+		AA1B607D1BD82E2400FB1EE4 /* Pods_flok_Tests.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Pods_flok_Tests.framework; path = "Pods/../build/Debug-iphoneos/Pods_flok_Tests.framework"; sourceTree = "<group>"; };
+		AA1B607E1BD82E2400FB1EE4 /* Quick.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quick.framework; path = "Pods/../build/Debug-iphoneos/Quick.framework"; sourceTree = "<group>"; };
+		AA1B60851BD82F0600FB1EE4 /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = "Pods/../build/Debug-iphoneos/CocoaAsyncSocket.framework"; sourceTree = "<group>"; };
+		AA4950321BDEF5F600FE70C7 /* SpecViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecViews.swift; sourceTree = "<group>"; };
+		AA4950481BE0254800FE70C7 /* lab-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lab-512.png"; sourceTree = "<group>"; };
+		AA49504A1BE041A000FE70C7 /* SpecBlank.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecBlank.swift; sourceTree = "<group>"; };
 		B44725B055FA0993907BB4E3 /* Pods-flok_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-flok_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-flok_Example/Pods-flok_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		DC6DEC3F70EC0E05828DF146 /* Pods_flok_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_flok_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EACFBDE738DDA06AC72906B1 /* Pods-flok_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-flok_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-flok_Example/Pods-flok_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -74,6 +89,12 @@
 		477B54A9EA412DD3FD5D6FCF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AA1B60851BD82F0600FB1EE4 /* CocoaAsyncSocket.framework */,
+				AA1B607A1BD82E2400FB1EE4 /* CocoaAsyncSocket.framework */,
+				AA1B607B1BD82E2400FB1EE4 /* flok.framework */,
+				AA1B607C1BD82E2400FB1EE4 /* Nimble.framework */,
+				AA1B607D1BD82E2400FB1EE4 /* Pods_flok_Tests.framework */,
+				AA1B607E1BD82E2400FB1EE4 /* Quick.framework */,
 				8AFC61A5E5F1D7FD43461D55 /* Pods_flok_Example.framework */,
 				DC6DEC3F70EC0E05828DF146 /* Pods_flok_Tests.framework */,
 			);
@@ -85,6 +106,7 @@
 			children = (
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for flok */,
+				AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				7F11711E3E8AD70EAF0D74AE /* Pods */,
@@ -104,6 +126,9 @@
 		607FACD21AFB9204008FA782 /* Example for flok */ = {
 			isa = PBXGroup;
 			children = (
+				AA49504C1BE041A700FE70C7 /* ModuleSpec */,
+				AA49503D1BDF357100FE70C7 /* views */,
+				AA4950311BDEF5CE00FE70C7 /* SpecHelpers */,
 				AA1B60731BD80FF700FB1EE4 /* Assets */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -165,9 +190,42 @@
 		AA1B60731BD80FF700FB1EE4 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				AA4950481BE0254800FE70C7 /* lab-512.png */,
+				AA1B60781BD82AA600FB1EE4 /* app.js */,
 				AA1B60741BD8104000FB1EE4 /* pipe.png */,
 			);
 			name = Assets;
+			sourceTree = "<group>";
+		};
+		AA4950311BDEF5CE00FE70C7 /* SpecHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				AA4950321BDEF5F600FE70C7 /* SpecViews.swift */,
+			);
+			name = SpecHelpers;
+			sourceTree = "<group>";
+		};
+		AA49503D1BDF357100FE70C7 /* views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = views;
+			sourceTree = "<group>";
+		};
+		AA49504C1BE041A700FE70C7 /* ModuleSpec */ = {
+			isa = PBXGroup;
+			children = (
+				AA49504D1BE041AF00FE70C7 /* UI */,
+			);
+			name = ModuleSpec;
+			sourceTree = "<group>";
+		};
+		AA49504D1BE041AF00FE70C7 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				AA49504A1BE041A000FE70C7 /* SpecBlank.swift */,
+			);
+			name = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,8 +236,8 @@
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "flok_Example" */;
 			buildPhases = (
 				3B06D87843DDE70F4D68B167 /* Check Pods Manifest.lock */,
-				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
+				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCE1AFB9204008FA782 /* Resources */,
 				E0E065DDAD167ED898F71521 /* Embed Pods Frameworks */,
 				37086F2BBDFC18051777E6FA /* Copy Pods Resources */,
@@ -257,9 +315,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA1B60791BD82AA600FB1EE4 /* app.js in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				AA1B60751BD8104000FB1EE4 /* pipe.png in Resources */,
+				AA4950491BE0254800FE70C7 /* lab-512.png in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +431,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4950331BDEF5F600FE70C7 /* SpecViews.swift in Sources */,
+				AA1B60771BD8152700FB1EE4 /* PipeViewController.swift in Sources */,
+				AA49504B1BE041A000FE70C7 /* SpecBlank.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
@@ -380,7 +443,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -500,6 +562,12 @@
 			baseConfigurationReference = B44725B055FA0993907BB4E3 /* Pods-flok_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/build/Debug-iphoneos",
+					"$(USER_LIBRARY_DIR)/XCode/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = flok/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -512,6 +580,12 @@
 			baseConfigurationReference = EACFBDE738DDA06AC72906B1 /* Pods-flok_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/build/Debug-iphoneos",
+					"$(USER_LIBRARY_DIR)/XCode/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = flok/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;

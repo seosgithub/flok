@@ -27,6 +27,10 @@ shared_context "iface:driver" do
   include SpecHelpers
   before(:each) do 
     @pipe = IO.popen("rake pipe:driver", "r+") 
+    wait_for_load = @pipe.readline
+    $stderr.puts "waiting for LOADED from pipe"
+    raise "Your pipe should have emitted LOADED at the start when it was ready, instead got #{wait_for_load.inspect}" if wait_for_load.strip != "LOADED"
+    $stderr.puts "got LOADED from pipe"
     @pid = @pipe.pid
     @mods = Flok::Platform.mods ENV['FLOK_ENV']
   end

@@ -20,6 +20,7 @@ class InteractiveServer
     tmp.close!
     File.write path, @app_js
 
+    puts "LOADED"
     p = Open3.popen3 "boojs #{path}" do |inp, out, err, t|
       pid = t[:pid]
       begin

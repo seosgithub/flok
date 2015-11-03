@@ -9,7 +9,7 @@ require '../../../spec/lib/helpers.rb'
 
 #Compile all the *.js files into one file
 task :build do
-  puts ENV["BUILD_PATH"]
+  $stderr.puts "build path is #{ENV["BUILD_PATH"]}"
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
   build_path = File.expand_path(build_path)
 
@@ -17,9 +17,13 @@ task :build do
 
   #Compile via xcodebuild
   FileUtils.mkdir_p "./flok-pod/tmp"
-  system(%{
-   xcodebuild -workspace flok-pod/Example/flok.xcworkspace -scheme "flok-Example" -sdk "iphonesimulator9.0" -destination "OS=9.0,name=iPhone 6s" -configuration Debug ONLY_ACTIVE_ARCH=NO CONFIGURATION_BUILD_DIR=$PWD/flok-pod/tmp build | xcpretty -c
+
+  #You should compile it by hand with XCode if you're using it interactively
+  unless ENV["XCODE_INTERACTIVE"]
+    system(%{
+   xcodebuild -workspace flok-pod/Example/flok.xcworkspace -scheme "flok-Example" -sdk "iphonesimulator" -destination "OS=9.1,name=iPhone 4s" -configuration Debug ONLY_ACTIVE_ARCH=NO CONFIGURATION_BUILD_DIR=$PWD/flok-pod/tmp build | xcpretty -c 1>&2
   })
+  end
 end
 
 #Make sure it runs
@@ -32,16 +36,21 @@ task :spec do
   include SpecHelpers
   $stderr.puts "Starting APPLE spec test"
   $stderr.puts "-----------------------------------------------------"
-  puts "hi"
 end
 
 #Establish an environment with a pipe assuming the world is built
 task :pipe => :build do
   raise "No BUILD_PATH given" unless build_path=ENV["BUILD_PATH"]
 
-  system "xcrun simctl install booted ./flok-pod/tmp/flok_Example.app"
-  system "xcrun simctl launch booted org.cocoapods.demo.flok-Example"
+  #Using xcode interactively, expecting it to be run from xcode
+  unless ENV["XCODE_INTERACTIVE"]
+    system "xcrun simctl install booted ./flok-pod/tmp/flok_Example.app 1>&2"
+    system "xcrun simctl launch booted org.cocoapods.demo.flok-Example 1>&2"
+  end
 
   exec "ruby", "-e", %{
+    require './pipe'
+    server = InteractiveServer.new
+    server.begin_pipe
   }
 end

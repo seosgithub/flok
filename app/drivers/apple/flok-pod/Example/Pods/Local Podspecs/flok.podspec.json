@@ -21,5 +21,13 @@
     "flok": [
       "Pod/Assets/*.png"
     ]
+  },
+  "dependencies": {
+    "Alamofire": [
+      "~> 3.0"
+    ],
+    "SnapKit": [
+
+    ]
   }
 }

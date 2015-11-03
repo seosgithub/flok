@@ -84,12 +84,14 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "Pods-flok_Tests/Alamofire.framework"
+  install_framework "Pods-flok_Tests/CocoaAsyncSocket.framework"
+  install_framework "Pods-flok_Tests/SnapKit.framework"
   install_framework "Pods-flok_Tests/flok.framework"
-  install_framework "Pods-flok_Tests/Nimble.framework"
-  install_framework "Pods-flok_Tests/Quick.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "Pods-flok_Tests/Alamofire.framework"
+  install_framework "Pods-flok_Tests/CocoaAsyncSocket.framework"
+  install_framework "Pods-flok_Tests/SnapKit.framework"
   install_framework "Pods-flok_Tests/flok.framework"
-  install_framework "Pods-flok_Tests/Nimble.framework"
-  install_framework "Pods-flok_Tests/Quick.framework"
 fi
