@@ -6,11 +6,12 @@ public class FlokView: UIView, Preloadable
     //-----------------------------------------------------------------------------------------------------
     //Property
     //-----------------------------------------------------------------------------------------------------
-    public var context: [String:AnyObject]!
     public var spots: [FlokSpot] = []
 
     //Either root or a spot
     public weak var parentView: UIView!
+    
+    weak var engine: FlokEngine!
 
     //Returns a auto-created spot if there is no spot
     func spotWithName(name: String) -> FlokSpot {
@@ -31,18 +32,22 @@ public class FlokView: UIView, Preloadable
         autoSpot.backgroundColor = UIColor.redColor()
         return autoSpot
     }
-    public var bp: Int!
+    public var bp: Int!  //View base-pointer
+    
+    //'controller' portion of the view, which is really just event handling & context loading code
+    public var cbp: Int?                     //Controller base-pointer
+    public var context: [String:AnyObject]! //Initialization context
     
     //Constructors
     //-----------------------------------------------------------------------------------------------------
     required public override init(frame: CGRect) {
         super.init(frame: frame)
-        defaultInit()
+//        defaultInit()
     }
     
     public required init(coder: NSCoder) {
         super.init(coder: coder)!
-        defaultInit()
+//        defaultInit()
     }
     
     public convenience init() {
@@ -61,6 +66,18 @@ public class FlokView: UIView, Preloadable
     }
     
     public class func preload() {
+    }
+    
+    public func didSwitchFromAction(from: String?, toAction to: String?) {
+        
+    }
+    
+    public func didReceiveEvent(name: String, info: [String:AnyObject]) {
+        
+    }
+    
+    public func send(name: String, withInfo info: [String:AnyObject]) {
+        engine.int_dispatch([3, "int_event", cbp!, name, info])
     }
     
     //-----------------------------------------------------------------------------------------------------

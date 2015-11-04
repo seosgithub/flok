@@ -53,6 +53,8 @@
 		A3505FA2FB3067D53847AD288AC04F03 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26934F1BAF387DA152B10E81F675CD7F /* Download.swift */; };
 		A8B01ABAB83549DB19AACB687AAD0BF8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBC4A7F727DBAECB222FB18C542ACF3E /* Foundation.framework */; };
 		AA163E1A1BE9145F002187D8 /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA163E181BE913BC002187D8 /* Net.swift */; };
+		AA163E1F1BE94D24002187D8 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA163E1D1BE94CF3002187D8 /* Event.swift */; };
+		AA163E221BE94EDB002187D8 /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA163E201BE94EB5002187D8 /* Weak.swift */; };
 		B0FB4B01682814B9E3D32F9DC4A5E762 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = B791149C721D7C8644AEC7194179A284 /* Alamofire.swift */; };
 		B4599278ECBDC9A2E82023CA8190871E /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B873A648FF6B183BCC516E93832ABE52 /* ConstraintAttributes.swift */; };
 		B56D06A39FAAE12443775A956E413021 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3BF7CC2DC24D1B38A60F94E1AD352C /* AsyncSocket.m */; settings = {COMPILER_FLAGS = "-DOS_OBJECT_USE_OBJC=0"; }; };
@@ -223,6 +225,8 @@
 		A8CCB9F4A9A409A3083204BC32D2C343 /* Controller.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 		A99FA5D9DF5821F6EFB05A0B8736D2D8 /* FlokEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FlokEngine.swift; sourceTree = "<group>"; };
 		AA163E181BE913BC002187D8 /* Net.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Net.swift; sourceTree = "<group>"; };
+		AA163E1D1BE94CF3002187D8 /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		AA163E201BE94EB5002187D8 /* Weak.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
 		AA4ABB3209D7EE659BA457EC7B37C1D4 /* flok-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "flok-prefix.pch"; sourceTree = "<group>"; };
 		AB3114AE2DF6D4A42A1F97F4C0ABD490 /* Stream.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Stream.swift; path = Source/Stream.swift; sourceTree = "<group>"; };
 		AF3BF7CC2DC24D1B38A60F94E1AD352C /* AsyncSocket.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = AsyncSocket.m; path = Source/RunLoop/AsyncSocket.m; sourceTree = "<group>"; };
@@ -391,6 +395,8 @@
 				2009605EB3DC00563A8212B350714392 /* Ping.swift */,
 				7910D61A1A9A7F65B2C9B003EE285021 /* UI.swift */,
 				AA163E181BE913BC002187D8 /* Net.swift */,
+				AA163E1D1BE94CF3002187D8 /* Event.swift */,
+				AA163E201BE94EB5002187D8 /* Weak.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -845,8 +851,10 @@
 			files = (
 				AA163E1A1BE9145F002187D8 /* Net.swift in Sources */,
 				286C18FA16905FAA17CD518F8E2C74A2 /* Controller.swift in Sources */,
+				AA163E221BE94EDB002187D8 /* Weak.swift in Sources */,
 				2DC9CF4411B430B6F4A81C1DA390E67B /* flok-dummy.m in Sources */,
 				657C8694AC5EDC732687CF8C6B00DF86 /* FlokEngine.swift in Sources */,
+				AA163E1F1BE94D24002187D8 /* Event.swift in Sources */,
 				D1A7510731F98AB04DD26B8EE7CEF10F /* FlokSpot.swift in Sources */,
 				64BCA619B9763668731597538BD9DFC2 /* FlokView.swift in Sources */,
 				4BDE9FDA075FD0729C228F26AB43470C /* FlokViewConceierge.swift in Sources */,

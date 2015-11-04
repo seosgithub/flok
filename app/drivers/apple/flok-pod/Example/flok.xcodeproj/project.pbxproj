@@ -19,7 +19,6 @@
 		AA1B60791BD82AA600FB1EE4 /* app.js in Resources */ = {isa = PBXBuildFile; fileRef = AA1B60781BD82AA600FB1EE4 /* app.js */; };
 		AA4950331BDEF5F600FE70C7 /* SpecViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4950321BDEF5F600FE70C7 /* SpecViews.swift */; };
 		AA4950491BE0254800FE70C7 /* lab-512.png in Resources */ = {isa = PBXBuildFile; fileRef = AA4950481BE0254800FE70C7 /* lab-512.png */; };
-		AA49504B1BE041A000FE70C7 /* SpecBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA49504A1BE041A000FE70C7 /* SpecBlank.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,7 +59,6 @@
 		AA1B60851BD82F0600FB1EE4 /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = "Pods/../build/Debug-iphoneos/CocoaAsyncSocket.framework"; sourceTree = "<group>"; };
 		AA4950321BDEF5F600FE70C7 /* SpecViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecViews.swift; sourceTree = "<group>"; };
 		AA4950481BE0254800FE70C7 /* lab-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lab-512.png"; sourceTree = "<group>"; };
-		AA49504A1BE041A000FE70C7 /* SpecBlank.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecBlank.swift; sourceTree = "<group>"; };
 		B44725B055FA0993907BB4E3 /* Pods-flok_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-flok_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-flok_Example/Pods-flok_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		DC6DEC3F70EC0E05828DF146 /* Pods_flok_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_flok_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EACFBDE738DDA06AC72906B1 /* Pods-flok_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-flok_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-flok_Example/Pods-flok_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 			children = (
 				AA49504C1BE041A700FE70C7 /* ModuleSpec */,
 				AA49503D1BDF357100FE70C7 /* views */,
-				AA4950311BDEF5CE00FE70C7 /* SpecHelpers */,
 				AA1B60731BD80FF700FB1EE4 /* Assets */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -197,14 +194,6 @@
 			name = Assets;
 			sourceTree = "<group>";
 		};
-		AA4950311BDEF5CE00FE70C7 /* SpecHelpers */ = {
-			isa = PBXGroup;
-			children = (
-				AA4950321BDEF5F600FE70C7 /* SpecViews.swift */,
-			);
-			name = SpecHelpers;
-			sourceTree = "<group>";
-		};
 		AA49503D1BDF357100FE70C7 /* views */ = {
 			isa = PBXGroup;
 			children = (
@@ -223,7 +212,7 @@
 		AA49504D1BE041AF00FE70C7 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				AA49504A1BE041A000FE70C7 /* SpecBlank.swift */,
+				AA4950321BDEF5F600FE70C7 /* SpecViews.swift */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -433,7 +422,6 @@
 			files = (
 				AA4950331BDEF5F600FE70C7 /* SpecViews.swift in Sources */,
 				AA1B60771BD8152700FB1EE4 /* PipeViewController.swift in Sources */,
-				AA49504B1BE041A000FE70C7 /* SpecBlank.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);

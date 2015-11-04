@@ -25,6 +25,7 @@
 
         let view = proto!.init(frame: CGRectZero)
         view.bp = tpBase
+        view.engine = self.engine
 
         //Put the base view inside
         var tpIdx = tpBase  //Start with the base pointer

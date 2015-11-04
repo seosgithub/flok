@@ -6,6 +6,7 @@
 ### Functions
 `if_controller_init(bp, rvp, name, context)` - Initialize a controller that manages the view at `rvp` and contains the address `bp`. All events are sent to `bp` should be handled appropriatlely.
 The `rvp` pointer will always be an initialized (but not attached) view. When receiving an action, the view is guaranteed to be attached at that time. Context is what the controller was initialized with.
+**All controllers should be the same name as their views, there is a 1-1 relationship between views and controllers that was not originally true in the first version. Now views and contollers act as one**
 
 ### Spec helpers
 
@@ -28,7 +29,7 @@ special meanings based on the `name` field of the event:
 but have not been destroyed.
 
 ### Spec fixtures (driver side)
-There should be a special controller called `__test__` that can be initialized and should respond in the following ways when it receives an action and
+There should be two identical controllers called `spec_one_spot` and `spec_blank` that can be initialized and should respond in the following ways when it receives an action and
 event:
   Note: an event is **not** a raw message, it is through the message of `int_event`, i.e. `[3, "int_event", "event_name", info]`
   Sends a **event** back called `action_rcv` containing `{from: from, to: to, info: info}` when an action is received

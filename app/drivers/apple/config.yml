@@ -4,6 +4,8 @@ DEBUG:
     - event
     - ui
     - net
+    - controller
+    - event
   defines:
     - mem_pager
     - sockio_pager

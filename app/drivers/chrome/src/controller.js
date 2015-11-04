@@ -161,7 +161,8 @@ function if_spec_controller_init() {
 
   //Register the new controller
   $(document).ready(function() {
-    regController("__test__", TestController);
+    regController("spec_blank", TestController);
+    regController("spec_one_spot", TestController);
   });
 }
 

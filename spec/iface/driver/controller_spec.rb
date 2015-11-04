@@ -27,7 +27,7 @@ RSpec.describe "iface:driver:controller" do
     end
 
     #Initilaize the view controller
-    @pipe.puts [[0, 4, "if_controller_init", bp, bp+1, "__test__", {}]].to_json
+    @pipe.puts [[0, 4, "if_controller_init", bp, bp+1, view_name, {}]].to_json
 
     #Attach that view to the root
     @pipe.puts [[0, 2, "if_attach_view", bp+1, rspace]].to_json

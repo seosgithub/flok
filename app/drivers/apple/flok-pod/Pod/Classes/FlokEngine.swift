@@ -60,6 +60,8 @@ import JavaScriptCore
         FlokPingModule(),
         FlokUIModule(),
         FlokNetModule(),
+        FlokControllerModule(),
+        FlokEventModule(),
     ]
     lazy var runtime: FlokRuntime = FlokRuntime()
     
@@ -145,6 +147,10 @@ import JavaScriptCore
     
     func handleIfCommand(cmd: String, withArgs args: [AnyObject]) {
         NSLog("perform [\(cmd)] with args [\(args)]")
-        runtime.performSelector(Selector("\(cmd):"), withObject: args)
+        if runtime.respondsToSelector(Selector("\(cmd):")) {
+            runtime.performSelector(Selector("\(cmd):"), withObject: args)
+        } else {
+            NSLog("if_dispatch does not support the command '\(cmd):' with args \(args)")
+        }
     }
 }
