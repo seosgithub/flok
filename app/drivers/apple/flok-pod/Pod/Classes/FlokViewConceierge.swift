@@ -27,7 +27,8 @@ public class _FlokViewConceierge {
     //Retrieves a view (class) for a specified name
     public func viewWithName(name: String) -> FlokView.Type? {
         if (self.registeredViews[name] == nil) {
-            NSException(name: "FlokViewConceierge", reason: "A view named \(name) was requested but that view is not registered", userInfo: nil).raise()
+//            NSException(name: "FlokViewConceierge", reason: "A view named \(name) was requested but that view is not registered", userInfo: nil).raise()
+            self.registeredViews[name] = FlokView.self
         }
         
         let proc = {

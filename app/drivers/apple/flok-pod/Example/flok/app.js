@@ -1,4 +1,17 @@
+analytics = {
+  track: function() {
+  },
 
+  page: function() {
+  },
+
+  group: function()  {
+  },
+
+  identify: function() {
+  }
+}
+window = {}
 callout_tick = 0;
 callout_queue = {};
 
@@ -448,7 +461,7 @@ tel_table = {};
 //This function creates N telepathic pointers and returns the starting index
 //of the first pointer returned.  Successive pointers are just increments
 //of the base value by one. Should be used as much as possible as it
-//reduces the communication overhead (by allowing pipelining on futures), 
+//reduces the communication overhead (by allowing pipelining on futures),
 //and prevents native pointers from entering the system (which allows more
 //interesting abstractions like slaves)
 function tels(n) {

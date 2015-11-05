@@ -6,6 +6,7 @@ DEBUG:
     - net
     - controller
     - event
+    - persist
   defines:
     - mem_pager
     - sockio_pager
@@ -17,7 +18,6 @@ RELEASE:
     - segue
     - controller
     - sockio
-    - persist
     - timer
     - rtc
     - hook

@@ -58,9 +58,14 @@ import JavaScriptCore
     
     lazy var modules: [FlokModule] = [
         FlokPingModule(),
-        FlokUIModule(),
+        FlokUiModule(),
         FlokNetModule(),
         FlokControllerModule(),
+        FlokPersistModule(),
+        FlokRtcModule(),
+        FlokSockioModule(),
+        FlokTimerModule(),
+        FlokDlinkModule(),
         FlokEventModule(),
     ]
     lazy var runtime: FlokRuntime = FlokRuntime()
@@ -92,9 +97,14 @@ import JavaScriptCore
         
         super.init()
         context.setObject(self, forKeyedSubscript: "swiftFlokEngine")
+        context.evaluateScript("function if_dispatch(q) { if_dispatch_pending = q; }")
         
         runtime.engine = self
         for e in modules { runtime.addModule(e) }
+    }
+    
+    public static func if_dispatch(q: [AnyObject]) {
+        
     }
     
     //Call into the int_dispatch of the engine
@@ -111,7 +121,13 @@ import JavaScriptCore
         if (inPipeMode) {
             pipeDelegate?.flokEngineDidReceiveIntDispatch?(q)
         } else {
-            intDispatchMethod.callWithArguments(q)
+            intDispatchMethod.callWithArguments([q])
+            
+            let pending = context.evaluateScript("JSON.parse(JSON.stringify(if_dispatch_pending))").toArray()
+            context.evaluateScript("if_dispatch_pending = []")
+            if pending.count > 0 {
+                if_dispatch(pending)
+            }
         }
     }
     

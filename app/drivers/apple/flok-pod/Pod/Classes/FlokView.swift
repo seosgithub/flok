@@ -22,14 +22,27 @@ public class FlokView: UIView, Preloadable
         NSLog("Warning: spot named \(name) was auto-created")
         let autoSpot = FlokSpot()
         autoSpot.name = name
-        spots.append(autoSpot)
         self.addSubview(autoSpot)
         autoSpot.snp_makeConstraints { make in
-            make.size.equalTo(self.snp_size).multipliedBy(0.5)
-            make.center.equalTo(self.snp_center).multipliedBy(0.5)
+            make.size.equalTo(self.snp_size).multipliedBy(0.2)
+            make.center.equalTo(self.snp_center).multipliedBy(0.2)
+            
+            if self.spots.count > 0 {
+                make.left.equalTo(self.spots.last!.snp_right)
+            }
             return
         }
+        spots.append(autoSpot)
         autoSpot.backgroundColor = UIColor.redColor()
+        
+        let label = UILabel()
+        label.text = name
+        autoSpot.addSubview(label)
+        label.snp_makeConstraints { make in
+            make.center.equalTo(autoSpot.snp_center)
+            make.size.equalTo(autoSpot.snp_size)
+            return
+        }
         return autoSpot
     }
     public var bp: Int!  //View base-pointer

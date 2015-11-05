@@ -12,7 +12,7 @@
         let info = args[3] as! [String:AnyObject]
         
         //Lookup up view that is part of this controller
-        let view = FlokUIModule.uiTpToSelector[vbp]
+        let view = FlokUiModule.uiTpToSelector[vbp]
         if view == nil {
             NSException(name: "FlokControllerModule", reason: "Tried to lookup view with pointer \(vbp) but it didn't exist", userInfo: nil).raise()
             return

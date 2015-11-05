@@ -82,3 +82,19 @@ def restart_driver_but_persist
     raise "Tried to restart driver but timed out waiting for 'RESTART OK'"
   end
 end
+
+#Do not persist
+def hard_restart_driver
+  #Ensure the pipe is fully drained before sending RESTART
+  @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+
+  @pipe.puts "HARD_RESTART"
+  begin
+    Timeout::timeout(10) do
+      expect(@pipe.readline).to eq("RESTART OK\n")
+    end
+  rescue Timeout::Error
+    raise "Tried to HARD restart driver but timed out waiting for 'RESTART OK'"
+  end
+end
+

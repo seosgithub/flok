@@ -1,4 +1,4 @@
-@objc class FlokUIModule : FlokModule {
+@objc class FlokUiModule : FlokModule {
     override var exports: [String] {
         return ["if_ui_spec_init:", "if_init_view:", "if_attach_view:", "if_ui_spec_views_at_spot:", "if_ui_spec_view_exists:", "if_free_view:", "if_ui_spec_view_is_visible:"]
     }
@@ -23,7 +23,7 @@
             NSException(name: "unhandled view", reason: "unhanded view named \(name)", userInfo: nil).raise()
         }
 
-        let view = proto!.init(frame: CGRectZero)
+        let view = proto!.init(frame: CGRectMake(0, 0, 400, 400))
         view.bp = tpBase
         view.engine = self.engine
 
