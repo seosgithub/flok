@@ -9,6 +9,7 @@ DEBUG:
     - persist
     - rtc
     - timer
+    - sockio
   defines:
     - mem_pager
     - sockio_pager

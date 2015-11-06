@@ -17,7 +17,7 @@ function if_sockio_fwd(sp, event_name, bp) {
     });
   } else {
     <% if @debug %>
-      console.error("Couldnt fwd sockio with sp: " + sp + " (It dspn't exist)");
+      console.error("Couldnt fwd sockio with sp: " + sp + " (It does not exist)");
     <% end %>
   }
 }
@@ -30,7 +30,7 @@ function if_sockio_send(sp, event_name, info) {
     socket.emit(event_name, info);
   } else {
     <% if @debug %>
-      console.error("Couldnt fwd sockio with sp: " + sp + " (It dspn't exist)");
+      console.error("Couldnt fwd sockio with sp: " + sp + " (It does not exist)");
     <% end %>
   }
 }

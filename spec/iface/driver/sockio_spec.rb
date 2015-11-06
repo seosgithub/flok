@@ -10,8 +10,8 @@ RSpec.describe "iface:driver:sockio_spec" do
 
   it "does allow calling of sockio functions" do
     @pipe.puts [[0, 2, "if_sockio_init", "test", 0]].to_json
-    @pipe.puts [[0, 3, "if_sockio_fwd", "hello", "test", 0]].to_json
-    @pipe.puts [[0, 3, "if_sockio_send", "hello", {}]].to_json
+    @pipe.puts [[0, 3, "if_sockio_fwd", 11, "test", 0]].to_json
+    @pipe.puts [[0, 3, "if_sockio_send", 11, "hello", {}]].to_json
 
     #Wait for response
     @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
@@ -40,7 +40,8 @@ RSpec.describe "iface:driver:sockio_spec" do
     #Start up the node server and wait for a CLIENT CONNECTED response
     sh2 "node", "./spec/iface/driver/assets/sockio_server.js", /STARTED/ do |server_in, server_out|
       #Start forwarding information to base pointer 0
-      @pipe.puts [[0, 2, "if_sockio_init", "http://localhost:9998", 0, 3, "if_sockio_send", 0, "test", {"hello" => "world"}]].to_json
+      @pipe.puts [[0, 2, "if_sockio_init", "http://localhost:9998", 0]].to_json
+      @pipe.puts [[0, 3, "if_sockio_send", 0, "test", {"hello" => "world"}]].to_json
 
       #Expect the server to get a client connection
       expect(server_out).to readline_and_equal_x_within_y_seconds("CLIENT CONNECTED", 10.seconds)
