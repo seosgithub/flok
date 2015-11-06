@@ -12,10 +12,10 @@ RSpec.describe "iface:driver:rtc" do
     #Wait for response
     @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
 
-    @pipe.puts [[0, 1, "if_rtc_init"]].to_json
+    @pipe.puts [[0, 0, "if_rtc_init"]].to_json
 
     #Wait to start until after the 1st event fires to make sure timer started up
-    @pipe.readline
+    @pipe.readline_timeout
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "int_rtc", Fixnum], 5.seconds)
     start_time = Time.now.to_i
     5.times do

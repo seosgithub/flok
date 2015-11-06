@@ -7,6 +7,7 @@ DEBUG:
     - controller
     - event
     - persist
+    - rtc
   defines:
     - mem_pager
     - sockio_pager
