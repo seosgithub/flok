@@ -28,6 +28,9 @@
     ],
     "SnapKit": [
 
+    ],
+    "Socket.IO-Client-Swift": [
+      "~> 4.1"
     ]
   }
 }

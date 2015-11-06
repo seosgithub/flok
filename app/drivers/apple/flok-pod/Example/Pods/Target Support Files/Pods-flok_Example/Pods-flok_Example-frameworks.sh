@@ -87,11 +87,13 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods-flok_Example/Alamofire.framework"
   install_framework "Pods-flok_Example/CocoaAsyncSocket.framework"
   install_framework "Pods-flok_Example/SnapKit.framework"
+  install_framework "Pods-flok_Example/Socket_IO_Client_Swift.framework"
   install_framework "Pods-flok_Example/flok.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods-flok_Example/Alamofire.framework"
   install_framework "Pods-flok_Example/CocoaAsyncSocket.framework"
   install_framework "Pods-flok_Example/SnapKit.framework"
+  install_framework "Pods-flok_Example/Socket_IO_Client_Swift.framework"
   install_framework "Pods-flok_Example/flok.framework"
 fi
