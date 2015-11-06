@@ -51,6 +51,10 @@ def mods
   Flok::Platform.mods ENV['FLOK_ENV']
 end
 
+def defines
+  Flok::Platform.defines ENV['FLOK_ENV']
+end
+
 def config_yml
   Flok::Platform.config_yml ENV['FLOK_ENV']
 end
@@ -61,6 +65,20 @@ def module_dep name
     skip "#{ENV["PLATFORM"].inspect} does not support #{name.inspect} module in config.yml" unless mods.include? name
   end
 end
+
+#Similar to module_dep this checks for a defines as well, useful for optional specs
+def module_dep_defines(name:, defines:)
+  before(:each) do
+    if mods.include? name
+      unless (Flok::Platform.defines ENV["FLOK_ENV"])[defines]
+        skip "#{ENV["PLATFORM"].inspect} does support #{name.inspect} module but does not define #{defines} in config.yml"
+      end
+    else
+        skip "#{ENV["PLATFORM"].inspect} does not support #{name.inspect} module in config.yml"
+    end
+  end
+end
+
 
 #Require a key value to be a apart of the config yml
 def settings_dep key, value

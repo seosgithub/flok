@@ -49,7 +49,7 @@
 		8AFC61A5E5F1D7FD43461D55 /* Pods_flok_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_flok_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C7E10B06C3E1FC0381D7CE9 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		AA1B60741BD8104000FB1EE4 /* pipe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pipe.png; sourceTree = "<group>"; };
-		AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PipeViewController.swift; path = flok/PipeViewController.swift; sourceTree = "<group>"; };
+		AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PipeViewController.swift; sourceTree = "<group>"; };
 		AA1B60781BD82AA600FB1EE4 /* app.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = app.js; sourceTree = "<group>"; };
 		AA1B607A1BD82E2400FB1EE4 /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = "Pods/../build/Debug-iphoneos/CocoaAsyncSocket.framework"; sourceTree = "<group>"; };
 		AA1B607B1BD82E2400FB1EE4 /* flok.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = flok.framework; path = "Pods/../build/Debug-iphoneos/flok.framework"; sourceTree = "<group>"; };
@@ -104,7 +104,6 @@
 			children = (
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for flok */,
-				AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				7F11711E3E8AD70EAF0D74AE /* Pods */,
@@ -124,6 +123,7 @@
 		607FACD21AFB9204008FA782 /* Example for flok */ = {
 			isa = PBXGroup;
 			children = (
+				AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */,
 				AA49504C1BE041A700FE70C7 /* ModuleSpec */,
 				AA49503D1BDF357100FE70C7 /* views */,
 				AA1B60731BD80FF700FB1EE4 /* Assets */,

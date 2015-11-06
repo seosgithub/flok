@@ -2,7 +2,6 @@ import UIKit
 import flok
 
 @objc class SpecBlank: FlokView {
-    
     override func didSwitchFromAction(from: String?, toAction to: String?) {
         let to = to ?? NSNull()
         let from = from ?? NSNull()

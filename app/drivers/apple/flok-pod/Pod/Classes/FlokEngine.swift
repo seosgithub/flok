@@ -70,6 +70,7 @@ import JavaScriptCore
     ]
     lazy var runtime: FlokRuntime = FlokRuntime()
     
+    //This should be moved to the UI module
     public weak var rootView: UIView!
     
     public convenience init(src: String) {
