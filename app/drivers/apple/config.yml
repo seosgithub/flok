@@ -8,6 +8,7 @@ DEBUG:
     - event
     - persist
     - rtc
+    - timer
   defines:
     - mem_pager
     - sockio_pager

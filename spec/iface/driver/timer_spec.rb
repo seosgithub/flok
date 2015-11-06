@@ -36,4 +36,24 @@ RSpec.describe "iface:driver:timer" do
     expect(end_time - start_time).to be < 10 
     expect(end_time - start_time).to be > 5
   end
+
+  it "Does support a different ticks-per-second interval" do
+    #Wait for response
+    @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+
+    #This time, 60 ticks per second
+    @pipe.puts [[3, 1, "if_timer_init", 60]].to_json
+
+    #Wait to start until after the 1st event fires to make sure timer started up
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "int_timer"], 5.seconds)
+    start_time = Time.now.to_i
+    300.times do
+      expect(@pipe).to readline_and_equal_json_x_within_y_seconds([0, "int_timer"], 2.seconds)
+    end
+    end_time = Time.now.to_i
+
+    #Just leave some room for connection latency, etc.
+    expect(end_time - start_time).to be < 7
+    expect(end_time - start_time).to be > 2
+  end
 end

@@ -5,9 +5,9 @@
         return ["if_rtc_init:", "_if_rtc_tick_handler"]
     }
     
-    static var tickHelper: TickHelper!
+    private static var tickHelper: RtcTickHelper!
     func if_rtc_init(args: [AnyObject]) {
-        self.dynamicType.tickHelper = TickHelper(interval: 1) { epoch in
+        self.dynamicType.tickHelper = RtcTickHelper(interval: 1) { epoch in
             self.engine.int_dispatch([1, "int_rtc", epoch])
         }
         self.dynamicType.tickHelper.start()
@@ -18,7 +18,7 @@
     }
 }
 
-@objc internal class TickHelper : NSObject {
+@objc class RtcTickHelper : NSObject {
     let interval: Double
     let onTick: (Int) -> ()
     init(interval: Double, onTick: (Int)->()) {
