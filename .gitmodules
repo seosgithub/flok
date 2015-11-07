@@ -1,0 +1,3 @@
+[submodule "app/drivers/apple"]
+	path = app/drivers/apple
+	url = git@github.com:sotownsend/flok-apple.git

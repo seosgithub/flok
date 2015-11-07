@@ -1,6 +1,0 @@
-framework module flok {
-  umbrella header "flok-umbrella.h"
-
-  export *
-  module * { export * }
-}
