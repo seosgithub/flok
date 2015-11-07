@@ -17,6 +17,9 @@ Pod::Spec.new do |s|
 #   * Write the description between the DESC delimiters below.
 #   * Finally, don't worry about the indent, CocoaPods strips it!  
   s.description      = <<-DESC
+  What is flok?
+  Flok is a work in progress. I'm just filling this description out so podspec will upload... :)
+
                        DESC
 
   s.homepage         = "https://github.com/sotownsend/flok"
