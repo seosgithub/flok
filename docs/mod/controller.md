@@ -34,3 +34,5 @@ event:
   Note: an event is **not** a raw message, it is through the message of `int_event`, i.e. `[3, "int_event", "event_name", info]`
   Sends a **event** back called `action_rcv` containing `{from: from, to: to, info: info}` when an action is received
   Sends a **event** back called `custom_rcv` containing a hash that looks like `{name: name, info: event}` when a custom event is received
+
+  Additionally, add a controller named `spec_blank_sends_context` that sends back the initialization context when it is created via the event named `context` with the initialization (context) parameters.

@@ -158,24 +158,23 @@ end
 
 #These are optional specs that may not necessarily match the implementation semantics. These
 #'typical' semantics include loading the context in a 'views' 'initializer' portion, etc.
-RSpec.describe "iface:driver:ui:typical_extra" do
-  module_dep_defines name:"ui", defines: "ui_typical_extra_specs"
-  include_context "iface:driver"
+#RSpec.describe "iface:driver:ui:typical_extra" do
+  #module_dep_defines name:"ui", defines: "ui_typical_extra_specs"
+  #include_context "iface:driver"
 
-  before(:each) do
-    #Initialize
-    @pipe.puts [[0, 0, "if_ui_spec_init"]].to_json
-  end
+  #before(:each) do
+    ##Initialize
+    #@pipe.puts [[0, 0, "if_ui_spec_init"]].to_json
+  #end
 
-  it "Does receive the context in the view initializer" do
-    #Create a new view 'spec'
-    @pipe.puts [[0, 4, "if_init_view", "spec_blank", {}, 333, ["main"]]].to_json
+  ##it "Does receive the context in the view initializer" do
+    ###Create a new view 'spec'
+    ##@pipe.puts [[0, 4, "if_init_view", "spec_blank_sends_context", {}, 333, ["main"]]].to_json
 
-    #Attach that view to the root
-    @pipe.puts [[0, 2, "if_attach_view", 333, 0]].to_json
+    ###Attach that view to the root
+    ##@pipe.puts [[0, 2, "if_attach_view", 333, 0]].to_json
 
-j   #Request a listing of all the views on the root node
-    @pipe.puts [[0, 1, "if_ui_spec_views_at_spot", 0]].to_json
-    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", 333], 6.seconds)
-  end
-end
+##j   #Request a listing of all the views on the root node
+    ##expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", 333, "context", {"foo" => "bar"}], 6.seconds)
+  ##end
+#end

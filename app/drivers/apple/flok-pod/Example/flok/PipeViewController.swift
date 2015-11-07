@@ -34,12 +34,7 @@ class PipeViewController : UIViewController, GCDAsyncSocketDelegate, FlokEngineP
         super.init(coder: aDecoder)
         
         // Override point for customization after application launch.
-        FlokViewConceierge.registeredViews = [
-            "spec_blank":SpecBlank.self,
-            "spec_one_spot":SpecOneSpot.self,
-            "spec_two_spot":SpecTwoSpot.self,
-        ]
-        FlokViewConceierge.preload()
+//        FlokViewConceierge.preload()
     }
     
     func socket(sock: GCDAsyncSocket!, didAcceptNewSocket newSocket: GCDAsyncSocket!) {

@@ -13,7 +13,6 @@ DEBUG:
   defines:
     - mem_pager
     - sockio_pager
-    - ui_typical_extra_specs
 RELEASE:
   mods:
     - ui

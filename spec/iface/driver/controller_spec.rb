@@ -16,18 +16,18 @@ RSpec.describe "iface:driver:controller" do
   end
 
   #Create a controller with the given base pointer and attach view to a spot pointer (rspace)
-  def init_controller(bp, view_name="spec_blank", rspace=0)
+  def init_controller(bp, view_name="spec_blank", rspace=0, context={})
     #Views are always bp+1, the bp points to an array with ['vc', 'main', spots...]
     #                                                        bp     bp+1  bp+n
     #Create a new view 'spec_blank' at bp+1
-    if view_name == "spec_blank"
+    if view_name == "spec_blank" || view_name == "spec_blank_sends_context"
       @pipe.puts [[0, 4, "if_init_view", view_name, {}, bp+1, ["main"]]].to_json
     elsif view_name == "spec_one_spot"
       @pipe.puts [[0, 4, "if_init_view", view_name, {}, bp+1, ["main", "content"]]].to_json
     end
 
     #Initilaize the view controller
-    @pipe.puts [[0, 4, "if_controller_init", bp, bp+1, view_name, {}]].to_json
+    @pipe.puts [[0, 4, "if_controller_init", bp, bp+1, view_name, context]].to_json
 
     #Attach that view to the root
     @pipe.puts [[0, 2, "if_attach_view", bp+1, rspace]].to_json
@@ -68,6 +68,14 @@ RSpec.describe "iface:driver:controller" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "custom_rcv", {"name" => custom_name, "info" => custom_info}], 6.seconds)
   end
 
+  it "Does receive the context on initialization" do
+    bp = 332
+    init_controller(bp, "spec_blank_sends_context", 0, {"foo" => "bar"})
+
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "context", {"foo" => "bar"}], 6.seconds)
+  end
+
+
   it "When a view is deleted that was associated with a view controller, the view controller should no longer exist" do
     bp = 332
     init_controller(bp)
@@ -91,7 +99,7 @@ RSpec.describe "iface:driver:controller" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", [bp0, bp1]], 6.seconds)
   end
 
-  it "Can initialize a controller that embeds a controller and delete all supb-controllers when a parent view is destroyed" do
+  it "Can initialize a controller that embeds a controller and delete all sub-controllers when a parent view is destroyed" do
     bp0 = 332
     bp1 = 335
     init_controller(bp0, "spec_one_spot")

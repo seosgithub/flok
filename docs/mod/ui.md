@@ -22,8 +22,6 @@
 `spec_one_spot` - "A blank view with with one spot named `content` that takes up the entire view"
 `spec_two_spot` - "A blank view with with one spot named `a` and one spot named `b`.
 
-#####Additionally, if you're UI implementation has typical semantics, add the `ui_typical_extra_specs` to your defines section of the config.yml
-`spec_blank_sends_context` - A view with no spots that sends back the context it receives with the event name `context`. This should be placed in the *initializer* like area.
 
 ------
 

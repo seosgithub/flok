@@ -21,7 +21,7 @@
             view.cbp = cbp
             view.context = info
             self.dynamicType.cbpToView[cbp] = view
-            view.defaultInit()
+            view.didLoad()
         } else {
             NSException(name: "FlokControllerModule", reason: "For view with pointer \(vbp), it existed, but was not a FlokView", userInfo: nil).raise()
         }

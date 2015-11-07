@@ -3,7 +3,6 @@ use_frameworks!
 
 target 'flok_Example', :exclusive => true do
   pod "flok", :path => "../"
-  pod 'CocoaAsyncSocket', '~> 7.4'
 end
 
 target 'flok_Tests', :exclusive => true do
@@ -11,5 +10,4 @@ target 'flok_Tests', :exclusive => true do
 
   #pod 'Quick', '~> 0.7.0'
   #pod 'Nimble', '~> 2.0.0'
-  pod 'CocoaAsyncSocket', '~> 7.4'
 end

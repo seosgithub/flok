@@ -125,7 +125,6 @@
 			children = (
 				AA1B60761BD8152700FB1EE4 /* PipeViewController.swift */,
 				AA49504C1BE041A700FE70C7 /* ModuleSpec */,
-				AA49503D1BDF357100FE70C7 /* views */,
 				AA1B60731BD80FF700FB1EE4 /* Assets */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -192,13 +191,6 @@
 				AA1B60741BD8104000FB1EE4 /* pipe.png */,
 			);
 			name = Assets;
-			sourceTree = "<group>";
-		};
-		AA49503D1BDF357100FE70C7 /* views */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = views;
 			sourceTree = "<group>";
 		};
 		AA49504C1BE041A700FE70C7 /* ModuleSpec */ = {

@@ -67,7 +67,7 @@ public class FlokView: UIView, Preloadable
         self.init(frame: CGRectZero)
     }
     
-    public func defaultInit() {
+    public func didLoad() {
     }
     
     override public func layoutSubviews() {
@@ -89,7 +89,7 @@ public class FlokView: UIView, Preloadable
         
     }
     
-    public func send(name: String, withInfo info: [String:AnyObject]) {
+    public func emit(name: String, withInfo info: [String:AnyObject]) {
         engine.int_dispatch([3, "int_event", cbp!, name, info])
     }
     
