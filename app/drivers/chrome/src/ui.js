@@ -114,21 +114,23 @@ function if_free_view(vp) {
 //Spec related////////////////////////////////////////////////
 function if_ui_spec_init() {
   //Set the body HTML
-  var body_html = "                                  \
-    <div id='root'></div>                            \
-                                                     \
-    <div id='prototypes' style='display: none'>      \
-      <div class='view' data-name='spec_blank'>      \
-      </div>                                         \
-      <div class='view' data-name='spec_one_spot'>   \
-        <div class='spot' data-name='content'></div> \
-      </div>                                         \
-      <div class='view' data-name='spec_two_spot'>   \
-        <div class='spot' data-name='a'></div>       \
-        <div class='spot' data-name='b'></div>       \
-      </div>                                         \
-    </div>                                           \
-                                                     \
+  var body_html = "                                           \
+    <div id='root'></div>                                     \
+                                                              \
+    <div id='prototypes' style='display: none'>               \
+      <div class='view' data-name='spec_blank'>               \
+      </div>                                                  \
+      <div class='view' data-name='spec_blank_sends_context'> \
+      </div>                                                  \
+      <div class='view' data-name='spec_one_spot'>            \
+        <div class='spot' data-name='content'></div>          \
+      </div>                                                  \
+      <div class='view' data-name='spec_two_spot'>            \
+        <div class='spot' data-name='a'></div>                \
+        <div class='spot' data-name='b'></div>                \
+      </div>                                                  \
+    </div>                                                    \
+                                                              \
   "
   $("body").html(body_html);
 }

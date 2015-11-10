@@ -159,10 +159,28 @@ function if_spec_controller_init() {
     }
   }
 
+  var TestControllerContext = function() {
+    this.base = FlokController; this.base(); self = this;
+
+    this.init = function() {
+      self.send("context", self.context)
+    }
+
+    self.action = function(from, to) {
+      self.send("action_rcv", {from: from, to:to});
+    }
+
+    self.event = function(name, info) {
+      self.send("custom_rcv", {name:name, info:info})
+    }
+  }
+
+
   //Register the new controller
   $(document).ready(function() {
     regController("spec_blank", TestController);
     regController("spec_one_spot", TestController);
+    regController("spec_blank_sends_context", TestControllerContext);
   });
 }
 

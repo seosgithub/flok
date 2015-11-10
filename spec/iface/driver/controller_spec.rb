@@ -57,12 +57,23 @@ RSpec.describe "iface:driver:controller" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "action_rcv", {"from" => nil, "to" => to_action}], 6.seconds)
   end
 
-  it "Does send back a message for the test controller custom action" do
+  it "Does send back a message for the test controller custom action named 'foo'" do
     bp = 332
     init_controller(bp)
 
     #Send an action event
-    custom_name = SecureRandom.hex
+    custom_name = "foo"
+    custom_info = {"info" => SecureRandom.hex}
+    send_event(bp, custom_name, custom_info)
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "custom_rcv", {"name" => custom_name, "info" => custom_info}], 6.seconds)
+  end
+
+  it "Does send back a message for the test controller custom action named 'bar'" do
+    bp = 332
+    init_controller(bp)
+
+    #Send an action event
+    custom_name = "bar"
     custom_info = {"info" => SecureRandom.hex}
     send_event(bp, custom_name, custom_info)
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([3, "int_event", bp, "custom_rcv", {"name" => custom_name, "info" => custom_info}], 6.seconds)

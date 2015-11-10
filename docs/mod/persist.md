@@ -1,5 +1,5 @@
 #Persist (persist.js)
-Persistance management. Loosely based on redis.
+Persistance management. Loosely based on redis. Value's can be any javascript object.
 
 ###Driver messages
 `if_per_set(ns, key, value)` - Set a key and value

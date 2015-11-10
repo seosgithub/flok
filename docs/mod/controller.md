@@ -31,7 +31,7 @@ but have not been destroyed.
 ### Spec fixtures (driver side)
 There should be two identical controllers called `spec_one_spot` and `spec_blank` that can be initialized and should respond in the following ways when it receives an action and
 event:
-  Note: an event is **not** a raw message, it is through the message of `int_event`, i.e. `[3, "int_event", "event_name", info]`
+  Note: an event is **not** a raw message, it is through the message of `int_event`, i.e. `[3, $NAME, bp, "custom_event", info]`. The event name may either be `foo` or `bar`
   Sends a **event** back called `action_rcv` containing `{from: from, to: to, info: info}` when an action is received
   Sends a **event** back called `custom_rcv` containing a hash that looks like `{name: name, info: event}` when a custom event is received
 

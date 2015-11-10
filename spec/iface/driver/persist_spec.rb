@@ -50,6 +50,22 @@ RSpec.describe "iface:driver:persist" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
   end
 
+  it "Can set a persist for a dictionary object, and then get" do
+    key = "persist_key"
+    value = {"foo" => "bar"}
+
+    #Disk is scheduling class 2
+    @pipe.puts [[2, 3, "if_per_set", "my_ns", key, value]].to_json
+    @pipe.puts [[2, 0, "ping"]].to_json; @pipe.readline_timeout
+    restart_driver_but_persist
+    @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
+
+    #Expect a response
+    res = [4, "int_per_get_res", "session", "my_ns", key, value]
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds(res, 8.seconds)
+  end
+
+
   #Not the bests of tests, but it's really testing the ability of the pipe
   #interface to properly reset the device's data
   it "Does not persists between tests (i.e. not restarts but complete new tests)" do
