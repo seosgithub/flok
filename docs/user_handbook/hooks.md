@@ -4,7 +4,7 @@
 ##### There are two questions that *Hooks* were designed to solve.
 
 1. Animation segues.  When a controller switches actions, often time it is swapping out view controllers. Adding animations at this time would be the optimal time to do so.  However, different clients, take blackberry and iOS, may either have fully-automated-animations, gesture controlled animations, cancelable-animations, synchronous-blocking, and the list goes on-and-on. Clearly, animations are handled differently on each platform, so how do we allow each platform to manage animation-segues?
-2. There are times when a client, e.g. chrome, need to support semantics that are platform dependent.  *For example*, you may need the back button in your web client to trigger a view controller to go back a page. However, this semantic does not make much sense when you have multiple view controllers; e.g. What view controller receives the back clicked event?
+2. There are times when a client, e.g. android, need to support semantics that are platform dependent.  *For example*, you may need the back button on your mobile phone to trigger a view controller to go back a page. However, this semantic does not make much sense when you have multiple view controllers; e.g. *(What view controller receives the back clicked event?)*
 
 ##### Additionally, these questions must be solved with these constraints
 1. Allowing the client to choose interception points at runtime would be prohibitively slow.  Therefore, care should be taken to make sure hooks are as static as possible and do not add un-necessary runtime overhead.
@@ -12,11 +12,12 @@
 -------
 
 ##### How hooks solves these problems:
-*Hooks* solves these questions and constraitns by allowing the user to define triggers in their project under `./config/hooks.rb` using a *DSL* which in-turn notifies the client. The client then handles each hook in an appropriate fashion.
-
+*Hooks* solves these questions and constraitns by allowing the user to define triggers in their project under `./config/hooks.rb` using a *DSL* which is used to create hook emitters at compile-time.  These hook emitters send the hook notification to the client.
 ## Hooking by example with `./config/hooks.rb`
 
 **Here is an example of a `./config/hooks.rb` which tells flok to notify the client that the `supports_back_clicked` hook triggered whenever a controller instance of a `"my_controller"` controller switches to an action via Goto that has an event handler defined with `back_clicked`:**
+
+Here is an example of a hook configuration file with *one* hook.  The hook generator is called `goto`, you may think of the generators as a set of helper DSL functions that have there own unique parameters.  The first line, `hook :goto => :supports_back_clicked` denotes that we are using the `goto` generator and the emitted event is called `:supports_back_clicked`.
 
 ```ruby
 # $USER_POJECT_ROOT/config/hooks.rb
@@ -30,16 +31,18 @@ hook :goto => :supports_back_clicked do
 end
 ```
 
-**The basic format of each hook looks like:**
+A break down of this code is:
+
 ```ruby
-hook :hook_generator_name => :hook_notification_name do
-  #Selector methods & Configuration specific to the hook generator
+hook :generator_name => :my_hook_name do
+  #Selectors
 end
 ```
 
 Selectors for each hook generator create more specific requirements for a trigger. By convention, all hook generators, if supplied no selector arguments will select all possible.  **For example, this would hook all Goto statements in all controllers**:
+
 ```ruby
-hook :hook_generator_name => :hook_notification_name do
+hook :goto => :all_goto do
 end
 ```
 
@@ -47,7 +50,8 @@ end
 ---
 The client, in-turn must handle the hook notification, in this example, the hook notification is named `supports_back_clicked`. The hook notifications typically includes a set of parameters, but the parameters are dependent on the *hook generator* used.  In the above example, we are using the `goto` hook generator. See below for the different `hook generators` specifics.
 
-** See client docs for how to handle hook notifications, here is an example in pseudo code: **
+See client docs for how to handle hook notifications, here is an example in pseudo code:
+
 ```ruby
 handleHook("supports_back_clicked", function(hookInfo) {
   var to_action_name = hookInfo.to_action_name;
@@ -70,7 +74,7 @@ The user's `./config/hooks.rb` file is compiled and then evaluated statically to
 and inserts code at particular hook detection points; the nature of the insertions is up to the particular hooking context.
 
 ##Synchronous vs Asynchronous Hooks
-Whether a hook is synchronous or not synchronous depends entirely on the type of hook in question. An example of a possible synchronous hook is a hook jkkkkkkkkkk..j
+There are situations where you may want a synchronous hook. Examples include 
 
 ##Hooking check points
 Each controller has a plethora of functions that determine it's lifetime and behaviours. These functions include the actions of creation, destruction, embedding, pushing actions, talking to services, etc.
