@@ -42,6 +42,7 @@ RSpec.describe "iface:driver:persist" do
     #Disk is scheduling class 2
     @pipe.puts [[2, 3, "if_per_set", "my_ns", key, value]].to_json
     @pipe.puts [[2, 0, "ping"]].to_json; @pipe.readline_timeout
+    sleep 3
     restart_driver_but_persist
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
@@ -57,6 +58,7 @@ RSpec.describe "iface:driver:persist" do
     #Disk is scheduling class 2
     @pipe.puts [[2, 3, "if_per_set", "my_ns", key, value]].to_json
     @pipe.puts [[2, 0, "ping"]].to_json; @pipe.readline_timeout
+    sleep 3
     restart_driver_but_persist
     @pipe.puts [[0, 3, "if_per_get", "session", "my_ns", key]].to_json
 
