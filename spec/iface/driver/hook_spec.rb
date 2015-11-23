@@ -94,5 +94,16 @@ RSpec.describe "iface:driver:hook" do
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds(json, 5.seconds)
   end
 
+  it "Can receive a hook without a handler and not crash" do
+    @ptr = SecureRandom.hex
 
+    #Wait for response
+    @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+
+    #Simulate a hook event on the main queue
+    @pipe.puts [[0, 2, "if_hook_event", "test3", {foo: "bar"}]].to_json
+
+    #Wait for response
+    @pipe.puts [[0, 0, "ping"]].to_json; @pipe.readline_timeout
+  end
 end
