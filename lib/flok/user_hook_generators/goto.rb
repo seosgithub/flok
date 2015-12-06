@@ -1,5 +1,7 @@
 require_relative 'helpers'
 
+$extra_code = ""
+
 module Flok
   class GotoHooksDSLEnv
     attr_accessor :selectors
@@ -50,6 +52,10 @@ module Flok
       end
     end
     #################################################################################
+
+    def before_views spider
+      $extra_code = "hook_info = find_view(__base__, #{spider.to_json})"
+    end
   end
 
   UserHooksToManifestOrchestrator.register_hook_gen :goto do |manifest, params|
@@ -65,7 +71,8 @@ module Flok
     #based on the hook entry static parameters
     entry = HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
       next %{
-        SEND("main", "if_hook_event", "#{hook_event_name}", {});
+        #{$extra_code}
+        SEND("main", "if_hook_event", "#{hook_event_name}", hook_info);
       }
     end
 

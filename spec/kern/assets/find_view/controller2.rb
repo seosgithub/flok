@@ -6,7 +6,7 @@ controller :my_controller do
       Embed("my_controller2", "content", {});
 
       find_view_res = find_view(__base__, {
-        "my_controller2": {
+        ".": {
            "__leaf__": "foo"
         }
       });
@@ -21,4 +21,3 @@ controller :my_controller2 do
     }
   end
 end
-

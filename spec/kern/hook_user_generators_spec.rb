@@ -136,4 +136,42 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
+  it "Can embed a pre and post selectors which will be returned in the hooking response" do
+    #Hook source code
+    hooks_src = %{
+      hook :goto => :goto do
+        controller "my_controller"
+        to_action_responds_to? "test"
+
+        before_views({
+          "." => {
+            "__leaf__" => "foo"
+          }
+        })
+      end
+    }
+
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
+    ctx = info[:ctx]
+
+    #Run the embed function
+    ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+    }
+
+
+    my_other_controller_base = ctx.eval("my_other_controller_base")
+    on_entry_base_pointer = ctx.eval("on_entry_base_pointer")
+
+    #Now we switch to an action and our last action contained a back click
+    @driver.int "int_event", [ on_entry_base_pointer, "hello", {} ] 
+    @driver.ignore_up_to("if_hook_event", 0)
+    hook_res = @driver.get "if_hook_event", 0
+
+    expect(hook_res[1]).to eq({
+      "foo" => my_other_controller_base
+    })
+  end
 end

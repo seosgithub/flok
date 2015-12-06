@@ -28,6 +28,13 @@ hook :goto => :supports_back_clicked do
   
   #Configuration methods
   is_sync
+
+  #View hierarchy selectors
+  before_views({
+    "." => {
+      "__leaf__" => "foo"
+    }
+  })
 end
 ```
 
@@ -35,7 +42,11 @@ A break down of this code is:
 
 ```ruby
 hook :generator_name => :my_hook_name do
-  #Selectors
+  #Selectors To Hook on
+
+  #Various configuration
+
+  #View hierarchy to forward to hook
 end
 ```
 

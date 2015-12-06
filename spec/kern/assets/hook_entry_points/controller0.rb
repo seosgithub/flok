@@ -14,13 +14,16 @@ controller :my_controller do
     }
 
     on "hello", %{
-      var x = 3;
+      Goto("other");
     }
 
     my_macro
   end
 
   action :other do
+    on_entry %{
+    }
+
     on "test", %{
     }
   end
