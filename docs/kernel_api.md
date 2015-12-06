@@ -38,6 +38,7 @@ instead.
   * `_embed(vc_name, sp, context, event_gw)` - Embed a view controller in a surface-pointer. Following the rules of the ui device, embedded to a sp of
       0 is the master root view. Returns base pointer. `event_gw` is a pointer to a `vc`. If it is null, then any events coming in will not be sent to
       somewhere else if they do not match any 'on' for the current action.
+  * `find_view(bp, spider_payload)` - Traverses the hierarchy within some controller (`bp`) and returns the named entries. See [find_view_specifics](./kernel_handbook/find_view.md) for how this works.
 
 ##Timers
   * See [./callout.md](Callout) for how to register a timer
