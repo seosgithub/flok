@@ -152,4 +152,64 @@ eof
     expect(dump["entry_params"]["old_action"]).to eq("choose_action")
     expect(dump["entry_params"]["new_action"]).to eq("index")
   end
+
+  it "Can hook the controller_did_goto event with the correct hook entry information and has the variables mentioned in the docs" do
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0a.rb')
+    src = info[:src]
+    ctx = info[:ctx]
+
+    manifest = Flok::HooksManifest.new
+    will_gotos_found = 0
+    from_to_action_pairs_found = []
+    entry = Flok::HooksManifestEntry.new("controller_did_goto") do |hook_info|
+      will_gotos_found += 1
+      #Static parameters
+      expect(hook_info["controller_name"]).to eq("my_controller")
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
+
+      #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+      #where each action list contains all the events this action responds to
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+
+      #Variables included
+      next %{
+        entry_params = {
+          old_action: old_action,
+          new_action: __info__.action,
+        };
+      }
+    end
+    manifest << entry
+
+    #Recompile source (We do this manually as we supplied no `config/hooks.rb` file)
+    src = Flok::HooksCompiler.compile src, manifest
+    
+    #Expect to have found two will_goto entries given that there is one Goto request
+    #and one implicit Goto from the entry
+    expect(will_gotos_found).to eq(2)
+
+    #Expect to have gotten all the goto to/from action pairs
+    expect(from_to_action_pairs_found.to_set).to eq([{"other" => "index"}, {"choose_action" => "index"}].to_set)
+
+    #Re-evaluate the v8 instance
+    ctx = v8_flok
+    ctx.eval src
+
+    #Now load the controller
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+
+      dump.entry_params = entry_params;
+    }
+
+    #Verify the parametrs were set
+    expect(dump["entry_params"]).not_to eq(nil)
+    expect(dump["entry_params"]["old_action"]).to eq("choose_action")
+    expect(dump["entry_params"]["new_action"]).to eq("index")
+  end
+
 end

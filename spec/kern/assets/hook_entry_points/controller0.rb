@@ -22,6 +22,7 @@ controller :my_controller do
 
   action :other do
     on_entry %{
+      Embed("new_controller", "hello", {});
     }
 
     on "test", %{
@@ -56,6 +57,14 @@ controller :my_other_controller do
   action :has_back_also do
     on "back_clicked", %{
       Goto("other");
+    }
+  end
+end
+
+controller :new_controller do
+  action :index do
+    on_entry %{
+      new_controller_base = __base__;
     }
   end
 end

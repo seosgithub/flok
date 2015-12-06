@@ -185,6 +185,7 @@ module Flok
 
             //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
 
+
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
@@ -223,6 +224,7 @@ module Flok
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
 
+            //HOOK_ENTRY[controller_did_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
             //'choose_action' pseudo-action will be sent as 'null' as it's the initial state
             if (old_action === "choose_action") {
               old_action = null;
@@ -233,6 +235,7 @@ module Flok
               from: old_action,
               to: "#{action_name}"
             }]);
+
           }
           out.puts res
         elsif l =~ /Push/

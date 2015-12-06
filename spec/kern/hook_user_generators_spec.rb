@@ -148,6 +148,13 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
             "__leaf__" => "foo"
           }
         })
+
+        after_views({
+          "new_controller" => {
+            "__leaf__" => "foo2"
+          }
+        })
+
       end
     }
 
@@ -167,11 +174,16 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
 
     #Now we switch to an action and our last action contained a back click
     @driver.int "int_event", [ on_entry_base_pointer, "hello", {} ] 
+    new_controller_base = ctx.eval("new_controller_base")
+
     @driver.ignore_up_to("if_hook_event", 0)
     hook_res = @driver.get "if_hook_event", 0
 
     expect(hook_res[1]).to eq({
-      "foo" => my_other_controller_base
+      "views" => {
+        "foo" => my_other_controller_base,
+        "foo2" => new_controller_base
+      }
     })
   end
 end

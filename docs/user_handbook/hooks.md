@@ -98,14 +98,18 @@ the following JSON format:
 The name is the hook name and the params is context specific inforamtion the compiler has embedded. Live variables that are in the context of the hook detection point are described in each hook detection point below.
 
   * `controller_will_goto` - The controller is about to invoke the Goto macro and switch actions or it has just entered the first action from choose_action (which is a Goto).
-    * params (static generated)
+    * params (static generated in the hook info)
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are coming from
       * `to_action` - The name of the action we are going to
-    * Useful (dynamic) variables
+    * Useful (dynamic/local JS) variables
       * `old_action` - The previous action, equal to `from_action` but in dynamic form. If there is no action, this is set to `choose_action`. Not sure why you would use this
       * `__info__.action` - The name of the new action
-  * `${controller_name}_did_destroy` - The controller has *just* been destroyed
+  * `controller_did_goto` - The controller has completed the goto switch
+    * params (static)
+      * `controller_name` - The controller name that this entry effects
+      * `from_action` - The name of the action we are coming from
+      * `to_action` - The name of the action we are going to
 
 ##Hooks Compiler
 The hooks compiler is able to take the hook entry points and inject code into them via a set of `HooksManifestEntries` which are bound togeather via a `HooksManifest`. The actual

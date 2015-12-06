@@ -1,13 +1,13 @@
 require_relative 'helpers'
 
-$extra_code = ""
-
 module Flok
   class GotoHooksDSLEnv
-    attr_accessor :selectors
+    attr_accessor :selectors, :before_view_spider, :after_view_spider
 
     def initialize
       @selectors = []
+      @before_view_spider = {}
+      @after_view_spider = {}
     end
 
     def controller name
@@ -54,7 +54,11 @@ module Flok
     #################################################################################
 
     def before_views spider
-      $extra_code = "hook_info = find_view(__base__, #{spider.to_json})"
+      @before_view_spider = spider
+    end
+
+    def after_views spider
+      @after_view_spider = spider
     end
   end
 
@@ -67,15 +71,27 @@ module Flok
     dsl_env = GotoHooksDSLEnv.new
     dsl_env.instance_eval(&block)
 
+    ns = "_#{SecureRandom.hex[0..5]}"
+
     #Inject into HOOK_ENTRY[controller_will_goto] that match the given selectors from the DSL
     #based on the hook entry static parameters
-    entry = HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
+    manifest << HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
       next %{
-        #{$extra_code}
-        SEND("main", "if_hook_event", "#{hook_event_name}", hook_info);
+        var #{ns}_before_views = find_view(__base__, #{dsl_env.before_view_spider.to_json});
       }
     end
 
-    manifest << entry
+    manifest << HooksManifestEntry.new("controller_did_goto", dsl_env.selectors) do |entry_hook_params|
+      next %{
+        var #{ns}_after_views = find_view(__base__, #{dsl_env.after_view_spider.to_json});
+        var #{ns}_info = {
+          views: #{ns}_after_views
+        };
+        for (var k in #{ns}_before_views) {
+          #{ns}_info.views[k] = #{ns}_before_views[k];
+        }
+        SEND("main", "if_hook_event", "#{hook_event_name}", #{ns}_info);
+      }
+    end
   end
 end
