@@ -29,7 +29,14 @@ controller :my_controller do
     nav
   end
 
+  #Don't use macro here to test inside of a function
   action :about do
-    nav
+    on "back_clicked", %{
+      if (push_count === 0) {
+        raised_back = true;
+      } else {
+        did_pop = true;
+      }
+    }
   end
 end

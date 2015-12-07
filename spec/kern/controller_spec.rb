@@ -1002,7 +1002,7 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [Integer, "action", {"from" => "about", "to" => "home"}])
   end
 
-  it "Does support using a macro that contains push_count" do
+  it "Does support using an action & macro that contains push_count" do
     #1. If we're in home, we should just raise back_clicked
     ctx = flok_new_user File.read('./spec/kern/assets/push_count.rb')
     dump = ctx.evald %{
