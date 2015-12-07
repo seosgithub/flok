@@ -1001,4 +1001,38 @@ RSpec.describe "kern:controller_spec" do
     @driver.mexpect("if_event", [Integer, "action", {"from" => "home", "to" => "about"}])
     @driver.mexpect("if_event", [Integer, "action", {"from" => "about", "to" => "home"}])
   end
+
+  it "Does support using a macro that contains push_count" do
+    #1. If we're in home, we should just raise back_clicked
+    ctx = flok_new_user File.read('./spec/kern/assets/push_count.rb')
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      int_dispatch([3, "int_event", base, "back_clicked", {}]);
+    }
+    raised_back = ctx.eval("raised_back")
+    expect(raised_back).to eq(true)
+
+
+    #2. If we're in home, and push about, then we should pop
+    ctx = flok_new_user File.read('./spec/kern/assets/push_count.rb')
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      int_dispatch([3, "int_event", base, "about_clicked", {}]);
+      int_dispatch([3, "int_event", base, "back_clicked", {}]);
+    }
+    did_pop = ctx.eval("did_pop")
+    expect(did_pop).to eq(true)
+
+    #3. If we're in about (start), then we should raise back_clicked
+    ctx = flok_new_user File.read('./spec/kern/assets/push_count.rb')
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {starts_in_about: true}, null);
+
+      int_dispatch([3, "int_event", base, "back_clicked", {}]);
+    }
+    raised_back = ctx.eval("raised_back")
+    expect(raised_back).to eq(true)
+  end
 end

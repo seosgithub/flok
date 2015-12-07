@@ -55,6 +55,20 @@ controller "tab_controller" do
     }
   end
 
+  #Navigation stacks often have multiple entry points, 'back' may differ
+  #in action depending on whether it is the highest in the stack, you
+  #may use the 'push_count' variable to get the current level of the
+  #hierarchy you are on
+  macro :my_stack_macro do
+    on "back_clicked", %{
+      //If the push_level is 0, then we cannot Pop
+      if (push_count === 0) {
+        Raise("back_clicked");
+      } else {
+        Pop();
+      }
+    }
+  end
 
   #Optional
   #Called after on_entry, but before any action is entered. This is a pseudo

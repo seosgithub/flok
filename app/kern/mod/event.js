@@ -6,7 +6,9 @@ edefer_q = [];
 
 function int_event(ep, event_name, info) {
   <% if @debug %>
-    if (ep.constructor !== String && ep.constructor !== Number) { throw "int_event was given either something that wasn't a string or number for ep: '" + (ep.constructor) + "' and the value was: '" + ep + "'"};
+    if (ep) {
+      if (ep.constructor !== String && ep.constructor !== Number) { throw "int_event was given either something that wasn't a string or number for ep: '" + (ep.constructor) + "' and the value was: '" + ep + "'"};
+    }
   <% end %>
 
   var f = evt[ep];

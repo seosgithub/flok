@@ -17,8 +17,6 @@ function _find_view(bp, spider, shared) {
   var ctable = tel_deref(bp);
   var embeds = ctable.embeds;
 
-  var output = {};
-
   for (var x = 0; x < embeds.length; ++x) {
     for (var i = 0; i < embeds[x].length; ++i) {
       //Pull info about the entry (subview)
