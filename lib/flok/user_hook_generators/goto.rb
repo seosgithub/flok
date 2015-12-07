@@ -51,6 +51,23 @@ module Flok
         next false
       end
     end
+
+    def to_action_named name
+      @selectors << lambda do |params|
+        to_action = params["to_action"]
+
+        next to_action == name
+      end
+    end
+
+    def from_action_named name
+      @selectors << lambda do |params|
+        from_action = params["from_action"]
+
+        next from_action == name
+      end
+    end
+
     #################################################################################
 
     def before_views spider

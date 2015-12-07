@@ -72,6 +72,8 @@ handleHook("supports_back_clicked", function(hookInfo) {
     * `DSL Selectors`
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
+      * `to_action_named "action_name"` - The name of the action you are going to
+      * `from_action_named "action_name"` - The name of the action you are coming from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
     * `Completion`
       * The `completion` event is expected to be raised via `int_event` for all goto events. This is because the old view is not destroyed until the `completion` event is called
