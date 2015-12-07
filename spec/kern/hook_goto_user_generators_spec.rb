@@ -136,11 +136,11 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use the :goto hook generator for a controller with the to_action_named constraint for various actions" do
+  it "Can use the :goto hook generator for a controller with the to_action constraint for various actions" do
     #Hook source code
     hooks_src = %{
       hook :goto => :goto do
-        to_action_named "other"
+        to_action "other"
       end
     }
 
@@ -162,11 +162,11 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use the :goto hook generator for a controller with the from_action_named constraint for various actions" do
+  it "Can use the :goto hook generator for a controller with the from_action constraint for various actions" do
     #Hook source code
     hooks_src = %{
       hook :goto => :goto do
-        from_action_named "index"
+        from_action "index"
       end
     }
 

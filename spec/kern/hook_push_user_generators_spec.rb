@@ -21,23 +21,23 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     }
 
     #Just expect this not to blow up
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
-    ctx.evald %{
+    dump = ctx.evald %{
       dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
       int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
     }
 
-    #We should have sent out an event for the hook event twice as we have two controllers
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+
     @driver.ignore_up_to("if_hook_event", 0)
     @driver.get "if_hook_event", 0
-    @driver.ignore_up_to("if_hook_event", 0)
   end
 
-  it "Can use the :push hook generator for a specific controller (by name) and receives a hook event" do
-    #Hook source code
+  it "Can use the :push hook generator for one specific controller by name" do
     hooks_src = %{
       hook :push => :push do
         controller "my_controller"
@@ -45,147 +45,131 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     }
 
     #Just expect this not to blow up
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
-    ctx.evald %{
+    dump = ctx.evald %{
       dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
       int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
     }
 
-    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 #We should have sent out an event for the hook event
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)  # At this point, we should have not received any events for if_hook_event, as we are not selecting the embedded controller
-  end
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
 
-  it "Can use the :push hook generator for a controller with the to_action_responds_to constraint for various actions" do
-    #Hook source code
-    hooks_src = %{
-      hook :push => :push do
-        to_action_responds_to? "back_clicked"
-      end
-    }
-
-    #Get a new js context with the controllers source and the hooks source
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
-    ctx = info[:ctx]
-
-    #Run the embed function
-    dump = ctx.evald %{
-      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
-      int_dispatch([]);                                         // Dispatch any events the are pending
-      dump.my_other_controller_base = my_other_controller_base; // Grab the base address of 'my_other_controller'
-    }
-
-    #The index of my_other_controller contains the back_clicked event, 
-    #and since this is embedded in the my_controller's index, this should have created an event
     @driver.ignore_up_to("if_hook_event", 0)
-    event = @driver.get "if_hook_event", 0
-
-    #Now we switch to an action that dosen't contain a back_clicked event for my_other_controller, so it shouldn't have triggered any hook event
-    @driver.int "int_event", [ dump["my_other_controller_base"], "back_clicked", {} ] 
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-
-    #Now we switch to the 3rd action which still contains no back_clicked
-    @driver.int "int_event", [ dump["my_other_controller_base"], "next_clicked", {} ]
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-
-    #Now we switch to the 4th action which *does* contains a back_clicked
-    @driver.int "int_event", [ dump["my_other_controller_base"], "next_clicked", {} ]
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
+    @driver.get "if_hook_event", 0
+    expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
-  it "Can use the :push hook generator for a controller with the from_action_responds_to constraint for various actions" do
-    #Hook source code
+  it "Can use the :push hook generator for one action that responds to something (going to thing)" do
     hooks_src = %{
       hook :push => :push do
-        from_action_responds_to? "back_clicked"
+        to_action_responds_to? "test"
       end
     }
 
-    #Get a new js context with the controllers source and the hooks source
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
     dump = ctx.evald %{
-      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
-      int_dispatch([]);                                         // Dispatch any events the are pending
-      dump.my_other_controller_base = my_other_controller_base; // Grab the base address of 'my_other_controller'
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
     }
 
-    #Although the first action has a 'back_clicked', it is going to it so this shouldn't have raised an event
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
 
-    #Now we switch to an action and our last action contained a back click
-    @driver.int "int_event", [ dump["my_other_controller_base"], "back_clicked", {} ] 
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
-
-    #Now we switch to the 3rd action and the last action didn't contain a back clicke
-    @driver.int "int_event", [ dump["my_other_controller_base"], "next_clicked", {} ]
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-
-    #Now we switch to the 4th action and the last action did not contain a back click
-    @driver.int "int_event", [ dump["my_other_controller_base"], "next_clicked", {} ]
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-
-    #Now we switch to the 2nd action and the last action had a back clicked
-    @driver.int "int_event", [ dump["my_other_controller_base"], "back_clicked", {} ]
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
+    @driver.ignore_up_to("if_hook_event", 0)
+    res = @driver.get "if_hook_event", 0
+    expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
-  it "Can use the :push hook generator for a controller with the to_action_named constraint for various actions" do
-    #Hook source code
+
+  it "Can use the :push hook generator for one action that responds to something (coming from thing)" do
     hooks_src = %{
       hook :push => :push do
-        to_action_named "other"
+        from_action_responds_to? "olah"
       end
     }
 
-    #Get a new js context with the controllers source and the hooks source
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0b.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
     dump = ctx.evald %{
-      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
-      int_dispatch([]);                                         // Dispatch any events the are pending
-      dump.my_controller_base = my_controller_base;
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
     }
 
-    #Should raise a hook at this time
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0)
+    res = @driver.get "if_hook_event", 0
+    expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
-  it "Can use the :push hook generator for a controller with the from_action_named constraint for various actions" do
-    #Hook source code
+  it "can hook into a particualr action we are pushing to" do
     hooks_src = %{
       hook :push => :push do
-        from_action_named "index"
+        to_action "other2"
       end
     }
 
-    #Get a new js context with the controllers source and the hooks source
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0b.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
     dump = ctx.evald %{
-      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
-      int_dispatch([]);                                         // Dispatch any events the are pending
-      dump.my_controller_base = my_controller_base;
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
     }
 
-    #Should raise a hook at this time
-    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
-    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0)
+    res = @driver.get "if_hook_event", 0
+    expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
+  end
+
+  it "can hook into a particualr action we are pushing from" do
+    hooks_src = %{
+      hook :push => :push do
+        from_action "index"
+      end
+    }
+
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
+    }
+
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
+    expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
   it "Can use push to embed a pre and post selectors which will be returned in the hooking response" do
@@ -193,7 +177,7 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     hooks_src = %{
       hook :push => :push do
         controller "my_controller"
-        to_action_responds_to? "test"
+        to_action "other"
 
         before_views({
           "." => {
@@ -202,7 +186,7 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
         })
 
         after_views({
-          "new_controller" => {
+          "my_controller3" => {
             "__leaf__" => "foo2"
           }
         })
@@ -211,7 +195,7 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     }
 
     #Just expect this not to blow up
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
     ctx = info[:ctx]
 
     #Run the embed function
@@ -221,71 +205,20 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     }
 
 
-    my_other_controller_base = ctx.eval("my_other_controller_base")
     on_entry_base_pointer = ctx.eval("on_entry_base_pointer")
 
-    #Now we switch to an action and our last action contained a back click
-    @driver.int "int_event", [ on_entry_base_pointer, "hello", {} ] 
-    new_controller_base = ctx.eval("new_controller_base")
+    @driver.int "int_event", [ on_entry_base_pointer, "next_clicked", {} ] 
+    my_controller3_base = ctx.eval("my_controller3_base")
+    on_entry_base_pointer2 = ctx.eval("on_entry_base_pointer2")
 
     @driver.ignore_up_to("if_hook_event", 0)
     hook_res = @driver.get "if_hook_event", 0
 
     expect(hook_res[1]).to eq({
       "views" => {
-        "foo" => my_other_controller_base,
-        "foo2" => new_controller_base
+        "foo" => on_entry_base_pointer2,
+        "foo2" => my_controller3_base
       }
     })
-  end
-
-  it "The push does not free views via the module until after the completion event is received" do
-    #Hook source code
-    hooks_src = %{
-      hook :push => :push do
-        controller "my_controller"
-        to_action_responds_to? "test"
-      end
-    }
-
-    #Just expect this not to blow up
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    ctx = info[:ctx]
-
-    #Run the embed function
-    ctx.evald %{
-      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
-      int_dispatch([]);                                 // Dispatch any events the are pending
-    }
-
-
-    my_other_controller_base = ctx.eval("my_other_controller_base")
-    on_entry_base_pointer = ctx.eval("on_entry_base_pointer")
-
-    #Now we switch to an action and our last action contained a back click
-    @driver.int "int_event", [ on_entry_base_pointer, "hello", {} ] 
-    new_controller_base = ctx.eval("new_controller_base")
-
-    #Should not receive a free view here because we have not sent the completion handler back
-    expect {
-      @driver.ignore_up_to("if_free_view", 0)
-    }.to raise_error /Waited/
-
-    @driver.ignore_up_to("if_hook_event", 0)
-    hook_res = @driver.get "if_hook_event", 0
-
-    #We need to have a 'completion' tele-pointer to signal back
-    cep = hook_res[1]["cep"]
-    expect(cep).not_to eq(nil)
-
-    #Now we send the completion event
-    @driver.int "int_event", [cep, "", {}]
-
-    #Now we should have received our free views
-    @driver.ignore_up_to("if_free_view", 0)
-    free_view = @driver.get "if_free_view", 0
-    expect(free_view).to eq([
-      my_other_controller_base+1
-    ])
   end
 end

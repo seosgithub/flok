@@ -50,7 +50,7 @@ module Flok
       end
     end
 
-    def to_action_named name
+    def to_action name
       @selectors << lambda do |params|
         to_action = params["to_action"]
 
@@ -58,7 +58,7 @@ module Flok
       end
     end
 
-    def from_action_named name
+    def from_action name
       @selectors << lambda do |params|
         from_action = params["from_action"]
 
@@ -93,19 +93,14 @@ module Flok
     manifest << HooksManifestEntry.new("controller_will_push", dsl_env.selectors) do |entry_hook_params|
       next %{
         var #{ns}_before_views = find_view(__base__, #{dsl_env.before_view_spider.to_json});
-        __free_asap = false;
       }
     end
 
     manifest << HooksManifestEntry.new("controller_did_push", dsl_env.selectors) do |entry_hook_params|
       next %{
-        //The completion callback will share a pointer to the views_to_free key index
-        reg_evt(views_to_free_id, hook_push_completion_cb);
-
         var #{ns}_after_views = find_view(__base__, #{dsl_env.after_view_spider.to_json});
         var #{ns}_info = {
-          views: #{ns}_after_views,
-          cep: views_to_free_id
+          views: #{ns}_after_views
         };
         for (var k in #{ns}_before_views) {
           #{ns}_info.views[k] = #{ns}_before_views[k];

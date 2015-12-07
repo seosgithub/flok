@@ -50,7 +50,7 @@ module Flok
       end
     end
 
-    def to_action_named name
+    def to_action name
       @selectors << lambda do |params|
         to_action = params["to_action"]
 
@@ -58,7 +58,7 @@ module Flok
       end
     end
 
-    def from_action_named name
+    def from_action name
       @selectors << lambda do |params|
         from_action = params["from_action"]
 
