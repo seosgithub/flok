@@ -1,4 +1,4 @@
-//GOTO hook generator expects this callback to be received usually for completion
+//goto hook generator expects this callback to be received usually for completion
 function hook_goto_completion_cb(ep, ename, info) {
   var views_to_free_id = ep;
   var our_views_to_free = views_to_free[ep];
