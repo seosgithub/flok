@@ -95,7 +95,6 @@ handleHook("supports_back_clicked", function(hookInfo) {
     * `info`:
       * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
 
-
 ## How the hook generators are defined & hooking internals
 See [Kernel Handbook | Hooks](../kernel_handbook/hooks.md)
 
@@ -118,17 +117,34 @@ The name is the hook name and the params is context specific inforamtion the com
 
   * `controller_will_goto` - The controller is about to invoke the Goto macro and switch actions or it has just entered the first action from choose_action (which is a Goto).
     * params (static generated in the hook info)
+      * `might_respond_to` - List of events this controller can respond to dependening on the action
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are coming from
       * `to_action` - The name of the action we are going to
-    * Useful (dynamic/local JS) variables
-      * `old_action` - The previous action, equal to `from_action` but in dynamic form. If there is no action, this is set to `choose_action`. Not sure why you would use this
-      * `__info__.action` - The name of the new action
+
   * `controller_did_goto` - The controller has completed the goto switch
     * params (static)
+      * `might_respond_to` - List of events this controller can respond to dependening on the action
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are coming from
       * `to_action` - The name of the action we are going to
+
+  * `controller_will_push` - The controller is about to invoke the Push macro and switch actions
+    * params (static generated in the hook info)
+      * `controller_name` - The controller name that this entry effects
+      * `from_action` - The name of the action we are pushing from
+      * `to_action` - The name of the action we are pushing to
+      * `actions_respond_to` - Hash of action_name to array of events each action responds to
+      * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+
+  * `controller_did_push` - The controller has completed the push
+    * params (static)
+      * `controller_name` - The controller name that this entry effects
+      * `from_action` - The name of the action we are pushing from
+      * `to_action` - The name of the action we are pushing to
+      * `actions_respond_to` - Hash of action_name to array of events each action responds to
+      * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+
 
 ##Hooks Compiler
 The hooks compiler is able to take the hook entry points and inject code into them via a set of `HooksManifestEntries` which are bound togeather via a `HooksManifest`. The actual

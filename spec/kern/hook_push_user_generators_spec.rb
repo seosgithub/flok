@@ -9,13 +9,13 @@ require './spec/lib/rspec_extensions.rb'
 require './lib/flok/hooks_compiler.rb'
 require 'zlib'
 
-RSpec.describe "kern:hook_user_geenrators_spec" do
+RSpec.describe "kern:hook_push_user_generators_spec" do
   include Zlib
   include_context "kern"
 
-  it "Can use the :goto hook generator for all controllers (no matchers)" do
+  it "Can use the :push hook generator for all controllers (no matchers)" do
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         #Select all
       end
     }
@@ -36,10 +36,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     @driver.ignore_up_to("if_hook_event", 0)
   end
 
-  it "Can use the :goto hook generator for a specific controller (by name) and receives a hook event" do
+  it "Can use the :push hook generator for a specific controller (by name) and receives a hook event" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         controller "my_controller"
       end
     }
@@ -58,10 +58,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)  # At this point, we should have not received any events for if_hook_event, as we are not selecting the embedded controller
   end
 
-  it "Can use the :goto hook generator for a controller with the to_action_responds_to constraint for various actions" do
+  it "Can use the :push hook generator for a controller with the to_action_responds_to constraint for various actions" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         to_action_responds_to? "back_clicked"
       end
     }
@@ -96,10 +96,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use the :goto hook generator for a controller with the from_action_responds_to constraint for various actions" do
+  it "Can use the :push hook generator for a controller with the from_action_responds_to constraint for various actions" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         from_action_responds_to? "back_clicked"
       end
     }
@@ -136,10 +136,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use the :goto hook generator for a controller with the to_action_named constraint for various actions" do
+  it "Can use the :push hook generator for a controller with the to_action_named constraint for various actions" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         to_action_named "other"
       end
     }
@@ -162,10 +162,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use the :goto hook generator for a controller with the from_action_named constraint for various actions" do
+  it "Can use the :push hook generator for a controller with the from_action_named constraint for various actions" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         from_action_named "index"
       end
     }
@@ -188,10 +188,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
 
-  it "Can use goto to embed a pre and post selectors which will be returned in the hooking response" do
+  it "Can use push to embed a pre and post selectors which will be returned in the hooking response" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         controller "my_controller"
         to_action_responds_to? "test"
 
@@ -239,10 +239,10 @@ RSpec.describe "kern:hook_user_geenrators_spec" do
     })
   end
 
-  it "The goto does not free views via the module until after the completion event is received" do
+  it "The push does not free views via the module until after the completion event is received" do
     #Hook source code
     hooks_src = %{
-      hook :goto => :goto do
+      hook :push => :push do
         controller "my_controller"
         to_action_responds_to? "test"
       end

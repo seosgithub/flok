@@ -212,4 +212,90 @@ eof
     expect(dump["entry_params"]["new_action"]).to eq("index")
   end
 
+  it "Can hook the controller_will_push event with the correct hook entry information mentioned in the docs" do
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0a_push.rb')
+    src = info[:src]
+    ctx = info[:ctx]
+
+    manifest = Flok::HooksManifest.new
+    will_pushs_found = 0
+    from_to_action_pairs_found = []
+    entry = Flok::HooksManifestEntry.new("controller_will_push") do |hook_info|
+      will_pushs_found += 1
+      #Static parameters
+      expect(hook_info["controller_name"]).to eq("my_controller")
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
+
+      #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+      #where each action list contains all the events this action responds to
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+    end
+    manifest << entry
+
+    #Recompile source (We do this manually as we supplied no `config/hooks.rb` file)
+    src = Flok::HooksCompiler.compile src, manifest
+    
+    #Expect to have found one will_push entries given that there is one push request
+    expect(will_pushs_found).to eq(1)
+
+    #Expect to have gotten all the push to/from action pairs
+    expect(from_to_action_pairs_found.to_set).to eq([{"other" => "index"}].to_set)
+
+    #Re-evaluate the v8 instance
+    ctx = v8_flok
+    ctx.eval src
+
+    #Now load the controller
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+  end
+
+  it "Can hook the controller_did_push event with the correct hook entry information mentioned in the docs" do
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0a_push.rb')
+    src = info[:src]
+    ctx = info[:ctx]
+
+    manifest = Flok::HooksManifest.new
+    did_pushs_found = 0
+    from_to_action_pairs_found = []
+    entry = Flok::HooksManifestEntry.new("controller_did_push") do |hook_info|
+      did_pushs_found += 1
+      #Static parameters
+      expect(hook_info["controller_name"]).to eq("my_controller")
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
+
+      #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+      #where each action list contains all the events this action responds to
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+    end
+    manifest << entry
+
+    #Recompile source (We do this manually as we supplied no `config/hooks.rb` file)
+    src = Flok::HooksCompiler.compile src, manifest
+    
+    #Expect to have found one did_push entries given that there is one push request
+    expect(did_pushs_found).to eq(1)
+
+    #Expect to have gotten all the push to/from action pairs
+    expect(from_to_action_pairs_found.to_set).to eq([{"other" => "index"}].to_set)
+
+    #Re-evaluate the v8 instance
+    ctx = v8_flok
+    ctx.eval src
+
+    #Now load the controller
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+  end
+
 end

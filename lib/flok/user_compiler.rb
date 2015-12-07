@@ -269,6 +269,9 @@ module Flok
 
             __info__.action = "#{action_name}";
 
+            //HOOK_ENTRY[controller_will_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
+
+
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds = [];
             for (var i = 1; i < #{@controller.spots.count}; ++i) {
@@ -278,6 +281,8 @@ module Flok
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
+
+            //HOOK_ENTRY[controller_did_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
 
             //Send off event for action change
             main_q.push([3, "if_event", __base__, "action", {

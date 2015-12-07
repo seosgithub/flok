@@ -1,5 +1,5 @@
 module Flok
-  class GotoHooksDSLEnv
+  class PushHooksDSLEnv
     attr_accessor :selectors, :before_view_spider, :after_view_spider
 
     def initialize
@@ -77,30 +77,30 @@ module Flok
     end
   end
 
-  UserHooksToManifestOrchestrator.register_hook_gen :goto do |manifest, params|
+  UserHooksToManifestOrchestrator.register_hook_gen :push do |manifest, params|
     hook_event_name = params[:hook_event_name]
 
     #Evaluate User given DSL (params[:block]) which comes from `./confg/hooks.rb`
     #to retrieve a set of selectors which we will pass the hooks compiler
     block = params[:block]
-    dsl_env = GotoHooksDSLEnv.new
+    dsl_env = PushHooksDSLEnv.new
     dsl_env.instance_eval(&block)
 
     ns = "_#{SecureRandom.hex[0..5]}"
 
-    #Inject into HOOK_ENTRY[controller_will_goto] that match the given selectors from the DSL
+    #Inject into HOOK_ENTRY[controller_will_push] that match the given selectors from the DSL
     #based on the hook entry static parameters
-    manifest << HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
+    manifest << HooksManifestEntry.new("controller_will_push", dsl_env.selectors) do |entry_hook_params|
       next %{
         var #{ns}_before_views = find_view(__base__, #{dsl_env.before_view_spider.to_json});
         __free_asap = false;
       }
     end
 
-    manifest << HooksManifestEntry.new("controller_did_goto", dsl_env.selectors) do |entry_hook_params|
+    manifest << HooksManifestEntry.new("controller_did_push", dsl_env.selectors) do |entry_hook_params|
       next %{
         //The completion callback will share a pointer to the views_to_free key index
-        reg_evt(views_to_free_id, hook_goto_completion_cb);
+        reg_evt(views_to_free_id, hook_push_completion_cb);
 
         var #{ns}_after_views = find_view(__base__, #{dsl_env.after_view_spider.to_json});
         var #{ns}_info = {
