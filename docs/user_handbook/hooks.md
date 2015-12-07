@@ -26,9 +26,6 @@ hook :goto => :supports_back_clicked do
   to_action_responds_to? "back_clicked"
   controller_name "my_controller"
   
-  #Configuration methods
-  is_sync
-
   #View hierarchy selectors
   before_views({
     "." => {
@@ -76,6 +73,14 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+    * `Completion`
+      * The `completion` event is expected to be raised via `int_event` for all goto events. This is because the old view is not destroyed until the `completion` event is called
+        to allow you to use the view in animations.
+    * `Cancellation`:
+      * Unlike other semantics, `Goto` has issues with *cancellation* because the old views are destroyed. In order to work around this, you must call, after the completion
+        event, the `back` segue that you have described checking whether or not a transition was in progress (interactive) based on the view-controller itself.
+    * `info`:
+      * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer.
 
 ## How the hook generators are defined & hooking internals
 See [Kernel Handbook | Hooks](../kernel_handbook/hooks.md)

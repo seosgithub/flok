@@ -78,14 +78,19 @@ module Flok
     manifest << HooksManifestEntry.new("controller_will_goto", dsl_env.selectors) do |entry_hook_params|
       next %{
         var #{ns}_before_views = find_view(__base__, #{dsl_env.before_view_spider.to_json});
+        __free_asap = false;
       }
     end
 
     manifest << HooksManifestEntry.new("controller_did_goto", dsl_env.selectors) do |entry_hook_params|
       next %{
+        //The completion callback will share a pointer to the views_to_free key index
+        reg_evt(views_to_free_id, hook_goto_completion_cb);
+
         var #{ns}_after_views = find_view(__base__, #{dsl_env.after_view_spider.to_json});
         var #{ns}_info = {
-          views: #{ns}_after_views
+          views: #{ns}_after_views,
+          cep: views_to_free_id
         };
         for (var k in #{ns}_before_views) {
           #{ns}_info.views[k] = #{ns}_before_views[k];

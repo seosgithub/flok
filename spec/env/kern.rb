@@ -177,9 +177,13 @@ shared_context "kern" do
     #for non-existant messages
     def ignore_up_to msg_name, priority=nil, &block
       @did_get = []
+      @original_q = @q == nil ? nil : JSON.parse(@q.to_json)
+      @original_cq = @cq == nil ? nil : JSON.parse(@cq.to_json)
 
       loop do
         if @q.count == 0 and @cq.count == 0
+          @q = @original_q
+          @cq = @original_cq
           raise "Waited for the message #{msg_name.inspect} but never got it... did get: \n * #{@did_get.join("\n * ")}"
         end
         #Dequeue from multi-priority queue if possible

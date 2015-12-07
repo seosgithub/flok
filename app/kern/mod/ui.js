@@ -22,3 +22,6 @@ function find_view(bp, spider) {
   }
   return output;
 }
+
+//Used by the delayed free views typically for the GOTO hook specifically
+var views_to_free = {};
