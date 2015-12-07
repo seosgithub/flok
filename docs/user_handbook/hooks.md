@@ -68,7 +68,7 @@ handleHook("supports_back_clicked", function(hookInfo) {
 
 ## Hook generators
 
-  * `goto` - Intercept `Goto` transitions and when a controller first loads (by virtue that a controller runs `Goto` when it first is initialized)
+  * `goto` - Intercept `Goto` transitions, unable to intercept first-load transition?
     * `DSL Selectors`
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
@@ -83,6 +83,18 @@ handleHook("supports_back_clicked", function(hookInfo) {
         event, the `back` segue that you have described checking whether or not a transition was in progress (interactive) based on the view-controller itself.
     * `info`:
       * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer.
+      * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
+
+  * `push` - Intercept `Push` transitions
+    * `DSL Selectors`
+      * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
+      * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
+      * `to_action_named "action_name"` - The name of the action you are pushing to
+      * `from_action_named "action_name"` - The name of the action you are pushing from
+      * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+    * `info`:
+      * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
+
 
 ## How the hook generators are defined & hooking internals
 See [Kernel Handbook | Hooks](../kernel_handbook/hooks.md)
