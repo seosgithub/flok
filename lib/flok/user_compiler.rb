@@ -308,6 +308,9 @@ module Flok
             //Save the old action
             //var old_action = __info__.action;
 
+            //HOOK_ENTRY[controller_will_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name}.to_json}
+
+
             //Restore the action we pushed from
             __info__.action = orig_action;
 
@@ -326,6 +329,9 @@ module Flok
 
             //Restore embeds
             __info__.embeds = orig_embeds;
+
+            //HOOK_ENTRY[controller_did_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name}.to_json}
+
           }
 
           out.puts res

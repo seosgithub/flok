@@ -298,4 +298,81 @@ eof
     }
   end
 
+  it "Can hook the controller_will_pop event with the correct hook entry information mentioned in the docs" do
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0a_push.rb')
+    src = info[:src]
+    ctx = info[:ctx]
+
+    manifest = Flok::HooksManifest.new
+    will_pops_found = 0
+    entry = Flok::HooksManifestEntry.new("controller_will_pop") do |hook_info|
+      will_pops_found += 1
+      #Static parameters
+      expect(hook_info["controller_name"]).to eq("my_controller")
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test", "holah"].to_set)
+
+      #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+      #where each action list contains all the events this action responds to
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+    end
+    manifest << entry
+
+    #Recompile source (We do this manually as we supplied no `config/hooks.rb` file)
+    src = Flok::HooksCompiler.compile src, manifest
+    
+    #Expect to have found one will_pop entries given that there is one pop request
+    expect(will_pops_found).to eq(1)
+
+    #Re-evaluate the v8 instance
+    ctx = v8_flok
+    ctx.eval src
+
+    #Now load the controller
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+  end
+
+  it "Can hook the controller_did_pop event with the correct hook entry information mentioned in the docs" do
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0a_push.rb')
+    src = info[:src]
+    ctx = info[:ctx]
+
+    manifest = Flok::HooksManifest.new
+    did_pops_found = 0
+    entry = Flok::HooksManifestEntry.new("controller_did_pop") do |hook_info|
+      did_pops_found += 1
+      #Static parameters
+      expect(hook_info["controller_name"]).to eq("my_controller")
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test", "holah"].to_set)
+
+      #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
+      #where each action list contains all the events this action responds to
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+    end
+    manifest << entry
+
+    #Recompile source (We do this manually as we supplied no `config/hooks.rb` file)
+    src = Flok::HooksCompiler.compile src, manifest
+    
+    #Expect to have found one did_pop entries given that there is one pop request
+    expect(did_pops_found).to eq(1)
+
+    #Re-evaluate the v8 instance
+    ctx = v8_flok
+    ctx.eval src
+
+    #Now load the controller
+    dump = ctx.evald %{
+      base = _embed("my_controller", 0, {}, null);
+
+      //Drain queue
+      int_dispatch([]);
+    }
+  end
+
+
 end

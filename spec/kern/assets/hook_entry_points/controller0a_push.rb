@@ -23,5 +23,9 @@ controller :my_controller do
     on "test", %{
       Push("index");
     }
+
+    on "holah", %{
+      Pop();
+    }
   end
 end
