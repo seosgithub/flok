@@ -82,7 +82,7 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * Unlike other semantics, `Goto` has issues with *cancellation* because the old views are destroyed. In order to work around this, you must call, after the completion
         event, the `back` segue that you have described checking whether or not a transition was in progress (interactive) based on the view-controller itself.
     * `info`:
-      * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer.
+      * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer. Views will not be removed until this is called
       * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
   * `push` - Intercept `Push` transitions
     * `DSL Selectors`
@@ -93,6 +93,16 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
     * `info`:
       * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
+  * `pop` - Intercept `Pop` transitions
+    * `DSL Selectors`
+      * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
+      * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
+      * `to_action "action_name"` - The name of the action you are pushing to
+      * `from_action "action_name"` - The name of the action you are pushing from
+      * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+    * `info`:
+      * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
+      * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer. Views will not be removed until this is called
 
 ## How the hook generators are defined & hooking internals
 See [Kernel Handbook | Hooks](../kernel_handbook/hooks.md)

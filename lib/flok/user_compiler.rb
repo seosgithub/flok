@@ -308,8 +308,15 @@ module Flok
             //Save the old action
             //var old_action = __info__.action;
 
+            var __free_asap = true;
             //HOOK_ENTRY[controller_will_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name}.to_json}
 
+            //If views are configured to not free right away, set up a new stack of views to free
+            //This is usually picked up by the hook GOTO
+            if (__free_asap === false) {
+              var views_to_free_id = gen_id();
+              views_to_free[views_to_free_id] = views_to_free[views_to_free_id] || [];
+            }
 
             //Restore the action we pushed from
             __info__.action = orig_action;
@@ -320,7 +327,12 @@ module Flok
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
                 //Free +1 because that will be the 'main' view
-                main_q.push([1, "if_free_view", embeds[i][j]+1]);
+                //Free if 'free_asap' is not set, this is usually configured via the 'goto' hook
+                if (__free_asap === true) {
+                  main_q.push([1, "if_free_view", embeds[i][j]+1]);
+                } else {
+                  views_to_free[views_to_free_id].push(embeds[i][j]+1);
+                }
 
                 //Call dealloc on the controller
                 tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
