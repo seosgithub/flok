@@ -75,6 +75,7 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * `to_action "action_name"` - The name of the action you are going to
       * `from_action "action_name"` - The name of the action you are coming from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+      * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `Completion`
       * The `completion` event is expected to be raised via `int_event` for all goto events. This is because the old view is not destroyed until the `completion` event is called
         to allow you to use the view in animations.
@@ -91,6 +92,7 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * `to_action "action_name"` - The name of the action you are pushing to
       * `from_action "action_name"` - The name of the action you are pushing from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+      * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `info`:
       * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
   * `pop` - Intercept `Pop` transitions
@@ -100,6 +102,7 @@ handleHook("supports_back_clicked", function(hookInfo) {
       * `to_action "action_name"` - The name of the action you are pushing to
       * `from_action "action_name"` - The name of the action you are pushing from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
+      * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `info`:
       * `views` - A `[String:Int]` mapping spider-selected view names to their base pointers
       * `ctp` - Completion telepointer, you should raise an `int_event` with this base-pointer. Views will not be removed until this is called
@@ -130,12 +133,14 @@ The name is the hook name and the params is context specific inforamtion the com
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are coming from
       * `to_action` - The name of the action we are going to
+      * `handling_event_named` - The event name this originated from if applicable
   * `controller_did_goto` - The controller has completed the goto switch
     * params (static)
       * `might_respond_to` - List of events this controller can respond to dependening on the action
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are coming from
       * `to_action` - The name of the action we are going to
+      * `handling_event_named` - The event name this originated from if applicable
   * `controller_will_push` - The controller is about to invoke the Push macro and switch actions
     * params (static generated in the hook info)
       * `controller_name` - The controller name that this entry effects
@@ -143,6 +148,7 @@ The name is the hook name and the params is context specific inforamtion the com
       * `to_action` - The name of the action we are pushing to
       * `actions_respond_to` - Hash of action_name to array of events each action responds to
       * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+      * `handling_event_named` - The event name this originated from if applicable
   * `controller_did_push` - The controller has completed the push
     * params (static)
       * `controller_name` - The controller name that this entry effects
@@ -150,18 +156,21 @@ The name is the hook name and the params is context specific inforamtion the com
       * `to_action` - The name of the action we are pushing to
       * `actions_respond_to` - Hash of action_name to array of events each action responds to
       * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+      * `handling_event_named` - The event name this originated from if applicable
   * `controller_will_pop` - The controller is about to invoke the Pop macro and switch actions
     * params (static generated in the hook info)
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are popping from
       * `actions_respond_to` - Hash of action_name to array of events each action responds to
       * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+      * `handling_event_named` - The event name this originated from if applicable
   * `controller_did_pop` - The controller has completed the pop
     * params (static)
       * `controller_name` - The controller name that this entry effects
       * `from_action` - The name of the action we are popping from
       * `actions_respond_to` - Hash of action_name to array of events each action responds to
       * `might_respond_to` - List of actions this controller can respond to (same info as of actions_respond_to)
+      * `handling_event_named` - The event name this originated from if applicable
 
 ##Hooks Compiler
 The hooks compiler is able to take the hook entry points and inject code into them via a set of `HooksManifestEntries` which are bound togeather via a `HooksManifest`. The actual

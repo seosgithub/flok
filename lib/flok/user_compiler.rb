@@ -184,12 +184,12 @@ module Flok
             __info__.action = "#{action_name}";
 
             var __free_asap = true;
-            //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
+            //HOOK_ENTRY[controller_will_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
 
             //If views are configured to not free right away, set up a new stack of views to free
             //This is usually picked up by the hook GOTO
             if (__free_asap === false) {
-              var views_to_free_id = gen_id();
+              var views_to_free_id = tels(1);
               views_to_free[views_to_free_id] = views_to_free[views_to_free_id] || [];
             }
 
@@ -237,7 +237,7 @@ module Flok
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
 
-            //HOOK_ENTRY[controller_did_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
+            //HOOK_ENTRY[controller_did_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
             //'choose_action' pseudo-action will be sent as 'null' as it's the initial state
             if (old_action === "choose_action") {
               old_action = null;
@@ -269,7 +269,7 @@ module Flok
 
             __info__.action = "#{action_name}";
 
-            //HOOK_ENTRY[controller_will_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
+            //HOOK_ENTRY[controller_will_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
 
 
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
@@ -282,7 +282,7 @@ module Flok
             //located in ctable
             __info__.cte.actions[__info__.action].on_entry(__base__)
 
-            //HOOK_ENTRY[controller_did_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name}.to_json}
+            //HOOK_ENTRY[controller_did_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
 
             //Send off event for action change
             main_q.push([3, "if_event", __base__, "action", {
@@ -309,12 +309,12 @@ module Flok
             //var old_action = __info__.action;
 
             var __free_asap = true;
-            //HOOK_ENTRY[controller_will_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name}.to_json}
+            //HOOK_ENTRY[controller_will_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "handling_event_named" => @handling_event_named}.to_json}
 
             //If views are configured to not free right away, set up a new stack of views to free
             //This is usually picked up by the hook GOTO
             if (__free_asap === false) {
-              var views_to_free_id = gen_id();
+              var views_to_free_id = tels(1);
               views_to_free[views_to_free_id] = views_to_free[views_to_free_id] || [];
             }
 
@@ -342,7 +342,7 @@ module Flok
             //Restore embeds
             __info__.embeds = orig_embeds;
 
-            //HOOK_ENTRY[controller_did_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name}.to_json}
+            //HOOK_ENTRY[controller_did_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "handling_event_named" => @handling_event_named}.to_json}
 
           }
 
@@ -603,7 +603,12 @@ module Flok
       #prior-knowledge of controller-level information like all possible events in all actions for hooks
       unless @__ons_did_build
         @__ons_did_build = true
-        @__ons = @_ons.map{|e| {:name => e[:name], :src => _macro(e[:src])}}
+        @__ons = @_ons.map do |e|
+          @handling_event_named = e[:name]
+          src = _macro(e[:src])
+          @handling_event_named = nil
+          {:name => e[:name], :src => src}
+        end
       end
 
       @__ons_is_building = false

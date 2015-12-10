@@ -112,6 +112,9 @@ eof
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
       expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+      if hook_info["from_action"] == "other"
+        expect(hook_info["handling_event_named"]).to eq("test")
+      end
 
       #Variables included
       next %{
@@ -172,6 +175,10 @@ eof
       #where each action list contains all the events this action responds to
       expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
 
+      if hook_info["from_action"] == "other"
+        expect(hook_info["handling_event_named"]).to eq("test")
+      end
+
       #Variables included
       next %{
         entry_params = {
@@ -224,12 +231,13 @@ eof
       will_pushs_found += 1
       #Static parameters
       expect(hook_info["controller_name"]).to eq("my_controller")
-      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test", "holah"].to_set)
       from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
 
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
-      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+      expect(hook_info["handling_event_named"]).to eq("test")
     end
     manifest << entry
 
@@ -267,12 +275,13 @@ eof
       did_pushs_found += 1
       #Static parameters
       expect(hook_info["controller_name"]).to eq("my_controller")
-      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test"].to_set)
+      expect(hook_info["might_respond_to"].to_set).to eq(["foo", "hello", "test", "holah"].to_set)
       from_to_action_pairs_found << {hook_info["from_action"] => hook_info["to_action"]}
 
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
-      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test"]})
+      expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+    expect(hook_info["handling_event_named"]).to eq("test")
     end
     manifest << entry
 
@@ -314,6 +323,7 @@ eof
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
       expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+      expect(hook_info["handling_event_named"]).to eq("holah")
     end
     manifest << entry
 
@@ -352,6 +362,7 @@ eof
       #actions_responds_to looks like {"action1" => ["event_a", ..."], "action2" => }...
       #where each action list contains all the events this action responds to
       expect(hook_info["actions_responds_to"]).to eq({"index" => ["hello", "foo"], "other" => ["test", "holah"]})
+      expect(hook_info["handling_event_named"]).to eq("holah")
     end
     manifest << entry
 
