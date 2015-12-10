@@ -119,6 +119,30 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
+  it "Can use the :push hook generator for a controller with the triggered_by constraint for various actions" do
+    #Hook source code
+    hooks_src = %{
+      hook :push => :push do
+        triggered_by "next_clicked"
+      end
+    }
+
+    #Get a new js context with the controllers source and the hooks source
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_pop2.rb'), nil, nil, hooks_src
+    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    ctx = info[:ctx]
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
+      int_dispatch([]);                                         // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer; // Grab the base address of 'my_other_controller'
+    }
+
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.ignore_up_to("if_hook_event", 0)
+  end
+
+
   it "can hook into a particualr action we are pushing to" do
     hooks_src = %{
       hook :push => :push do

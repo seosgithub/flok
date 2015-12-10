@@ -32,6 +32,13 @@ module Flok
       end
     end
 
+    def triggered_by event_name
+      @selectors << lambda do |params|
+        handling_event_named = params["handling_event_named"]
+        next handling_event_named == event_name
+      end
+    end
+
     def to_action_responds_to? responds
       @selectors << lambda do |params|
         to_action = params["to_action"]

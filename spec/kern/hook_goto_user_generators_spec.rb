@@ -58,6 +58,31 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)  # At this point, we should have not received any events for if_hook_event, as we are not selecting the embedded controller
   end
 
+  it "Can use the :goto hook generator for a controller with the triggered_by constraint for various actions" do
+    #Hook source code
+    hooks_src = %{
+      hook :goto => :goto do
+        triggered_by "back_clicked"
+      end
+    }
+
+    #Get a new js context with the controllers source and the hooks source
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
+    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
+      int_dispatch([]);                                         // Dispatch any events the are pending
+      dump.my_other_controller_base = my_other_controller_base; // Grab the base address of 'my_other_controller'
+    }
+
+    @driver.int "int_event", [ dump["my_other_controller_base"], "back_clicked", {} ] 
+    @driver.ignore_up_to("if_hook_event", 0)
+  end
+
+
   it "Can use the :goto hook generator for a controller with the to_action_responds_to constraint for various actions" do
     #Hook source code
     hooks_src = %{
