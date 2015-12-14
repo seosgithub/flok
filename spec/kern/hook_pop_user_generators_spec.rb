@@ -151,6 +151,35 @@ RSpec.describe "kern:hook_pop_user_generators_spec" do
     expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
+  it "can hook into multiple actions we are poping from" do
+    hooks_src = %{
+      hook :pop => :pop do
+        from_action "other2", "other"
+      end
+    }
+
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_pop2.rb'), nil, nil, hooks_src
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
+    }
+
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "back_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "back_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
+    @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
+  end
+
+
   it "Can use pop to embed a pre and post selectors which will be returned in the hooking response" do
     #Hook source code
     hooks_src = %{

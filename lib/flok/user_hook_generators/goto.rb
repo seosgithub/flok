@@ -57,19 +57,19 @@ module Flok
       end
     end
 
-    def to_action name
+    def to_action *names
       @selectors << lambda do |params|
         to_action = params["to_action"]
 
-        next to_action == name
+        next names.include? to_action
       end
     end
 
-    def from_action name
+    def from_action *names
       @selectors << lambda do |params|
         from_action = params["from_action"]
 
-        next from_action == name
+        next names.include? from_action
       end
     end
 

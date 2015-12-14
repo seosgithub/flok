@@ -170,7 +170,7 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     }
 
     #Get a new js context with the controllers source and the hooks source
-    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0b.rb'), nil, nil, hooks_src
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
     File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
@@ -184,8 +184,41 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     #Should raise a hook at this time
     expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
     @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
-    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
+    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0
+    expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.to raise_error /Waited/
   end
+
+  it "Can use the :goto hook generator for a controller with the to_action constraint for multiple actions" do
+    #Hook source code
+    hooks_src = %{
+      hook :goto => :goto do
+        to_action "other", "other2"
+      end
+    }
+
+    #Get a new js context with the controllers source and the hooks source
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
+    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
+      int_dispatch([]);                                         // Dispatch any events the are pending
+      dump.my_controller_base = my_controller_base;
+    }
+
+    #Should raise a hook at this time
+    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
+    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0
+    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0
+  end
+
 
   it "Can use the :goto hook generator for a controller with the from_action constraint for various actions" do
     #Hook source code
@@ -212,6 +245,35 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
     @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
     expect { @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0 }.not_to raise_error
   end
+
+  it "Can use the :goto hook generator for a controller with the from_action constraint for multiple actions" do
+    #Hook source code
+    hooks_src = %{
+      hook :goto => :goto do
+        from_action "index", "other"
+      end
+    }
+
+    #Get a new js context with the controllers source and the hooks source
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
+    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null);         // Embed the controller
+      int_dispatch([]);                                         // Dispatch any events the are pending
+      dump.my_controller_base = my_controller_base;
+    }
+
+    #Should raise a hook at this time
+    expect { @driver.ignore_up_to("if_hook_event", 0) }.to raise_error(/Waited for/)
+    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["my_controller_base"], "next_clicked", {} ] 
+    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0
+    @driver.ignore_up_to("if_hook_event", 0); @driver.get "if_hook_event", 0
+  end
+
 
   it "Can use goto to embed a pre and post selectors which will be returned in the hooking response" do
     #Hook source code

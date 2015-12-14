@@ -72,8 +72,8 @@ handleHook("supports_back_clicked", function(hookInfo) {
     * `DSL Selectors`
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
-      * `to_action "action_name"` - The name of the action you are going to
-      * `from_action "action_name"` - The name of the action you are coming from
+      * `to_action "action_name"` - The name(s) of the action you are going to
+      * `from_action "action_name"` - The name(s) of the action you are coming from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
       * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `Completion`
@@ -89,8 +89,8 @@ handleHook("supports_back_clicked", function(hookInfo) {
     * `DSL Selectors`
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
-      * `to_action "action_name"` - The name of the action you are pushing to
-      * `from_action "action_name"` - The name of the action you are pushing from
+      * `to_action "action_name"` - The name(s) of the action you are pushing to
+      * `from_action "action_name"` - The name(s) of the action you are pushing from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
       * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `info`:
@@ -99,8 +99,8 @@ handleHook("supports_back_clicked", function(hookInfo) {
     * `DSL Selectors`
       * `to_action_responds_to? "event_name"` - Whenever a controller switches **to** an action that contains an `on "event_name", %{...}` handler
       * `from_action_responds_to? "event_name"` - Whenever a controller switches **from** an action that contains an `on "event_name", %{...}` handler
-      * `to_action "action_name"` - The name of the action you are pushing to
-      * `from_action "action_name"` - The name of the action you are pushing from
+      * `to_action "action_name"` - The name(s) of the action you are pushing to
+      * `from_action "action_name"` - The name(s) of the action you are pushing from
       * `controller "controller_name"` - Only applies to controllers with the name `"controller_name"`
       * `triggered_by "event_name"` - The event that caused this segue to occurr
     * `info`:

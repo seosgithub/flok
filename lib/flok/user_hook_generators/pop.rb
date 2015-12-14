@@ -32,11 +32,11 @@ module Flok
       end
     end
 
-    def from_action name
+    def from_action *names
       @selectors << lambda do |params|
         from_action = params["from_action"]
 
-        next from_action == name
+        next names.include? from_action
       end
     end
 
