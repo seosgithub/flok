@@ -50,7 +50,7 @@ RSpec.describe "kern:rest_service" do
     tp_base = msg.last
 
     @driver.int "int_net_cb", [
-      tp_base, true, {"foo" => "bar"}
+      tp_base, 200, {"foo" => "bar"}
     ]
 
     dump = ctx.evald %{
@@ -59,6 +59,7 @@ RSpec.describe "kern:rest_service" do
 
     expect(dump["rest_res_params"]).to eq({
       "path" => "test",
+      "code" => 200,
       "res" => {
         "foo" => "bar"
       }

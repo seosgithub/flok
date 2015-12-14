@@ -25,6 +25,7 @@ will look like one of two things, for a successful request it will look like:
   path: "/original/path",
   code: 200,
   res: {
+    <<response from server>>
   }
 }
 ```
@@ -33,7 +34,8 @@ For a failed request, e.g. network connection not available, not necessarily a s
 ```
 {
   path: "/original/path",
-  err: "",
+  code: -1,
+  res: "",
 }
 ```
 We say *not necessarily a succesful request* because even if the request goes through, if it's not

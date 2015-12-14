@@ -2,13 +2,14 @@ service :rest do
   global %{
     rest_in_flight = {}
 
-    function rest_cb(tp, success, info) {
+    function rest_cb(tp, code, info) {
       var e = rest_in_flight[tp];
       var bp = e[0];
       var path = e[1];
 
       int_event(bp, "rest_res", {
         path: path,
+        code: code,
         res: info
       });
 
