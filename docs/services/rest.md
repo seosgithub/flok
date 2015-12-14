@@ -19,8 +19,25 @@ Request("<service name>", "get", info);
 You will then receive the event `rest_res`.
 
 For sucessful requests, `rest_res` will be sent as an event. This event
-will contain `path` and `res` where `path` is the `path` given in th
-request and `res` is the results of the request.
+will look like one of two things, for a successful request it will look like:
+```ruby
+{
+  path: "/original/path",
+  code: 200,
+  res: {
+  }
+}
+```
+
+For a failed request, e.g. network connection not available, not necessarily a succesful request, the parameters will look like:
+```
+{
+  path: "/original/path",
+  err: "",
+}
+```
+We say *not necessarily a succesful request* because even if the request goes through, if it's not
+a `2XX` it may still not be succesful but that's a contract between you and your server.
 
 ###Globals
   * `rest_in_flight` - A hash that maps `rest_in_flight[tp_base] => bp` where `[bp, path]` is the requesting entity for the original request and

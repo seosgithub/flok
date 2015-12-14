@@ -8,11 +8,11 @@ if_net_req = function(verb, url, params, tp_base) {
     method: verb,
     data: params,
     dataType: "json",
-    success: function(data) {
-      int_dispatch([3, "int_net_cb", tp_base, true, data]);
+    success: function(data, textStatus, xhr) {
+      int_dispatch([3, "int_net_cb", tp_base, xhr.status, data]);
     },
   error: function(xhr, textStatus, err) {
-    int_dispatch([3, "int_net_cb", tp_base, false, textStatus]);
+    int_dispatch([3, "int_net_cb", tp_base, -1, textStatus]);
   }
 })
 }
