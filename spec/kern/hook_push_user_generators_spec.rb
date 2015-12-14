@@ -170,7 +170,63 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
 
-  it "can hook into a particualr action we are pushing from" do
+  it "can hook into multiple particualr action we are pushing to" do
+    hooks_src = %{
+      hook :push => :push do
+        to_action "other", "other2"
+      end
+    }
+
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
+    }
+
+    @driver.int "int_event", [ dump["on_entry_base_pointer"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0)
+    res = @driver.get "if_hook_event", 0
+
+    @driver.ignore_up_to("if_hook_event", 0)
+    res = @driver.get "if_hook_event", 0
+  end
+
+
+  it "can hook into multiple action we are pushing from" do
+    hooks_src = %{
+      hook :push => :push do
+        from_action "index", "other2"
+      end
+    }
+
+    #Just expect this not to blow up
+    info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller_0b_push2.rb'), nil, nil, hooks_src
+    ctx = info[:ctx]
+
+    #Run the embed function
+    dump = ctx.evald %{
+      dump.base = _embed("my_controller", 0, {}, null); // Embed the controller
+      int_dispatch([]);                                 // Dispatch any events the are pending
+      dump.on_entry_base_pointer = on_entry_base_pointer;
+      dump.on_entry_base_pointer2 = on_entry_base_pointer2;
+    }
+
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+    @driver.int "int_event", [ dump["on_entry_base_pointer2"], "next_clicked", {} ] 
+
+    @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
+    @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
+  end
+
+  it "can hook into a particular action we are pushing from" do
     hooks_src = %{
       hook :push => :push do
         from_action "index"
@@ -195,6 +251,7 @@ RSpec.describe "kern:hook_push_user_generators_spec" do
     @driver.ignore_up_to("if_hook_event", 0);  @driver.get "if_hook_event", 0
     expect {@driver.ignore_up_to("if_hook_event", 0)}.to raise_error /Waited/
   end
+
 
   it "Can use push to embed a pre and post selectors which will be returned in the hooking response" do
     #Hook source code
