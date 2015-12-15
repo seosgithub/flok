@@ -38,6 +38,9 @@ For a failed request, e.g. network connection not available, not necessarily a s
   res: "",
 }
 ```
+> *This will be retried until the network request is succesful so be prepared to get multiple `rest_res` repsonses*
+
+
 We say *not necessarily a succesful request* because even if the request goes through, if it's not
 a `2XX` it may still not be succesful but that's a contract between you and your server.
 
