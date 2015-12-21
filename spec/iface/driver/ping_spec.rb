@@ -13,6 +13,7 @@ RSpec.describe "iface:driver:ping_spec" do
     arg = SecureRandom.hex
     @pipe.puts [[0, 1, "ping1", arg]].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "pong1", arg], 6.seconds)
+    @pipe.readline
   end
 
   it "supports ping2" do

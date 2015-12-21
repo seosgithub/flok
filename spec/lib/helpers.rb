@@ -78,7 +78,7 @@ module Webbing
           @pipe.puts("ready")
         }
         @server.mount_proc '/' do |req, res|
-          @pipe.puts req.query.to_json
+          @pipe.puts({:params => req.query, :headers => req.header}.to_json)
           res.body = @pipe.readline
           res.header["Access-Control-Allow-Origin"] = "*"
           res.header["Content-Type"] = "json/text"
@@ -96,8 +96,10 @@ module Webbing
       Thread.new do
         begin
           loop do
-            params = JSON.parse(@pipe.readline)
-            res = @block.call(params)
+            info = JSON.parse(@pipe.readline)
+            params = info["params"]
+            headers = info["headers"]
+            res = @block.call(params, headers)
             @pipe.puts res.to_json
           end
         rescue => e

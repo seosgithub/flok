@@ -6,12 +6,15 @@ module Flok
   module HooksCompiler
     #Returns a new copy of the source transformed as described by the manifest
     def self.compile(src, manifest)
+      puts "a0"
       new_src = src.split("\n").map{|e| manifest.transform_line(e) }.join("\n")
 
       #Re-process macros
+      puts "a1"
       new_src = Flok.macro_process new_src
 
 
+      puts "a2"
       return new_src
     end
   end
@@ -28,13 +31,16 @@ module Flok
     #be inserted there, this will return the inserted code (which may then be multiple lines)
     #And will also remove the comment itself
     def transform_line line
+      puts "a3"
       #Get all the matched HooksManifestEntry(s) 
       injected_code = @manifest_entries.select{|e| e.does_match? line}.map{|e| e.code_for_line(line)}
 
+      puts "an"
       #If there is a match of at least one hook, remove the original line and replace it
       #with all the newly found code from the HooksManifestEntry(s)
       return injected_code.join("\n") if injected_code.count > 0
 
+      puts "a4"
       #Else, nothing was found, keep moving along and don't transform the line
       return line
     end

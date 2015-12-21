@@ -7,7 +7,7 @@
 (main)>if_init_view('nav_container', {title: "Home"}, 333, ["root", "content"]);
 ```
 
-`if_free_view(vp)` - Destroy a view with a `view pointer`.
+`if_free_view(vp)` - Destroy a view with a `view pointer`. This should be allowed to fail.  There are certain circumstances, such as when a hooked transition takes pace, where a view may have a delayed destroy.  If during this period the view's parent is destroyed, then the delayed destroy message will be received as a free andc we can safely ignore it. Flok shouldn't handle this internally because we don't keep track of the entire hierarchy for performance reasons.
 
 `if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`.  If *p* is 0, then you should place this **inside** of the root view.
 

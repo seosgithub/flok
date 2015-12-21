@@ -1,7 +1,11 @@
 #Virtual Memory (vm.js)
 Virtual memory provides something akin to operating system virtual memory systems with an emphasis on the paging infrastructure.  Unlike an operating system, flok has the concept of a grand-unified namespaced address space that extends the concepts of caching and semantics across asynchronous and even networked systems.  This vm systems is increadibly powerful because it allows you to create custom paging devices; this allows you to use one set of semantics to perform very complicated activities like pulling a news feed or list; having that news feed cached to disk automatically; etc.
 
+This system has borrowed design concepts from `Git`'s distributed commit system for the synchronization mechanism, `FreeBSD's` layout of the `vm` paging-demand system, and Bell Lab's *Plan 9* operating system concept of networked files for communication.
+
 Additionally, flok introduces a notification system that works with the demand paging schemes and caching schemes that allow you to grab data *now* and then be notified whenever a fresh copy is available from the server.
+
+Notifications also extend naturally to controllers; use pages to perform `'ipc'` across controllers. This alows you to push information around your application in ways that the hierarchy may not take kind to.
 
 Each pager belongs to a *namespace*; page faults hit a namespace and then the pager takes over. The pager can choose to service a request; or even throw an exception if a certain semantic is not supported in it's namespace; for example, you may want to disable write semantics for a network pager you called `net` because you expect people to make ordinary network requests.
 

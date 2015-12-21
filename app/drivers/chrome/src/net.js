@@ -16,3 +16,25 @@ if_net_req = function(verb, url, params, tp_base) {
   }
 })
 }
+
+//A basic get request that supports callbacks
+if_net_req2 = function(verb, headers, url, params, tp_base) {
+  $.ajax({
+    url: url,
+    method: verb,
+    data: params,
+    beforeSend: function (xhr) {
+      for (var name in headers) {
+        var value = headers[name];
+        xhr.setRequestHeader(name, value);
+      }
+    },
+    success: function(data, textStatus, xhr) {
+      int_dispatch([3, "int_net_cb", tp_base, xhr.status, data]);
+    },
+  error: function(xhr, textStatus, err) {
+    int_dispatch([3, "int_net_cb", tp_base, -1, textStatus]);
+  }
+})
+}
+

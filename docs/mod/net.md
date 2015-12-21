@@ -3,7 +3,8 @@
 ###Functions
 
 **@telepathy[2]**
-`"if_net_req"(verb, url, params, tp_base)` - Perform an HTTP network request with the given VERB. Assign the network request with the correct telepathy pointer.
+`"if_net_req(verb, url, params, tp_base)` - Perform an HTTP network request with the given VERB. Assign the network request with the correct telepathy pointer.
+`"if_net_req2(verb, headers, url, params, tp_base)`" - Perform an HTTP network request, but accept some HTTP headers in the form of a dictionary.  Useful for authentication or requesting content types.
 
 ###Interrupts
 `int_net_cb(tp, code, info)` - An interrupt that a network request has completed (or failed). 
