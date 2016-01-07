@@ -581,6 +581,50 @@ RSpec.describe "kern:vm_service" do
     })
   end
 
+  it "unwatches all watched pages when a controller disconnects" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    pg_spec0_unwatchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_unwatchlist)"))
+    expect(pg_spec0_unwatchlist).to eq(["test"])
+  end
+
+  it "does not make multiple calls to unwatch in the event the page is not fully unwatched yet" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16c.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    pg_spec0_unwatchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_unwatchlist)"))
+    expect(pg_spec0_unwatchlist).to eq([])
+  end
+
+  it "does unwatch after both watches are cancelled" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller16d.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Drain queue
+      int_dispatch([3, "int_event", base, "next", {}]);
+    }
+
+    pg_spec0_unwatchlist = JSON.parse(ctx.eval("JSON.stringify(pg_spec0_unwatchlist)"))
+    expect(pg_spec0_unwatchlist).to eq([])
+  end
+
+
+
   it "Stores dirty pages written via vm_cache_write in vm_dirty" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config3.rb") 
 

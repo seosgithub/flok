@@ -29,6 +29,15 @@ service :vm do
         <%= p[:namespace] %>: {},
       <% end %>
     };
+
+    //Dynamic pager lookups (add as needed)
+    /////////////////////////////////////////////////
+    vm_ns_to_pg_unwatch = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: <%= p[:name] %>_unwatch,
+      <% end %>
+    }
+    /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     //Cache
@@ -700,7 +709,7 @@ service :vm do
       //Namespace node
       var nn = vm_bp_to_nmap[bp][nss[i]];
 
-      //Get all keys (which are ids)
+      //Get all previously watched keys (which are ids)
       var nnk = Object.keys(nn);
 
       for (var x = 0; x < nnk.length; ++x) {
@@ -711,6 +720,12 @@ service :vm do
 
         //Remove
         arr.splice(idx, 1);
+
+        //Notify the pager of an unwatch for this key *if* there
+        //are no more watches on that particular key
+        if (arr.length == 0) {
+          vm_ns_to_pg_unwatch[nss[x]](nnk[i]);
+        }
       }
 
     }
