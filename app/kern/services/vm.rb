@@ -210,6 +210,7 @@ service :vm do
         _id: id,
         _head: null,
         _next: null,
+        _prev: null,
         _hash: null,
         entries: [],
         __index: {},
@@ -223,6 +224,7 @@ service :vm do
         _id: page._id,
         _head: page._head,
         _next: page._next,
+        _prev: page._prev,
         _hash: page._hash,
         entries: JSON.parse(JSON.stringify(page.entries)),
       };
@@ -235,9 +237,10 @@ service :vm do
     function vm_rehash_page(page) {
       var z = 0;
 
-      //head and next are optional
+      //head and prev are optional
       if (page._head) { var z = crc32(0, page._head) }
       if (page._next) { z = crc32(z, page._next) }
+      if (page._prev) { z = crc32(z, page._prev) }
 
       z = crc32(z, page._id)
 
@@ -300,6 +303,11 @@ service :vm do
       if (old_page._next !== new_page._next) {
         diff_log.push(["NEXT_M", new_page._next])
       }
+
+      if (old_page._prev !== new_page._prev) {
+        diff_log.push(["prev_M", new_page._prev])
+      }
+
 
       var from_entries = old_page.entries;
       var to_entries = new_page.entries;
@@ -438,6 +446,8 @@ service :vm do
           page._head = e[1];
         } else if (type === "NEXT_M") {
           page._next = e[1];
+        } else if (type === "PREV_M") {
+          page._prev = e[1];
         }
       }
     } 
@@ -563,6 +573,8 @@ service :vm do
                 int_event_defer(bp, "entry_ins", {page_id: page_id, index: eindex, entry: entry});
               } else if (diff_entry[0] === "NEXT_M") {
                 int_event_defer(bp, "next_changed", {page_id: page_id, value: diff_entry[1]});
+              } else if (diff_entry[0] === "PREV_M") {
+                int_event_defer(bp, "prev_changed", {page_id: page_id, value: diff_entry[1]});
               } else if (diff_entry[0] === "HEAD_M") {
                 int_event_defer(bp, "head_changed", {page_id: page_id, value: diff_entry[1]});
               } 

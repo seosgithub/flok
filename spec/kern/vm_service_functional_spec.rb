@@ -26,6 +26,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["new_page"]).to eq({
       "_head" => nil,
       "_next" => nil,
+      "_prev" => nil,
       "_id" => "my_id",
       "entries" => [],
       "__index" => {},
@@ -165,6 +166,7 @@ RSpec.describe "kern:vm_service_functional" do
       //Modify the new_page with a head, next, and entry; then create a copy
       dump.new_page._head = "Z";
       dump.new_page._next = "Triangle";
+      dump.new_page._prev = null;
       dump.new_page.entries.push({"_id": "id0", "_sig": "Square", "value": "Square"});
       dump.head_z_next_triangle_entry_square = vm_copy_page(dump.new_page);
 
@@ -190,6 +192,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["no_head_no_next_no_entry"]).to eq({
       "_head" => nil,
       "_next" => nil,
+      "_prev" => nil,
       "_id" => "Q",
       "_hash" => nil,
       "entries" => [],
@@ -199,6 +202,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["head_z_next_triangle_entry_square"]).to eq({
       "_head" => "Z",
       "_next" => "Triangle",
+      "_prev" => nil,
       "_id" => "Q",
       "_hash" => nil,
       "entries" => [
@@ -210,6 +214,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["head_z_next_triangle_entry_circle"]).to eq({
       "_head" => "Z",
       "_next" => "Triangle",
+      "_prev" => nil,
       "_id" => "Q",
       "_hash" => nil,
       "entries" => [
@@ -221,6 +226,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(dump["head_z_next_triangle_entry_triangle_indexed"]).to eq({
       "_head" => "Z",
       "_next" => "Triangle",
+      "_prev" => nil,
       "_id" => "Q",
       "_hash" => nil,
       "entries" => [
@@ -231,6 +237,7 @@ RSpec.describe "kern:vm_service_functional" do
 
     expect(dump["new_page"]).to eq({
       "_head" => "Z",
+      "_prev" => nil,
       "_next" => "Triangle",
       "_id" => "Q",
       "_hash" => nil,
@@ -255,6 +262,7 @@ RSpec.describe "kern:vm_service_functional" do
       var page = {
         _head: null,
         _next: null,
+        _prev: null,
         _id: "hello",
         entries: [
           {_id: "hello2", _sig: "nohteunth"},
@@ -273,6 +281,7 @@ RSpec.describe "kern:vm_service_functional" do
     #Expect the same hash
     expect(page).to eq({
       "_head" => nil,
+      "_prev" => nil,
       "_next" => nil,
       "_id" => "hello",
       "entries" => [
@@ -290,6 +299,7 @@ RSpec.describe "kern:vm_service_functional" do
       //Manually construct a page
       var page = {
         _head: "a",
+        _prev: "c",
         _next: "b",
         _id: "hello",
         entries: [
@@ -303,6 +313,7 @@ RSpec.describe "kern:vm_service_functional" do
     #Calculate hash ourselves
     hash = crc32("a")
     hash = crc32("b", hash)
+    hash = crc32("c", hash)
     hash = crc32("hello", hash)
     hash = crc32("nohteunth", hash)
     page = JSON.parse(ctx.eval("JSON.stringify(page)"))
@@ -311,6 +322,7 @@ RSpec.describe "kern:vm_service_functional" do
     expect(page).to eq({
       "_head" => "a",
       "_next" => "b",
+      "_prev" => "c",
       "_id" => "hello",
       "entries" => [
         {"_id" => "hello2", "_sig" => "nohteunth"}
