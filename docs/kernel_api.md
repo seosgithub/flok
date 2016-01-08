@@ -10,6 +10,10 @@
           * `json`
             * `kern_log_json(json)` - Writes an entry to `kern_log_stdout` like `{"foo": "bar"}` which has been serialized and deserialized (to
                 prevent reference)
+  * inspect object
+    * `xinspect(object)` - Returns a string of the object
+  * assertions
+    * `assert_arg_is_str(params, key, fail_msg)` - Throws an exception if params[key] is not a string, fail_msg will be added to exception message
 
 ##Telepointer (Mapped I/O)
   * `tels(n)` - Returns one number that represents the base index of the telepointer.  See [Messaging](Messaging.md) for details on telepointers.

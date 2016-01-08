@@ -724,7 +724,7 @@ service :vm do
         //Notify the pager of an unwatch for this key *if* there
         //are no more watches on that particular key
         if (arr.length == 0) {
-          vm_ns_to_pg_unwatch[nss[x]](nnk[i]);
+          vm_ns_to_pg_unwatch[nss[i]](nnk[x]);
         }
       }
 
@@ -769,6 +769,11 @@ service :vm do
 
   on "watch", %{
     <% raise "No pagers given in options for vm" unless @options[:pagers] %>
+
+    <% if @debug %>
+      assert_arg_is_str(params, "ns", "When making a watch request to the vm service the ns (namespace) argument was not a string");
+      assert_arg_is_str(params, "id", "When making a watch request to the vm service, the id (page id) argument was not a string");
+    <% end %>
 
     //Cache entry
     var cache_entry = vm_cache[params.ns][params.id];
