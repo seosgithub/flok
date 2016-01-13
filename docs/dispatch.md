@@ -52,7 +52,7 @@ Imagine that a flok server has the following available in it's queues for transf
     net_q = [[1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", "..."], [1, "download", ...]  ,
     gpu_q = [[1, "blur_button", 23]]
 ```
-The `main_q` contains over 5 messages. However, because the `main_q` is dispatched synchronously, we will send those all at once. The `net_q` has
+The `main_q` contains over 7 messages. However, because the `main_q` is dispatched synchronously, we will send those all at once. The `net_q` has
 6 messages; so we will only send 5 of those at once. The `gpu_q` only contains 1 message, so we will send that at once.
 
 The client then calls `int_dispatch`:
@@ -63,7 +63,7 @@ The client then calls `int_dispatch`:
 And it receives this in `res`:
 ```javascript
   'i',
-  [0, 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping"],
+  [0, 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping", 0, "ping"],
   [1, 1, "download", "..."], 1, "download", "...", 1, "download", "...", 1, "download", "...", 1, "download", "..."]
   [4, 1, "blur_button", 23]
 ```

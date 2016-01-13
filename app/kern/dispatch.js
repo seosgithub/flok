@@ -52,6 +52,14 @@ function int_dispatch(q) {
     main_q = [];
   }
 
+  if (dump.length != 0) {
+    if_dispatch(dump);
+    incomplete = net_q.length > 0 || disk_q.length > 0 || cpu_q.length > 0 || gpu_q.length > 0
+    if (incomplete || edefer_q.length > 0) { dump.unshift("i"); }
+    return;
+  }
+
+
   if (net_q.length > 0 && net_q_rem > 0) {
     //Always pick the minimum between the amount remaining and the q length
     var n = net_q.length < net_q_rem ? net_q.length : net_q_rem;

@@ -123,6 +123,15 @@ controller "tab_controller" do
 end
 ```
 
+###The different segue types
+Including Goto, there are several different kinds of segue types.  Each has it's own semantics w.r.t the destruction and level of the destination view.
+
+  1. `Goto` - All views in spots that were filled in the previous action will be removed before completing the Goto statement.
+  2. `Push` - A copy of the view-controller's subviews (views in spots) will be maintained but the event receiving will still act like `Goto`, as in the destinatino action is subsumes the current action.
+
+Additionally, an action may be marked `sticky`. E.g. `sticky_action "home" do`. Sticky action's will not call `on_entry` during the second jump for **Goto**. Pushing a sticky action
+will result in undefined behaviour. This acts as a *lazy* loader where pages are loaded once and then kept around (but hidden away).
+
 ###`fuc` API
   See [Client API](./client_api.md)
 
