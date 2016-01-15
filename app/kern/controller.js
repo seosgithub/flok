@@ -115,10 +115,13 @@ function _embed(vc_name, sp, context, event_gw) {
       }
     }
 
-    var name = shared_spots[i];
+    var spot_info = shared_spots[i];
+    var name = spot_info.name;
+    var name_as = spot_info.name_as;
+
     var spot_index = cte.spots.indexOf(name);
-    if (spot_index === null) { throw "Tried to share spot named: '"+ name + "but this wasn't a spot"; }
-    available_shared[name] = {bp: base, sbp: base+1+spot_index}
+    if (spot_index === -1) { throw "Tried to share spot named: '"+ name + "but this wasn't a spot"; }
+    available_shared[name_as] = {bp: base, sbp: base+1+spot_index}
   }
 
   //Map shares if needed

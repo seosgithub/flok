@@ -734,8 +734,16 @@ module Flok
       @mapped_shares << key
     end
 
-    def share_spot spot_name
-      @shared_spots << spot_name
+    #Use as share_spot :content => :alt_name
+    def share_spot params
+      raise "share_spot requires a name and alias, like :content => 'user_root.content'" if params.class != Hash
+      name = params.keys[0]
+      name_as = params.values[0]
+      if name_as.nil? or name.nil?
+        raise "share_spot requires a name and alias, like :content => 'user_root.content'"
+      end
+
+      @shared_spots << {"name" => name, "name_as" => name_as}
     end
 
     def map_shared_spot spot_name

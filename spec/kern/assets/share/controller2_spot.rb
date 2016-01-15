@@ -1,5 +1,5 @@
 controller :foo do
-  share_spot :content
+  share_spot :content => "foo.content"
   spots "content"
 
   action :index do
@@ -29,11 +29,11 @@ controller :bar do
 end
 
 controller :bar2 do
-  map_shared_spot :content
+  map_shared_spot "foo.content"
   action :index do
     on_entry %{
       bar2_base = __base__;
-      Embed("hello", "content", {});
+      Embed("hello", "foo.content", {});
     }
   end
 end

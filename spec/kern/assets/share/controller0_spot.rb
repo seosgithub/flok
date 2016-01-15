@@ -1,5 +1,5 @@
 controller :foo do
-  share_spot :content
+  share_spot "content" => "content"
   spots "content"
 
   action :index do
@@ -11,7 +11,7 @@ controller :foo do
 end
 
 controller :bar do
-  map_shared_spot :content
+  map_shared_spot "content"
 
   action :index do
     on_entry %{

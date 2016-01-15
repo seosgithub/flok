@@ -1,5 +1,5 @@
 controller :foo do
-  share_spot :content
+  share_spot :content => :content
   spots "content"
 
   action :index do
