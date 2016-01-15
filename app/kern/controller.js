@@ -144,7 +144,8 @@ function _embed(vc_name, sp, context, event_gw) {
     event_gw: event_gw,
     stack: [],
     shared: shared,
-    available_shared: available_shared
+    available_shared: available_shared,
+    heap: {},
   };
 
   //Register controller base with the struct, we already requested base

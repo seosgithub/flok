@@ -56,8 +56,8 @@ module Flok
       @controllers << UserCompilerController.new(name, self, &block)
     end
 
-    def action controller, name, &block
-      @actions << UserCompilerAction.new(controller, name, self, &block)
+    def action controller, name, sticky, &block
+      @actions << UserCompilerAction.new(controller, sticky, name, self, &block)
     end
 
     def on controller_name, action_name, name, &block
@@ -195,6 +195,26 @@ module Flok
 
           action_name = o.shift.gsub(/"/, "")
 
+          to_action = @ctx.actions.select{|e| e.name.to_s == action_name.to_s}.first
+          from_action = @ctx.actions.select{|e| e.name.to_s == @name.to_s}.first
+
+          #This section frees the views if the last action was not marked sticky
+          free_section_one = ""
+          if from_action and not from_action.is_sticky
+            free_section_one = %{
+                //Free if 'free_asap' is not set, this is usually configured via the 'goto' hook
+                if (__free_asap === true) {
+                  main_q.push([1, "if_free_view", embeds[i][j]+1]);
+                } else {
+                  views_to_free[views_to_free_id].push(embeds[i][j]+1);
+                }
+
+                //Call dealloc on the controller, it will also recursively call deallocs
+                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j], collected_shared_spot_embeds);
+            }
+          else
+          end
+
           #Switch the actions, reset embeds, and call on_entry
           res = %{
             var old_action = __info__.action;
@@ -209,7 +229,7 @@ module Flok
               var views_to_free_id = tels(1);
               views_to_free[views_to_free_id] = views_to_free[views_to_free_id] || [];
             }
-
+            
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
@@ -218,31 +238,7 @@ module Flok
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
                 //Free +1 because that will be the 'main' view
 
-                //Free if 'free_asap' is not set, this is usually configured via the 'goto' hook
-                if (__free_asap === true) {
-                  main_q.push([1, "if_free_view", embeds[i][j]+1]);
-                } else {
-                  views_to_free[views_to_free_id].push(embeds[i][j]+1);
-                }
-
-                //Call dealloc on the controller, it will also recursively call deallocs
-                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j], collected_shared_spot_embeds);
-
-
-                <% if @debug %>
-                  var vp = embeds[i][j]+1;
-                  //First locate spot this view belongs to in reverse hash
-                  var spot = debug_ui_view_to_spot[vp];
-
-                  //Find it's index in the spot
-                  var idx = debug_ui_spot_to_views[spot].indexOf(vp);
-
-                  //Remove it from the spot => [view]
-                  debug_ui_spot_to_views[spot].splice(idx, 1);
-
-                  //Remove it from the reverse hash
-                  delete debug_ui_view_to_spot[vp];
-                <% end %>
+                #{free_section_one}
               }
             }
 
@@ -591,16 +587,17 @@ module Flok
   end
 
   class UserCompilerAction
-    attr_accessor :controller, :name, :every_handlers
+    attr_accessor :controller, :name, :every_handlers, :is_sticky
     include UserCompilerMacro
 
-    def initialize controller, name, ctx, &block
+    def initialize controller, is_sticky, name, ctx, &block
       @controller = controller
       @name = name
       @ctx = ctx
       @_on_entry_src = ""
       @_ons = [] #Event handlers
       @every_handlers = []
+      @is_sticky = is_sticky
 
       self.instance_eval(&block)
     end
@@ -692,7 +689,7 @@ module Flok
       #Ensure that choose_action exists
       actions = @ctx.actions_for_controller(@name)
       unless actions.detect{|e| e.name === :choose_action}
-        @ctx.action self, :choose_action do
+        @ctx.action self, :choose_action, false do
           on_entry %{
             Goto("#{actions[0].name}");
           }
@@ -710,7 +707,7 @@ module Flok
     end
 
     def choose_action &block
-      @ctx.action self, :choose_action, &block
+      @ctx.action self, :choose_action, false, &block
     end
 
     #Names of spots
@@ -755,7 +752,12 @@ module Flok
 
     #Pass through action
     def action name, &block
-      @ctx.action self, name, &block
+      @ctx.action self, name, false, &block
     end
+
+    def sticky_action name, &block
+      @ctx.action self, name, true, &block
+    end
+
   end
 end

@@ -48,5 +48,6 @@ controller_info {
   event_gw: //When an event cannot be serviced, it is given to the gateway to continue propogating
   shared: {}, //A hash that represents the accessible shared elements
   available_shared: {}
+  heap: {} //Similar to the stack, maintains a list of ongoing actions => view pointers that need to revealed.
 }
 ```

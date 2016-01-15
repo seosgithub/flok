@@ -154,6 +154,36 @@ j   #Request a listing of all the views on the root node
     @pipe.puts [[0, 1, "if_ui_spec_view_exists", 335]].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", false], 6.seconds)
   end
+
+   it "Can hide and then show a view" do
+    #Create two views
+    @pipe.puts [[0, 4, "if_init_view", "spec_blank", {}, 333, ["main"]]].to_json
+
+    #View should not be rendered
+    @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", false], 6.seconds)
+
+    #Attach the container view to the root, and the blank to the spot
+    @pipe.puts [[0, 2, "if_attach_view", 333, 0]].to_json
+
+    #View should be visible
+    @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", true], 6.seconds)
+
+    #Hide the view
+    @pipe.puts [[0, 2, "if_view_hide", 333, true]].to_json
+
+    #View should be not-visible
+    @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", false], 6.seconds)
+
+    #Show the view
+    @pipe.puts [[0, 2, "if_view_hide", 333, false]].to_json
+
+    #View should be visible
+    @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
+    expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", true], 6.seconds)
+  end
 end
 
 #These are optional specs that may not necessarily match the implementation semantics. These

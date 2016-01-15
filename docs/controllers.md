@@ -158,6 +158,10 @@ controller :example2 do
 end
 ```
 
+###`action` types
+Most actions are created with just `action`.  However, there is the `sticky_action` which will not destroy it's views upon a change via `Goto` but will destroy it's views in a change in a `Pop`.
+Instead, the views are hidden/unhidden when actions are done multiple times.
+
 ###The different segue types
 Including Goto, there are several different kinds of segue types.  Each has it's own semantics w.r.t the destruction and level of the destination view.
 

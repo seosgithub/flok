@@ -11,6 +11,8 @@
 
 `if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`.  If *p* is 0, then you should place this **inside** of the root view.
 
+`if_view_hide(vp, is_hidden)` - A request to either hide or show a view that is already created.
+
 ###Spec related
 `if_ui_spec_init` - Setup anything necessary for the spec tests, this may include adding prototype views to your hierarchy, etc.
 `if_ui_spec_views_at_spot(p)` - Sends a packet back that contains a listing of all the view pointers inside of a spot. If 0 is passed, the view pointers are from the root node. `[N(vp*), "spec", vp*]`
