@@ -11,7 +11,7 @@
 
 `if_attach_view(vp, p)` - A request to embed a view (`vp`) into the top of a view or spot located at `vp`|`sp` provided during `if_init_view`. If `p` is a `view pointer`, then `vp` is placed **ontop** of `p`.  If `p` is a `spot pointer`, then `vp` is placed **inside** of `p`.  If *p* is 0, then you should place this **inside** of the root view.
 
-`if_view_hide(vp, is_hidden)` - A request to either hide or show a view that is already created.
+`if_hide_view(vp, is_hidden)` - A request to either hide or show a view that is already created.
 
 ###Spec related
 `if_ui_spec_init` - Setup anything necessary for the spec tests, this may include adding prototype views to your hierarchy, etc.

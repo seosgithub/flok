@@ -33,8 +33,13 @@ RSpec.describe "kern:controller_sticky_action_spec" do
 
     @driver.int "int_event", [foo_base, "next_clicked", {}]
 
+    #Expect it not to have a free
     expect {
       @driver.ignore_up_to "if_free_view"
     }.to raise_error /Waited/
+
+    #Should have hidden the view
+    @driver.ignore_up_to "if_view_hide"
+    expect(@driver.get "if_view_hide").to equal([])
   end
 end

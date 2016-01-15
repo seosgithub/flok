@@ -171,14 +171,14 @@ j   #Request a listing of all the views on the root node
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", true], 6.seconds)
 
     #Hide the view
-    @pipe.puts [[0, 2, "if_view_hide", 333, true]].to_json
+    @pipe.puts [[0, 2, "if_hide_view", 333, true]].to_json
 
     #View should be not-visible
     @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
     expect(@pipe).to readline_and_equal_json_x_within_y_seconds([1, "spec", false], 6.seconds)
 
     #Show the view
-    @pipe.puts [[0, 2, "if_view_hide", 333, false]].to_json
+    @pipe.puts [[0, 2, "if_hide_view", 333, false]].to_json
 
     #View should be visible
     @pipe.puts [[0, 1, "if_ui_spec_view_is_visible", 333]].to_json
