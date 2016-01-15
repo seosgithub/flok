@@ -123,6 +123,41 @@ controller "tab_controller" do
 end
 ```
 
+###Sharing
+You may share a set of information by adding the `share` or `share_spot`.  You can import shared information by using `map_share`, or `map_shared_spot`.
+e.g.
+
+```ruby
+controller :example do
+  #Allows you to use the shared.user object (its blank by default)
+  share "user"
+  spots "content"
+  share_spot "content" => "example.content"
+
+  action :index do
+    on_entry %{
+      shared.user.name = "foo"
+    }
+  end
+end
+
+controller :example2 do
+  #Allows you to use the shared.user object (its blank by default)
+  map_share "user"
+
+  map_shared_spot "example.content"
+
+  action :index do
+    on_entry %{
+      //Can access shared.user assuming that it's embedded within the example controller
+
+      //Remote embed
+      Embed("example3", "example.content", {});
+    }
+  end
+end
+```
+
 ###The different segue types
 Including Goto, there are several different kinds of segue types.  Each has it's own semantics w.r.t the destruction and level of the destination view.
 

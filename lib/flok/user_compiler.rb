@@ -99,11 +99,10 @@ module Flok
           spot_index = @controller.spots.map{|e| e.to_s}.index(spot_name)
           unless spot_index
             #Maybe it's a shared spot?
-            spot_index = @controller.mapped_shared_spots.map{|e| e.to_s}.index(spot_name.to_s)+@controller.spots.count
+            shared_spot_index = @controller.mapped_shared_spots.map{|e| e.to_s}.index(spot_name.to_s)
+            raise "controller #{@controller.name.inspect} attempted to embed #{spot_name.inspect} inside #{@name.inspect}, but #{spot_name.inspect} was not defined in 'spots' (#{@controller.spots.inspect})" unless shared_spot_index
+            spot_index = shared_spot_index+@controller.spots.count
             shared_spot = true
-            unless spot_index
-              raise "controller #{@controller.name.inspect} attempted to embed #{spot_name.inspect} inside #{@name.inspect}, but #{spot_name.inspect} was not defined in 'spots' (#{@controller.spots.inspect})"
-            end
           end
 
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
