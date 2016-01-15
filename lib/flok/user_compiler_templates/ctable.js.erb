@@ -20,11 +20,12 @@ ctable = {
 
           //The 'context' which is user-defined
           var context = __info__.context;
+          var shared = __info__.shared;
 
           //Call global on entry
           <%= c._on_entry %>
         },
-        __dealloc__: function(__base__) {
+        __dealloc__: function(__base__, collected_shared_spot_embeds) {
           var __info__ = tel_deref(__base__);
 
           //Recursively call dealloc
@@ -32,9 +33,16 @@ ctable = {
           while (true) {
             for (var i = 0; i < embeds.length; ++i) {
               for (var x = 0; x < embeds[i].length; ++x) {
-                tel_deref(embeds[i][x]).cte.__dealloc__(embeds[i][x]);
+                tel_deref(embeds[i][x]).cte.__dealloc__(embeds[i][x], collected_shared_spot_embeds);
               }
             }
+
+            <% c.mapped_shared_spots.each_with_index do |s, i| %>
+                var mapped_shared_spot_embeds = embeds[<%= i + c.spots.count - 1 %>];
+                for (var i = 0; i < mapped_shared_spot_embeds.length; ++i) {
+                  collected_shared_spot_embeds.push(mapped_shared_spot_embeds[i]);
+                }
+            <% end %>
 
             if (__info__.stack.length > 0) {
               var slice = __info__.stack.pop();
@@ -51,9 +59,12 @@ ctable = {
           dereg_evt(__base__);
           tel_del(__base__);
         },
+        shares: <%= c.shares.to_json %>,
+        mapped_shares: <%= (c.mapped_shares + c.mapped_shared_spots).to_json %>,
+        shared_spots: <%= c.shared_spots.to_json %>,
         name: '<%= c.name %>',
         root_view: '<%= c.name %>',
-        spots: <%= c.spots.to_json %>,
+        spots: <%= (c.spots + c.mapped_shared_spots).to_json %>,
         actions: {
           <% actions_for_controller(c.name).each do |a| %>
               <%= a.name %>: {
@@ -63,6 +74,7 @@ ctable = {
 
                   //The 'context' which is user-defined
                   var context = __info__.context;
+                  var shared = __info__.shared;
 
                   <%= a.on_entry_src.strip %>
                 },
@@ -77,6 +89,7 @@ ctable = {
                       var context = __info__.context;
                       var current_action = __info__.action;
                       var push_count = __info__.stack.length;
+                      var shared = __info__.shared;
 
                       <%= e[:src] %>
                     },

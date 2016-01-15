@@ -3,6 +3,7 @@ controller :my_controller do
 
   action :my_action do
     on_entry %{
+      base = __base__;
       Embed("my_controller2", "hello", {});
     }
 

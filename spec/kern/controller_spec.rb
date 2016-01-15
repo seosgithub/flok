@@ -294,17 +294,23 @@ RSpec.describe "kern:controller_spec" do
     ctx = flok_new_user File.read('./spec/kern/assets/goto.rb')
 
     #Run the embed function
-    ctx.eval %{
+    dump = ctx.evald %{
       //Call embed on main root view
       base = _embed("my_controller", 0, {}, null);
 
       //Drain queue with test event
       int_dispatch([3, "int_event", base, "test_event", {}]);
+
+      dump["controller_info"] = tel_deref(base);
     }
 
     #Now we expect the action for the controller to be 'my_other_action' and for it's on_entry
     #to be called
     expect(ctx.eval("my_other_action_on_entry_called")).not_to eq(nil)
+
+    #Expect the embeds to be set-up properly
+    embeds = dump["controller_info"]["embeds"]
+    expect(embeds).to eq([[], [], []])
   end
 
   it "Can receive 'test_event' and change actions via Push" do

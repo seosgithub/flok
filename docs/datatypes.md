@@ -16,6 +16,7 @@ ctable_entry {
   Additionally, all interval timers are configured here based on their unique names. Actions that are not active will not receive these events (they
   will be ignored).
   __dealloc__    //A function that is called when this controller is destroyed via parent controller switching actions in Goto. Signals services d/c
+  shares,        //The names of all the shares that are mounted as context.$share_name = {}
 }
 ```
 

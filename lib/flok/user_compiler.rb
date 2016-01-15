@@ -95,25 +95,43 @@ module Flok
           context = o.shift
 
           #Get the spot 
-          spot_index = @controller.spots.index(spot_name)
-          raise "controller #{@controller.name.inspect} attempted to embed #{spot_name.inspect} inside #{@name.inspect}, but #{spot_name.inspect} was not defined in 'spots' (#{@controller.spots.inspect})" unless spot_index
+          shared_spot = false
+          spot_index = @controller.spots.map{|e| e.to_s}.index(spot_name)
+          unless spot_index
+            #Maybe it's a shared spot?
+            spot_index = @controller.mapped_shared_spots.map{|e| e.to_s}.index(spot_name.to_s)+@controller.spots.count
+            shared_spot = true
+            unless spot_index
+              raise "controller #{@controller.name.inspect} attempted to embed #{spot_name.inspect} inside #{@name.inspect}, but #{spot_name.inspect} was not defined in 'spots' (#{@controller.spots.inspect})"
+            end
+          end
 
           #Calculate spot index as an offset from the base address using the index of the spot in the spots
           #address offset
           res = ""
 
           if @debug
+          res += %{
+            if (__base__.constructor !== Number) { throw "Embed for the controller: #{@controller.name} was not given a number for it's __base__ pointer, but of type: " + __base__.constructor + "with the value: " + __base__};
+          }
+          end
+
+          #Depending on whether it's a shared spot
+          if not shared_spot
             res += %{
+              var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
+              __info__.embeds[#{spot_index-1}].push(ptr);
+            }
+          else
+            res += %{
+              //var remote_info = tel_deref(shared['#{spot_name}'].bp);
+              var ptr = _embed("#{vc_name}", shared['#{spot_name}'].sbp, #{context}, __base__);
+              __info__.embeds[#{spot_index-1}].push(ptr);
+              //remote_info.embeds[#{spot_index-1}].push(ptr);
             }
           end
 
           res += %{
-            <% if @debug %>
-              if (__base__.constructor !== Number) { throw "Embed for the controller: #{@controller.name} was not given a number for it's __base__ pointer, but of type: " + __base__.constructor + "with the value: " + __base__};
-            <% end %>
-
-            var ptr = _embed("#{vc_name}", __base__+#{spot_index}+1, #{context}, __base__);
-            __info__.embeds[#{spot_index-1}].push(ptr);
           }
           out.puts res
         #Send(event_name, info)
@@ -196,6 +214,7 @@ module Flok
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
+            var collected_shared_spot_embeds = [];
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
                 //Free +1 because that will be the 'main' view
@@ -207,8 +226,9 @@ module Flok
                   views_to_free[views_to_free_id].push(embeds[i][j]+1);
                 }
 
-                //Call dealloc on the controller
-                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
+                //Call dealloc on the controller, it will also recursively call deallocs
+                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j], collected_shared_spot_embeds);
+
 
                 <% if @debug %>
                   var vp = embeds[i][j]+1;
@@ -227,11 +247,18 @@ module Flok
               }
             }
 
-            //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
-            __info__.embeds = [];
-            for (var i = 1; i < #{@controller.spots.count}; ++i) {
-              __info__.embeds.push([]);
+            //Reap any shared spots
+            for (var i = 0; i < collected_shared_spot_embeds.length; ++i) {
+              if (__free_asap === true) {
+                main_q.push([1, "if_free_view", collected_shared_spot_embeds[i]+1]);
+              } else {
+                views_to_free[views_to_free_id].push(collected_shared_spot_embeds[i]+1);
+              }
             }
+
+
+            //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
+            __info__.embeds =  #{(1..@controller.all_spots.count).to_a.map{|e| []}.to_json};
 
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable
@@ -271,12 +298,8 @@ module Flok
 
             //HOOK_ENTRY[controller_will_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
 
-
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
-            __info__.embeds = [];
-            for (var i = 1; i < #{@controller.spots.count}; ++i) {
-              __info__.embeds.push([]);
-            }
+            __info__.embeds =  #{(1..@controller.all_spots.count).to_a.map{|e| []}.to_json};
 
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable
@@ -312,7 +335,7 @@ module Flok
             //HOOK_ENTRY[controller_will_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "handling_event_named" => @handling_event_named}.to_json}
 
             //If views are configured to not free right away, set up a new stack of views to free
-            //This is usually picked up by the hook GOTO
+            //This is usually picked up by the hook POP
             if (__free_asap === false) {
               var views_to_free_id = tels(1);
               views_to_free[views_to_free_id] = views_to_free[views_to_free_id] || [];
@@ -323,11 +346,12 @@ module Flok
 
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
+            var collected_shared_spot_embeds = [];  //collect all the shared spots that wont be removed from the hierarchy
             var embeds = __info__.embeds;
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
                 //Free +1 because that will be the 'main' view
-                //Free if 'free_asap' is not set, this is usually configured via the 'goto' hook
+                //Free if 'free_asap' is not set, this is usually configured via the 'pop' hook
                 if (__free_asap === true) {
                   main_q.push([1, "if_free_view", embeds[i][j]+1]);
                 } else {
@@ -335,7 +359,16 @@ module Flok
                 }
 
                 //Call dealloc on the controller
-                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j]);
+                tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j], collected_shared_spot_embeds);
+              }
+            }
+
+            //Reap any shared spots
+            for (var i = 0; i < collected_shared_spot_embeds.length; ++i) {
+              if (__free_asap === true) {
+                main_q.push([1, "if_free_view", collected_shared_spot_embeds[i]+1]);
+              } else {
+                views_to_free[views_to_free_id].push(collected_shared_spot_embeds[i]+1);
               }
             }
 
@@ -343,7 +376,6 @@ module Flok
             __info__.embeds = orig_embeds;
 
             //HOOK_ENTRY[controller_did_pop] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "handling_event_named" => @handling_event_named}.to_json}
-
           }
 
           out.puts res
@@ -641,13 +673,17 @@ module Flok
   class UserCompilerController
     include UserCompilerMacro
 
-    attr_accessor :name, :spots, :macros, :_services, :_on_entry
+    attr_accessor :name, :spots, :macros, :_services, :_on_entry, :shares, :mapped_shares, :shared_spots, :mapped_shared_spots
     def initialize name, ctx, &block
       @name = name
       @ctx = ctx
       @spots = ['main']
       @macros = {}
+      @shares = []
+      @mapped_shares = []
       @_services = []
+      @mapped_shared_spots = []
+      @shared_spots = []
 
       #Some macros expect controller instance
       @controller = self
@@ -685,6 +721,29 @@ module Flok
 
     def services *instance_names
       @_services = instance_names.map{|e| e.to_s}
+    end
+
+    def share key
+      @shares << key
+    end
+
+    #This will cause a shared key to be added to this controller's
+    #shared structure or an exception if it's not available in some
+    #super controller. use as map_share "user" => "user"
+    def map_share key
+      @mapped_shares << key
+    end
+
+    def share_spot spot_name
+      @shared_spots << spot_name
+    end
+
+    def map_shared_spot spot_name
+      @mapped_shared_spots << spot_name
+    end
+
+    def all_spots
+      return @spots+@mapped_shared_spots
     end
 
     #Pass through action

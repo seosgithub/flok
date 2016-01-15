@@ -72,6 +72,66 @@ function _embed(vc_name, sp, context, event_gw) {
     embeds.push([]);
   }
 
+  //Retrieve available shares from the event gateway if its available (assumes event_gw might be a controller)
+  var event_gw_info = tel_deref(event_gw);
+  if (event_gw_info !== undefined && event_gw_info.available_shared !== undefined) {
+    var available_shared = event_gw_info.available_shared;
+  } else {
+    var available_shared = {};
+  }
+
+  //Retrieve shares we're adding
+  var has_copied = false;
+  var shares = cte.shares;
+  var shared = {};
+  for (var i = 0; i < shares.length; ++i) {
+    //Copy on modify
+    if (i === 0) {
+      has_copied = true;
+      var _available_shared = {};
+      for (var key in available_shared) {
+        _available_shared[key] = available_shared[key];
+      }
+      available_shared = _available_shared;
+    }
+    var name = shares[i];
+    available_shared[name] = {};
+    shared[name] = available_shared[name];
+  }
+
+  //Retrieve spots we're adding
+  var shared_spots = cte.shared_spots;
+  for (var i = 0; i < shared_spots.length; ++i) {
+    //Do we need to replicate shared? May have not designated
+    //anything outside of spots
+    if (has_copied === false) {
+      //has_copied = true;
+      if (i === 0) {
+        var _available_shared = {};
+        for (var key in available_shared) {
+          _available_shared[key] = available_shared[key];
+        }
+        available_shared = _available_shared;
+      }
+    }
+
+    var name = shared_spots[i];
+    var spot_index = cte.spots.indexOf(name);
+    if (spot_index === null) { throw "Tried to share spot named: '"+ name + "but this wasn't a spot"; }
+    available_shared[name] = {bp: base, sbp: base+1+spot_index}
+  }
+
+  //Map shares if needed
+  var mapped_shares = cte.mapped_shares;
+  for (var i = 0; i < mapped_shares.length; ++i) {
+    var name = mapped_shares[i];
+    if (available_shared[name] !== undefined) {
+      shared[name] = available_shared[name];
+    } else {
+      throw "controller named: " + vc_name + " requested a map of share: " + name + " but this did not exist as a share";
+    }
+  }
+
   //Create controller information struct
   var info = {
     context: context,
@@ -80,6 +140,8 @@ function _embed(vc_name, sp, context, event_gw) {
     embeds: embeds,
     event_gw: event_gw,
     stack: [],
+    shared: shared,
+    available_shared: available_shared
   };
 
   //Register controller base with the struct, we already requested base

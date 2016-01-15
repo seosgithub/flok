@@ -36,8 +36,6 @@ class FlokCLI < Thor
       #1. Use the rake task
       system('rake build:world')
 
-      puts "a"
-
       #2. Copy everything in the gems ./flok/products/$PLATFORM -> $PROJECT/products/$PLATFORM and ./flok/app/kern/services/*.rb -> #$PROJECT/products/$PLATFORM/services
       FileUtils.cp_r "./products/#{platform}", local_products_path
 
@@ -49,19 +47,15 @@ class FlokCLI < Thor
     controller_glob_path = "#{local_products_path}/#{platform}/glob/controllers.rb" 
     Flok.src_glob_r("rb", './app/controllers', controller_glob_path)
 
-      puts "b"
     user_compiler_js = Flok::UserCompiler.compile File.read(controller_glob_path)
     services_config_js = File.read "./config/services.rb"
     Flok.src_glob("rb", './app/services', File.join(local_products_path, platform, "./services/user_services.rb"))
 
-      puts "c"
     #4. Move ./app/scripts/*.js into `./products/$PLATFORM/./glob/scripts.js`
     Flok.src_glob("js", './app/scripts', File.join(local_products_path, platform, "./glob/scripts.js"))
 
-      puts "d"
     #Save the current local user's project directory to reference
     user_project_dir = Dir.pwd
-      puts "e"
 
     #We are now inside the platform folder
     Dir.chdir File.join(local_products_path, platform) do
@@ -70,7 +64,6 @@ class FlokCLI < Thor
 
       #4. The `./products/$PLATFORM/services/*.rb` file are globbed into `./products/$PLATFORM/services/combined_services.rb`
       Flok.src_glob("rb", "./services/", "./services/combined_services.rb")
-      puts "f"
 
       #5. The service configuration in `./config/services.rb` is read and run through `services_compiler` and files from `./products/$PLATFORM/services/combined_services.rb` and write to ./glob/services.js
       services_js = Flok::ServicesCompiler.compile(File.read("./services/combined_services.rb"), services_config_js)
@@ -79,7 +72,6 @@ class FlokCLI < Thor
       #6. Move application.js to the glob folder
       FileUtils.cp "application.js", "glob/application.js"
       FileUtils.rm "application.js"
-      puts "g"
 
       #7. The local project `./products/$PLATFORM/glob/application.js` and `./products/$PLATFORM/glob/user_compiler.js` and `./products/$PLATFORM/glob/services.js` and `./products/$PLATFORM/glob/scripts.js`  are merged into `./products/$PLATFORM/glob/application_user.js.erb.hooks`.
       File.open "glob/application_user.js.erb.hooks", "w" do |f|
