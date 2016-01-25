@@ -201,7 +201,7 @@ shared_context "kern" do
         end
         args = @cq.shift(arg_len)
 
-        @did_get << name
+        @did_get << "#{name}: #{args.inspect}"
 
         if name == msg_name
           if priority

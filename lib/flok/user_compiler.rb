@@ -195,9 +195,8 @@ module Flok
 
           action_name = o.shift.gsub(/"/, "")
 
-          to_action = @ctx.actions.select{|e| e.name.to_s == action_name.to_s}.first
-          from_action = @ctx.actions.select{|e| e.name.to_s == @name.to_s}.first
-
+          to_action = @ctx.actions_for_controller(@controller.name).select{|e| e.name.to_s == action_name.to_s}.first
+          from_action = @ctx.actions_for_controller(@controller.name).select{|e| e.name.to_s == @name.to_s}.first
           #This section frees the views if the last action was not marked sticky
           free_section_one = ""
           if from_action and not from_action.is_sticky
@@ -212,7 +211,48 @@ module Flok
                 //Call dealloc on the controller, it will also recursively call deallocs
                 tel_deref(embeds[i][j]).cte.__dealloc__(embeds[i][j], collected_shared_spot_embeds);
             }
+
+            free_section_init = ""
           else
+            free_section_one = %{
+                //Free if 'free_asap' is not set, this is usually configured via the 'goto' hook
+                if (__free_asap === true) {
+                  var hvbp = embeds[i][j]+1;
+                  //Only hide the view
+                  main_q.push([2, "if_hide_view", hvbp, true]);
+                } else {
+                  //Assume that interceptor will hide it
+                }
+            }
+
+            free_section_init = %{
+              //Save our hidden views to the heap
+              __info__.heap["#{@name}"] = __info__.embeds;
+            }
+          end
+
+          #Called to load the destination view
+          if to_action and to_action.is_sticky
+            #Target is sticky, might just need to re-show views marked hidden via the heap
+            init_target_section_one = %{
+              var to_action_heap = __info__.heap["#{action_name}"]; 
+              if (to_action_heap !== undefined) {
+                for (var i = 0; i < to_action_heap.length; ++i) {
+                  for (var ii = 0; ii < to_action_heap[i].length; ++ii) {
+                    main_q.push([2, "if_hide_view", to_action_heap[i][ii]+1, false]);
+                  }
+                }
+                __info__.embeds = __info__.heap["#{action_name}"];
+                delete __info__.heap["#{action_name}"];
+              } else {
+                __info__.cte.actions[__info__.action].on_entry(__base__)
+              }
+            }
+          else
+            #Target is not sticky, just create
+            init_target_section_one = %{
+              __info__.cte.actions[__info__.action].on_entry(__base__)
+            }
           end
 
           #Switch the actions, reset embeds, and call on_entry
@@ -233,6 +273,7 @@ module Flok
             //Remove all views, we don't have to recurse because removal of a view
             //is supposed to remove *all* view controllers of that tree as well.
             var embeds = __info__.embeds;
+            #{free_section_init}
             var collected_shared_spot_embeds = [];
             for (var i = 0; i < __info__.embeds.length; ++i) {
               for (var j = 0; j < __info__.embeds[i].length; ++j) {
@@ -242,6 +283,7 @@ module Flok
               }
             }
 
+            //TODO: Support sticky actions
             //Reap any shared spots
             for (var i = 0; i < collected_shared_spot_embeds.length; ++i) {
               if (__free_asap === true) {
@@ -251,13 +293,12 @@ module Flok
               }
             }
 
-
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
             __info__.embeds =  #{(1..@controller.all_spots.count).to_a.map{|e| []}.to_json};
 
             //Call on_entry for the new action via the singleton on_entry
-            //located in ctable
-            __info__.cte.actions[__info__.action].on_entry(__base__)
+            //located in ctable if the destination was not stickied
+            #{init_target_section_one}
 
             //HOOK_ENTRY[controller_did_goto] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
             //'choose_action' pseudo-action will be sent as 'null' as it's the initial state
