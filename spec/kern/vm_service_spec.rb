@@ -661,7 +661,50 @@ RSpec.describe "kern:vm_service" do
     })
   end
 
-  it "Tries to write to disk when the pageout runs" do
+  it "Does not try to write to disk when the pageout runs but a disk read has not come back yet" do
+    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+
+    ctx.eval %{
+      base = _embed("my_controller", 1, {}, null);
+
+      //Call pageout *now* which wont do anything yet because
+      //we haven't responded to the read request yet so its not
+      //going to actually pageout until we respond to the read
+      //and then call pageout again
+      vm_pageout();
+
+      //Drain queue
+      int_dispatch([]);
+      int_dispatch([]);
+    }
+
+    page = JSON.parse(ctx.eval("JSON.stringify(page)"))
+
+    #Shouldn't have gotten a 'set' yet, because we haven't sent a page back
+    expect {
+      @driver.ignore_up_to "if_per_set", 2
+    }.to raise_error /Waited/
+
+    @driver.ignore_up_to "if_per_get", 2
+    #Respond to get
+    @driver.int "int_per_get_res", ["vm", "spec", "test", {
+      "_id" => "test",
+      "_hash" => nil,
+      "_next" => nil,
+      "entries" => [],
+    }]
+
+    #Call pageout again after we respond to the if_per_get
+    ctx.eval %{
+      vm_pageout();
+      int_dispatch([]);
+    }
+
+    #Should have gotten a set request
+    @driver.ignore_up_to "if_per_set", 2
+  end
+
+  it "Does attempt " do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller18.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
     ctx.eval %{
@@ -676,9 +719,11 @@ RSpec.describe "kern:vm_service" do
 
     page = JSON.parse(ctx.eval("JSON.stringify(page)"))
 
-    @driver.ignore_up_to "if_per_set", 2
-    @driver.mexpect("if_per_set", ["spec", page["_id"], page], 2)
+    expect {
+      @driver.ignore_up_to "if_per_get", 2
+    }.to raise_error /Waited/
   end
+
 
   it "Does send a read request from disk cache when watching a key for the first time" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller19.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
@@ -722,7 +767,7 @@ RSpec.describe "kern:vm_service" do
 
     @driver.mexpect("if_per_get", ["vm", "spec", "test2"], 0)
 
-    @driver.int "int_per_get_res", ["vm", "spec", "test2", {
+    @driver.int "int_per_get_res", ["vm", "spec", "test3", {
       "_id" => "test2",
       "_hash" => nil,
       "_next" => nil,
