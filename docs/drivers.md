@@ -24,7 +24,8 @@ Contains the following tasks:
   * `build` - A request for this driver to build it's files into the folder `$BUILD_PATH`
   * `spec`  - Run any unit tests that the implementor deems necessary that do not need the pipe. Given `$BUILD_PATH`. Should return 0 on success and
       non-0 on failure
-  * `pipe`  - Establish a 2-way pipe on standard io where input goes to `if_dispatch` and `int_dispatch` goes to output.  
+  * `pipe`  - Establish a 2-way pipe on standard io where input goes to `if_dispatch` and `int_dispatch` goes to output.
+  * `can_build` - Should exit -1 if the platform can not be built (or can not be tested) on the current environment. exit 0 otherwise
 
 ## Minimum interface
 Every driver *must* export `if_dispatch` into the context managing `application.js` (See [Messaging](./messaging.md)). The driver should then handle `if_dispatch` and it's implementation should handle messages appropriately so that the messages it receives can be fulfilled as stated in the modules
