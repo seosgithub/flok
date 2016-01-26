@@ -73,6 +73,7 @@ RSpec.describe "kern:rest_service" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     @driver.ignore_up_to("if_net_req")

@@ -189,6 +189,9 @@ shared_context "kern" do
         #Dequeue from multi-priority queue if possible
         if @cq.nil? or @cq.count == 0
           @cq = @q.shift
+          if @cq == "i"
+            @cq = @q.shift
+          end
           @cp = @cq.shift #save priority
         end
 
