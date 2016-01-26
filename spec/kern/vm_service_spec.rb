@@ -1523,6 +1523,7 @@ RSpec.describe "kern:vm_service" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #Expect a if_per_get request attempt
