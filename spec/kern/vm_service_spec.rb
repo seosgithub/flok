@@ -372,6 +372,7 @@ RSpec.describe "kern:vm_service" do
     ################################################################################
     #Trigger controller 'write_first'
     @driver.int "int_event", [ ctx.eval("base"), "write_first", {} ]
+    @ctx.eval %{ int_dispatch([]) }
 
     #Write should have trigger a disk read (to ensure there is no page in cache) vhich we respond
     #with nothing
@@ -385,7 +386,7 @@ RSpec.describe "kern:vm_service" do
     @driver.int "int_event", [ ctx.eval("base"), "watch_first", {} ]
 
     #Asynchronous dispatch
-    100.times { @ctx.eval("int_dispatch()")}
+    100.times { @ctx.eval("int_dispatch([])")}
 
     #Should have triggered the read_res
     expect(@ctx.dump("read_res_params").count).to eq(1)
