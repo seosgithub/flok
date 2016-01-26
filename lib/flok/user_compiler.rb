@@ -294,7 +294,7 @@ module Flok
             }
 
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
-            __info__.embeds =  #{(1..@controller.all_spots.count).to_a.map{|e| []}.to_json};
+            __info__.embeds =  #{(1...@controller.all_spots.count).to_a.map{|e| []}.to_json};
 
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable if the destination was not stickied
