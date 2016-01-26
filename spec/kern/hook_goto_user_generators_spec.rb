@@ -68,7 +68,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -93,7 +92,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -131,7 +129,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -171,7 +168,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -200,7 +196,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -230,7 +225,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0b.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
@@ -256,7 +250,6 @@ RSpec.describe "kern:hook_goto_user_generators_spec" do
 
     #Get a new js context with the controllers source and the hooks source
     info = flok_new_user_with_src File.read('./spec/kern/assets/hook_entry_points/controller0bc.rb'), nil, nil, hooks_src
-    File.write File.expand_path("~/Downloads/src.txt"), info[:src]
     ctx = info[:ctx]
 
     #Run the embed function
