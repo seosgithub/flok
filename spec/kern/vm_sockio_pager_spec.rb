@@ -356,6 +356,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
 
       //pg_sockio0 socket address & the endpoint for the event callback
       dump.pg_sockio0_bp = pg_sockio0_bp;
