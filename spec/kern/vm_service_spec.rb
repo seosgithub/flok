@@ -484,7 +484,6 @@ RSpec.describe "kern:vm_service" do
     vm_notify_map = JSON.parse(ctx.eval("JSON.stringify(vm_notify_map)"));
     expect(vm_notify_map).to eq({
       "spec" => {
-        "test" => []
       }
     })
   end
