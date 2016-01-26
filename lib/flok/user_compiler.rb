@@ -335,7 +335,7 @@ module Flok
             //HOOK_ENTRY[controller_will_push] #{{"controller_name" => @controller.name, "might_respond_to" => @ctx.might_respond_to, "actions_responds_to" => @ctx.actions_respond_to, "from_action" => @name, "to_action" => action_name, "handling_event_named" => @handling_event_named}.to_json}
 
             //Prep embeds array, embeds[0] refers to the spot bp+2 (bp is vc, bp+1 is main)
-            __info__.embeds =  #{(1..@controller.all_spots.count).to_a.map{|e| []}.to_json};
+            __info__.embeds =  #{(1...@controller.all_spots.count).to_a.map{|e| []}.to_json};
 
             //Call on_entry for the new action via the singleton on_entry
             //located in ctable

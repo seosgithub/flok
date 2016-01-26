@@ -310,7 +310,7 @@ RSpec.describe "kern:controller_spec" do
 
     #Expect the embeds to be set-up properly
     embeds = dump["controller_info"]["embeds"]
-    expect(embeds).to eq([[], [], []])
+    expect(embeds).to eq([[], []])
   end
 
   it "Can receive 'test_event' and change actions via Push" do
@@ -338,8 +338,8 @@ RSpec.describe "kern:controller_spec" do
 
     #The controller's instance embeds array is the correct blank version
     #Each blank array in embeds refers to one spot (not including the main spot)
-    spot_count = dump["ctable_entry"]["spots"].count-1
-    expect(dump["controller_info"]["embeds"]).to eq((1..spot_count).map{|e| []})
+    spot_count = dump["ctable_entry"]["spots"].count
+    expect(dump["controller_info"]["embeds"]).to eq((1...spot_count).map{|e| []})
 
     #Does not dealloc the controller (and kill views)
     @driver.expect_not_to_contain "if_free_view"
