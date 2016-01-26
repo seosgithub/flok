@@ -17,7 +17,7 @@ service :my_service do
 
   every 1.seconds, %{
     for (var i = 0; i < Object.keys(sessions).length; ++i) {
-      var bp = Object.keys(sessions)[i];
+      var bp = parseInt(Object.keys(sessions)[i]);
       int_event(bp, "ping", {});
     }
   }
