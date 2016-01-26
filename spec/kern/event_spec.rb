@@ -40,6 +40,7 @@ RSpec.describe "kern:event_spec" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #Incomplete should have been added

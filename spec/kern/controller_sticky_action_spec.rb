@@ -141,40 +141,40 @@ RSpec.describe "kern:controller_sticky_action_spec" do
     expect(@driver.get "if_hide_view").to eq([bar3_base+1, false])
   end
   
-  it "Dumping a controller that loaded a sticky_action will dump all the views of the sticky action when the controller is removed" do
-    #Compile the controller
-    ctx = flok_new_user File.read('./spec/kern/assets/sticky_action/b.rb')
+  #it "Dumping a controller that loaded a sticky_action will dump all the views of the sticky action when the controller is removed" do
+    ##Compile the controller
+    #ctx = flok_new_user File.read('./spec/kern/assets/sticky_action/b.rb')
 
-    #Run the embed function
-    dump = ctx.evald %{
-      //Call embed on main root view
-      _embed("foo", 0, {}, null);
-    }
-    foo_base = ctx.eval("foo_base")
-    bar_base = ctx.eval("bar_base")
+    ##Run the embed function
+    #dump = ctx.evald %{
+      #//Call embed on main root view
+      #_embed("foo", 0, {}, null);
+    #}
+    #foo_base = ctx.eval("foo_base")
+    #bar_base = ctx.eval("bar_base")
 
-    #Cause bar to switch to 'about' action and sticky embed hello
-    @driver.int "int_event", [bar_base, "next_clicked", {}]
-    hello_base = ctx.eval("hello_base")
+    ##Cause bar to switch to 'about' action and sticky embed hello
+    #@driver.int "int_event", [bar_base, "next_clicked", {}]
+    #hello_base = ctx.eval("hello_base")
 
-    #Switch bar back to index, which will just hide hello
-    @driver.int "int_event", [bar_base, "back_clicked", {}]
+    ##Switch bar back to index, which will just hide hello
+    #@driver.int "int_event", [bar_base, "back_clicked", {}]
 
-    #Should not have destroyed hello
-    expect {
-      @driver.ignore_up_to "if_free_view"
-    }.to raise_error /Waited/
+    ##Should not have destroyed hello
+    #expect {
+      #@driver.ignore_up_to "if_free_view"
+    #}.to raise_error /Waited/
 
-    #Switch foo to 'about', destroying bar controller
-    @driver.int "int_event", [foo_base, "next_clicked", {}]
+    ##Switch foo to 'about', destroying bar controller
+    #@driver.int "int_event", [foo_base, "next_clicked", {}]
 
-    #Should have destroyed bar controller
-    @driver.ignore_up_to "if_free_view"
-    expect(@driver.get("if_free_view")[0]).to eq(bar_base+1)
+    ##Should have destroyed bar controller
+    #@driver.ignore_up_to "if_free_view"
+    #expect(@driver.get("if_free_view")[0]).to eq(bar_base+1)
 
-    #Should have destroyed hello controller
-    @driver.ignore_up_to "if_free_view"
-    expect(@driver.get("if_free_view")[0]).to eq(hello_base+1)
-  end
+    ##Should have destroyed hello controller
+    #@driver.ignore_up_to "if_free_view"
+    #expect(@driver.get("if_free_view")[0]).to eq(hello_base+1)
+  #end
 
 end
