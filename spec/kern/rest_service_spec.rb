@@ -18,6 +18,7 @@ RSpec.describe "kern:rest_service" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
   end
 
@@ -27,6 +28,7 @@ RSpec.describe "kern:rest_service" do
       dump.base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 
@@ -40,6 +42,7 @@ RSpec.describe "kern:rest_service" do
       dump.base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 
@@ -126,6 +129,7 @@ RSpec.describe "kern:rest_service" do
       _embed("root_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 
