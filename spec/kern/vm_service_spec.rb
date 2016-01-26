@@ -645,7 +645,9 @@ RSpec.describe "kern:vm_service" do
       vm_rehash_page(page);
 
       //Save page
+      vm_transaction_begin();
       vm_cache_write("user", page);
+      vm_transaction_end();
     }
 
     vm_dirty = JSON.parse(ctx.eval("JSON.stringify(vm_dirty)"))
