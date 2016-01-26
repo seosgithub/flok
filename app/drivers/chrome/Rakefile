@@ -90,3 +90,7 @@ task :pipe => :build do
     server.begin_pipe
   }
 end
+
+task :can_build do
+  exit 0
+end

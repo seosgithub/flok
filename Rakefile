@@ -142,3 +142,7 @@ task :spec do
     Flok.system! "rake spec:world PLATFORM=#{p} FLOK_ENV=DEBUG"
   end
 end
+
+task :list_platforms do
+  puts Flok.platforms.inspect
+end

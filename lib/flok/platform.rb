@@ -6,6 +6,11 @@ module Flok
       Dir.chdir './app/drivers' do
         #Get a list of directories, each directory is technically a platform
         dirs = Dir["*"].select{|e| File.directory?(e)}
+        dirs.select! do |dir|
+          Dir.chdir dir do
+            next system("rake can_build")
+          end
+        end
 
         return dirs
       end
