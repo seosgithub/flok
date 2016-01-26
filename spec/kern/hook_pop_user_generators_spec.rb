@@ -222,12 +222,8 @@ RSpec.describe "kern:hook_pop_user_generators_spec" do
     @driver.ignore_up_to("if_hook_event", 0)
     hook_res = @driver.get "if_hook_event", 0
 
-    expect(hook_res[1]).to eq({
-      "views" => {
-        "foo2" => on_entry_base_pointer2,
-        "foo" => on_entry_base_pointer3
-      }
-    })
+    expect(hook_res[1]["views"]["foo2"]).to eq(on_entry_base_pointer2)
+    expect(hook_res[1]["views"]["foo"]).to eq(on_entry_base_pointer3)
   end
 
   it "Does not dump the views until *after* the callback is received" do
