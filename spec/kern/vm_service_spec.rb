@@ -393,20 +393,23 @@ RSpec.describe "kern:vm_service" do
     ################################################################################
   end
 
-  it "vm_cache_write does not tell controllers an update has occurred if the page requested to cache was already cached" do
-    ctx = flok_new_user File.read('./spec/kern/assets/vm/controller13.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
+  #Just read before you write!
+  #it "vm_cache_write does not tell controllers an update has occurred if the page requested to cache was already cached" do
+    #ctx = flok_new_user File.read('./spec/kern/assets/vm/controller13.rb'), File.read("./spec/kern/assets/vm/config4.rb") 
 
-    ctx.eval %{
-      base = _embed("my_controller", 1, {}, null);
+    #dump = ctx.evald %{
+      #dump.base = _embed("my_controller", 1, {}, null);
 
-      //Drain queue
-      int_dispatch([]);
-    }
+      #//Drain queue
+      #int_dispatch([]);
+    #}
 
-    read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
-    vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list)"));
-    expect(read_res_params).to eq([vm_write_list[0]])
-  end
+    #@driver.int "int_event", [dump["base"], "next", {}]
+
+    #read_res_params = JSON.parse(ctx.eval("JSON.stringify(read_res_params)"))
+    #vm_write_list = JSON.parse(ctx.eval("JSON.stringify(vm_write_list)"));
+    #expect(read_res_params).to eq([vm_write_list[0]])
+  #end
 
   it "updates vm_notify_map when a watch takes place" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller14.rb'), File.read("./spec/kern/assets/vm/config4.rb") 

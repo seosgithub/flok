@@ -30,7 +30,11 @@ controller :my_controller do
       read_res_params = [];
       Request("vm", "write", write_info);
       Request("vm", "watch", watch_info);
-      Request("vm", "write", write_info);
+      context.write_info = write_info;
+    }
+
+    on "next", %{
+      Request("vm", "write", context.write_info);
     }
 
     on "read_res", %{
