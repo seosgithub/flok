@@ -644,6 +644,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
 
       //pg_sockio0 socket address & the endpoint for the event callback
       dump.pg_sockio0_bp = pg_sockio0_bp;
@@ -844,6 +845,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
 
       dump.vm_cache = vm_cache;
     }
@@ -863,6 +865,7 @@ RSpec.describe "kern:sockio_pager" do
       dump.base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
 
       dump.vm_cache = vm_cache;
