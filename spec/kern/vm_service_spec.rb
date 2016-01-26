@@ -250,9 +250,7 @@ RSpec.describe "kern:vm_service" do
     vm_bp_to_nmap = ctx.dump("vm_bp_to_nmap")
 
     expect(vm_notify_map).to eq({
-      "spec" => {
-        "test" => []
-      },
+      "spec" => {},
       "spec1" => {}
     })
 
