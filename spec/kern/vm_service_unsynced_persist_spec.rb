@@ -66,6 +66,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
       vm_pg_sync_pagein();
 
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #Should be loaded (manually called)
