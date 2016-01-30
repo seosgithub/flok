@@ -736,6 +736,7 @@ RSpec.describe "kern:vm_service" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     @driver.ignore_up_to "if_per_get", 2
@@ -1016,6 +1017,7 @@ RSpec.describe "kern:vm_service" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     @driver.ignore_up_to "if_per_get", 2
@@ -1024,7 +1026,7 @@ RSpec.describe "kern:vm_service" do
     #There should not be another request for the drive
     expect {
       @driver.ignore_up_to "if_per_get"
-    }.to raise_exception
+    }.to raise_error /Waited/
   end
 
   it "A watch request with the sync flag enabled does trigger a synchronous read for a non-existant page" do
