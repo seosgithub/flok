@@ -12,7 +12,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
   include Zlib
   include_context "kern"
 
-  it "Should have called vm_pg_sync_pagein after 2 seconds" do
+  it "Should have called vm_pg_sync_pagein after 20 seconds" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/controller0.rb'), File.read("./spec/kern/assets/vm/config5c.rb")
     dump = ctx.evald %{
       //Needed to initialize pagers
@@ -22,8 +22,8 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
     #Should not be loaded at this time
     expect(ctx.eval("vm_unsynced_paged_in")).to eq(false)
 
-    #Call the timer for 2 seconds (should invoke the load for the pg_spec0_sync_request)
-    (2*4).times do
+    #Call the timer for 20 seconds (should invoke the load for the pg_spec0_sync_request)
+    (20*4).times do
       @driver.int "int_timer", []
     end
 

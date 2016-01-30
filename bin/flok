@@ -7,6 +7,7 @@ require 'webrick'
 require_relative '../spec/lib/helpers.rb'
 
 class FlokCLI < Thor
+
   desc "new <path>", "Create a new flok project and/or module, you may supply an absolute path or relative, the last entry in the path will be the module name and folder name of the project"
   def new path
     #Name of this project
@@ -20,6 +21,7 @@ class FlokCLI < Thor
 
   desc "build", "Build the products for a platform"
   def build
+    $stderr.puts "[Flok version #{Flok::VERSION}]"
     raise "$PLATFORM was not set" unless ENV['PLATFORM']
     platform = ENV['PLATFORM']
 
@@ -99,6 +101,7 @@ class FlokCLI < Thor
   desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM when something in ./app changes"
   include SpecHelpers #Contains sh2
   def server
+    $stderr.puts "[Flok version #{Flok::VERSION}]"
     raise "$PLATFORM was not set" unless ENV['PLATFORM']
     platform = ENV['PLATFORM']
 
@@ -162,6 +165,11 @@ class FlokCLI < Thor
       @debug = (ENV['FLOK_ENV'] == "DEBUG")
       @release = (ENV['FLOK_ENV'] == "RELEASE")
     end
+  end
+
+  desc "z__gem_console", "Open a console to help debug the flok build environment"
+  def z__gem_console
+    require 'pry'; binding.pry
   end
 end
 
