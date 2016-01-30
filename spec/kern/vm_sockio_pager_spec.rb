@@ -47,6 +47,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
 
       dump.pg_sockio0_bp = pg_sockio0_bp;
     }
@@ -88,6 +89,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #We are sending a watch request for a page named 'test'
@@ -104,6 +106,7 @@ RSpec.describe "kern:sockio_pager" do
       base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 
@@ -188,6 +191,7 @@ RSpec.describe "kern:sockio_pager" do
 
       //Drain queue
       int_dispatch([]);
+      int_dispatch([]);
 
       //pg_sockio0 socket address & the endpoint for the event callback
       dump.pg_sockio0_bp = pg_sockio0_bp;
@@ -264,6 +268,7 @@ RSpec.describe "kern:sockio_pager" do
       dump.base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
 
       //pg_sockio0 socket address & the endpoint for the event callback
@@ -446,6 +451,7 @@ RSpec.describe "kern:sockio_pager" do
       dump.base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
 
       //pg_sockio0 socket address & the endpoint for the event callback

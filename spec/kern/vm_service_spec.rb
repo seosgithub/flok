@@ -1289,9 +1289,12 @@ RSpec.describe "kern:vm_service" do
 
       //Recalculate hashes
       vm_rehash_page(page);
+      vm_reindex_page(page);
       vm_rehash_page(page2);
+      vm_reindex_page(page2);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 
@@ -1306,7 +1309,11 @@ RSpec.describe "kern:vm_service" do
 
     #Now, we pretend that a pager has written to the cache because it has
     #received data back
-    ctx.eval(%{vm_cache_write("spec", page2)})
+    ctx.eval(%{
+      vm_transaction_begin();
+      vm_cache_write("spec", page2)
+      vm_transaction_end();
+    })
 
     #And then we let the cache from disk reply, which should be ignored
     #because the cache is already there from the pager
@@ -1560,6 +1567,7 @@ RSpec.describe "kern:vm_service" do
       base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
+      int_dispatch([]);
       int_dispatch([]);
     }
 

@@ -41,6 +41,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
       vm_pg_sync_pagein();
 
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #Should be loaded (manually called)
@@ -119,6 +120,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
       }
 
       int_dispatch([]);
+      int_dispatch([]);
     }
 
     #Should be loaded (manually called)
@@ -171,6 +173,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
         }
       }
 
+      int_dispatch([]);
       int_dispatch([]);
     }
 
@@ -237,6 +240,7 @@ RSpec.describe "kern:vm_service unsynced (persist)" do
       vm_pg_sync_pageout();
       vm_pg_sync_pageout();
 
+      int_dispatch([]);
       int_dispatch([]);
     }
 

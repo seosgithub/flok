@@ -903,13 +903,13 @@ service :vm do
     <% end %>
   }
 
-  every 5.seconds, %{
+  every 20.seconds, %{
     vm_pageout();
     vm_pg_sync_wakeup();
     vm_pg_sync_pageout();
   }
 
-  every 2.seconds, %{
+  every 20.seconds, %{
     vm_pg_sync_pagein();
   }
 end
