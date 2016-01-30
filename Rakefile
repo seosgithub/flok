@@ -133,7 +133,9 @@ namespace :spec do
     raise "Driver spec for platform #{platform} has failed" if $? != 0
   end
 
-  task :world => ['etc', 'kern', 'iface', 'driver'] do
+  # Disabled iface specs for now...
+  #task :world => ['etc', 'kern', 'iface', 'driver'] do
+  task :world => ['etc', 'kern', 'driver'] do
   end
 end
 
