@@ -811,29 +811,23 @@ service :vm do
       } else {
         int_event_defer(bp, "read_res", cache_entry);
       }
-    } else {
-      ////////////////////////////////////////////////////
-      //No cache entry... pull it from disk
-      ////////////////////////////////////////////////////
-      //Add ourselves to synchronous read list so the next disk read will
-      //send a synchronous event to us (and then clear). We will not get the 
-      //normal asynhronous read. Additionally, we may also get a `{}` page indicating
-      //that the page is blank
+    }
 
-      //Is a read in place? if not, creat queue
-      var read_is_pending = vm_cache_write_sync_pending[params.id] !== undefined;
-      if (!read_is_pending) { vm_cache_write_sync_pending[params.id] = []; }
+    //Send a request now for disk read for sync
+    if (!cache_entry) {
+      if (params.sync !== undefined && params.sync === true) {
+        //Add ourselves to synchronous read list so the next disk read will
+        //send a synchronous event to us (and then clear). We will not get the 
+        //normal asynhronous read. Additionally, we may also get a `{}` page indicating
+        //that the page is blank
 
-      //Place our BP in waiting queue
-      vm_cache_write_sync_pending[params.id].push(bp);
-
-      //Request disk read if a read was not pending (so we don't do this multiple times)
-      if (!read_is_pending) {
-        //Signal depending on whether we're synchronous
-        if (params.sync !== undefined && params.sync === true) {
-          SEND("main", "if_per_get", "vm", params.ns, params.id);
-        } else {
-          //Not synchronous?
+        //The sync_pending queue so *only* for synchronous reads.  All others will be caught
+        //via the vm_notify_map!!!
+        vm_cache_write_sync_pending[params.id] = vm_cache_write_sync_pending[params.id] || []; 
+        vm_cache_write_sync_pending[params.id].push(bp);
+        SEND("main", "if_per_get", "vm", params.ns, params.id);
+      } else {
+        if (vm_notify_map[params.ns][params.id].length === 1) {
           SEND("disk", "if_per_get", "vm", params.ns, params.id);
         }
       }
