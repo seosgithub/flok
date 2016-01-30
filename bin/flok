@@ -21,7 +21,7 @@ class FlokCLI < Thor
 
   desc "build", "Build the products for a platform"
   def build
-    $stderr.puts "[Flok version #{Flok::VERSION}]"
+    puts "[Flok version #{Flok::VERSION}]"
     raise "$PLATFORM was not set" unless ENV['PLATFORM']
     platform = ENV['PLATFORM']
 
@@ -101,7 +101,7 @@ class FlokCLI < Thor
   desc "server", "Monitors for changes within your flok application and triggers an automatic rebuild of ./products/* for a PLATFORM when something in ./app changes"
   include SpecHelpers #Contains sh2
   def server
-    $stderr.puts "[Flok version #{Flok::VERSION}]"
+    puts "[Flok version #{Flok::VERSION}]"
     raise "$PLATFORM was not set" unless ENV['PLATFORM']
     platform = ENV['PLATFORM']
 
