@@ -147,6 +147,20 @@ requested. This is because a cached page will be returned by the call stack whil
     * `read_res`
       * `entire params` - The page that was retrieved (or `{}` if it dosen't exist)
 
+
+###`invalidate`
+Mark a page as invalid. This will clear the page from cache and notify any **controllers** watching the page via the `page_invalidated` message. The messaging
+to controllers is done through the defer queue. Invalidation will then wipe the page from vm_cache and request that the page be deleted on the next page-out.
+The pager will be notified via the `$pager.invalidate(page_id)` function. Pagers shall respond asynchronously to the invalidation request and assume
+that the cache has already been wiped at this point.
+  * Parameters.
+    * `ns` - Namespace of the page
+    * `id` - id of the page
+  * Event Responses [For controllers watching the page]
+    * `invalidated`
+      * `ns` - The namespace of the page that was invalidated.
+      * `id` - The id of the page that was invalidated
+
 ##Cache
 See below with `vm_cache_write` for how to write to the cache. Each pager can choose whether or not to cache; some pagers may cache only reads while others will cache writes.  Failure to write to the cache at all will cause `watch` to never trigger. Some pagers may use a trick where writes are allowed, and go directly to the cache but nowhere else. This is to allow things like *pending* transactions where you can locally fake data until a server response is received which will both wipe the fake write and insert the new one. Cache writes will trigger `watch`; if you write to cache with `vm_cache_write` with a page that has the same `_hash` as a page that already exists in cache, no `watch` events will be triggered. Additionally, calling `vm_cache_write` with a non-modified page will result in no performance penalty. `vm_cache_write` notifies controllers asynchronously and is not effected by the `watch` flag on controllers.
 
@@ -170,6 +184,7 @@ The pager synchronization daemon is embodied in the function called `vm_pg_sync_
 ###Datatypes & Structures (Opaque, do not directly modify)
   * `vm_cache` - The main area for storing the cache. Stored in `vm_cache[ns][key]`. Contains all namespaces by default with blank hashes.
   * `vm_dirty` - Pages recently written to cache go on the dirty list so that they may be written when the pageout handler runs. Dictionary contains map for `vm_dirty[ns][page._id] => page` for all dirty pages. Pages are removed from the dictionary when they are written in the pageout. Contains all namespaces by default with blank hashes.
+  * `vm_evict` - Pages that need to be deleted from disk. `vm_evict[ns][page._id] => true`.  These pages are reaped during pageout. If the vm_evict has a page in it, but the page exists in vm_cache, then the page was added after the eviction request and should no longer be deleted
   * `vm_notify_map` - The dictionary used to lookup what controllers need to be notified about changes. Stored in `vm_notify_map[ns][id]` which yields an array of controller base pointers.
   * `vm_bp_to_nmap` - A dictionary that maps a `bp` key (usually from a controller) to a dictionary. This dictionary contains a mapping of `bp => ns => id` to an array that contains `[node, index]` where `node` is a reference to `vm_notify_map[ns][id]`. This inverted map must (a) provide a way for `unwatch` to quickly remove entries from itself and (b) provide a way for all entries in `vm_notify_map` to be removed when something (usually a controller) disconrnects.
     must support `unwatch` removal which we only receive the `bp`, `ns`, and `key`.
@@ -262,7 +277,7 @@ Aside, modifying a page goes against the semantics of the vm system; you're thin
 
 If you're creating a new page, please use these macros as well; just switch out `CopyPage` for `NewPage`.
 
-####Per entry
+####Per entry (OUT-DATED!!! use generic page helpers defined above)
   * `NewPage(type, id)` - Returns a new blank page; internally creates a page that has a null `_prev`, `_next`, `_head`, and `entries` array with 0 elements.  `_id` is generated if it is not passed.
   * `CopyPage(page)` - Copies a page and returns the new page. Internally this copies the entire page with the exception of the
       `_hash` field.

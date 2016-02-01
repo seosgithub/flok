@@ -9,7 +9,18 @@ service :vm do
       <% end %>
     };
 
+    //Pages that are pending dirty
     vm_dirty = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: {},
+      <% end %>
+    };
+
+    //Pages that are pending deletion. The assumption is 
+    //that the page doesn't exist in the cache at the moment
+    //and if it does, then it was written after the eviction
+    //request and should nolonger be evicted. Only maps to 'true'.
+    vm_evict = {
       <% @options[:pagers].each do |p| %>
         <%= p[:namespace] %>: {},
       <% end %>
@@ -37,6 +48,13 @@ service :vm do
         <%= p[:namespace] %>: <%= p[:name] %>_unwatch,
       <% end %>
     }
+
+    vm_ns_to_pg_watch = {
+      <% @options[:pagers].each do |p| %>
+        <%= p[:namespace] %>: <%= p[:name] %>_watch,
+      <% end %>
+    }
+
     /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -131,13 +149,36 @@ service :vm do
             SEND("disk", "if_per_set", "<%= p[:namespace] %>", ids[i], p);
           }
         }
-        <% end %>
+      <% end %>
+
+      <% @options[:pagers].each do |p| %>
+        //Get id_to_page mappings
+        var page_ids = vm_evict["<%= p[:namespace] %>"];
+        if (page_ids) {
+          var ids = Object.keys(page_ids);
+
+          //For each mapping, delete the entry
+          for (var i = 0; i < ids.length; ++i) {
+            var pid = ids[i];
+            if (vm_cache["<%= p[:namespace] %>"][pid] === undefined) {
+              SEND("disk", "if_per_del", "<%= p[:namespace] %>", pid);
+            }
+          }
+        }
+      <% end %>
 
       vm_dirty = {
         <% @options[:pagers].each do |p| %>
           <%= p[:namespace] %>: {},
         <% end %>
       };
+
+      vm_evict = {
+        <% @options[:pagers].each do |p| %>
+          <%= p[:namespace] %>: {},
+        <% end %>
+      };
+
     }
 
     //Part of the persist module
@@ -897,9 +938,34 @@ service :vm do
     <% end %>
   }
 
+  on "invalidate", %{
+    //Notify *all* our watching controllers of the invalidation (asynchronously)
+    var nbps = vm_notify_map[params.ns][params.id];
+    if (nbps) {
+      for (var i = 0; i < nbps.length; ++i) {
+        var nbp = nbps[i];
+        int_event_defer(nbp, "invalidated", params);
+      }
+
+      //Delete from vm_cache, mark for eviction
+      var page = vm_cache[params.ns][params.id];
+      delete vm_cache[params.ns][params.id];
+      if (page !== undefined) {
+        vm_evict[params.ns][params.id] = true;
+      }
+
+      //Notify the pager
+      vm_ns_to_pg_watch[params.ns](params.id);
+    }
+  }
+
   every 20.seconds, %{
     vm_pageout();
+
+    //Notify pagers of any pending unsynced pages
     vm_pg_sync_wakeup();
+
+    //Save a list of page ids that are pending sync with the pager
     vm_pg_sync_pageout();
   }
 
