@@ -41,7 +41,7 @@ RSpec.describe "kern:vm_service" do
 
   it "Can make an invalidate request to the vm pager with an invalid page id without throwing an error" do
     ctx = flok_new_user File.read('./spec/kern/assets/vm/invalidate/controller0b.rb'), File.read("./spec/kern/assets/vm/invalidate/config0.rb") 
-    ctx.evald %{
+    ctx.eval %{
       base = _embed("my_controller", 0, {}, null);
 
       //Drain queue
@@ -54,6 +54,8 @@ RSpec.describe "kern:vm_service" do
     @driver.int "int_per_get_res", ["vm", "user", "test", nil]
 
     @driver.int "int_event", [ctx.eval("base"), "next_clicked", {}]
+
+    expect(ctx).to include_in_kernel_log /Attempted to invalidate/
   end
 
   it "Invalidation causes the page to be wiped from the vm cache & page-out will request that the page should be deleted." do
@@ -119,7 +121,6 @@ RSpec.describe "kern:vm_service" do
       dump.invalidate_res = invalidate_res
 
       dump.vm_cache = vm_cache;
-
     }
 
     @driver.ignore_up_to "if_per_get", 2

@@ -341,3 +341,31 @@ shared_context "kern" do
     end
   end
 end
+
+#For unknown reasons, the v8 (therubyracer) gem will dump
+#the references and throw errors. For what ever reason, this
+#calling context (which ends up being a NOP) prevents these
+#references from being destroyed and throw a WeakRef error.
+def v8_memory_hack
+    ENV["DISABLE_PRY"] = "true";
+    require 'pry'; binding.pry;
+    ENV["DISABLE_PRY"] = "false"
+end
+
+require 'rspec/expectations'
+
+#Does the kernel log contain at least 1 line that matches the given regex expression
+RSpec::Matchers.define :include_in_kernel_log do |regex|
+  match do |ctx|
+    v8_memory_hack
+    kern_log_stdout = JSON.parse(ctx.eval "JSON.stringify(kern_log_stdout)")
+
+    kern_log_stdout.detect {|e| e =~ regex}
+  end
+
+  failure_message do |ctx|
+    kern_log_stdout = JSON.parse(ctx.eval "JSON.stringify(kern_log_stdout)")
+
+    "The message defined by (#{regex.inspect}) did not exist in the kernel log: \n #{kern_log_stdout.inspect}"
+  end
+end

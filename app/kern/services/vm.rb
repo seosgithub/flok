@@ -956,6 +956,10 @@ service :vm do
 
       //Notify the pager
       vm_ns_to_pg_watch[params.ns](params.id);
+    } else {
+      <% if @debug %>
+        kern_log("[vm_service]: Attempted to invalidate the page with id: " + params.id + " but this page did not exist. Are you sure this is an valid page?");
+      <% end %>
     }
   }
 
