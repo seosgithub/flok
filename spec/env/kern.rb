@@ -3,6 +3,67 @@ require 'awesome_print'
 require './spec/lib/temp_dir'
 require './spec/env/global.rb'
 
+class DumpHelper
+  def initialize dump
+    @dump = dump
+  end
+
+  def [](index)
+    return @dump[index]
+  end
+end
+
+class V8::Context
+  def dump variable
+    json_res = self.eval %{
+      JSON.stringify(#{variable});
+    }
+
+    return JSON.parse(json_res)
+  end
+
+  alias_method :_eval, :eval
+  def eval src, x=nil
+    begin
+      _eval src
+    rescue V8::Error => e
+      puts e
+      context = e.javascript_backtrace.instance_eval "@context"
+      src = context.instance_variable_get "@src"
+      line = e.backtrace[0].match(/.*?:(?<line>\d+)/)[:line].to_i
+      $stderr.puts "==============================================================="
+      src.split("\n")[(line-10)..(line+10)].each_with_index do |line, index|
+        if index == 9
+          puts "#{index}| #{line} <--------------------------- [#{e}]"
+        else
+          puts "#{index}| #{line}"
+        end
+      end
+      $stderr.puts "==============================================================="
+
+      raise e
+    end
+  end
+
+  #Will return everything put into the 'dump' dictionary (pre-defined for your convenience)
+  def evald str
+    self.eval "dump = {}; #{str}"
+    _dump = self.dump("dump")
+
+    return DumpHelper.new(_dump)
+  end
+
+  def dump_log
+    $stderr.puts "---------------------------------------------------"
+    out = self.dump "kern_log_stdout"
+    self.eval "kern_log_stdout = []"
+    out.each_with_index do |e, i|
+      ap e
+    end
+    $stderr.puts "---------------------------------------------------"
+  end
+end
+
 shared_context "kern" do
   before(:each) do
     reset_for_ctx
@@ -20,43 +81,7 @@ shared_context "kern" do
     end
   end
 
-  class V8::Context
-    def dump variable
-      json_res = self.eval %{
-        JSON.stringify(#{variable});
-      }
 
-      return JSON.parse(json_res)
-    end
-
-    #Will return everything put into the 'dump' dictionary (pre-defined for your convenience)
-    def evald str
-      self.eval "dump = {}; #{str}"
-      _dump = self.dump("dump")
-
-      return DumpHelper.new(_dump)
-    end
-
-    def dump_log
-      $stderr.puts "---------------------------------------------------"
-      out = self.dump "kern_log_stdout"
-      self.eval "kern_log_stdout = []"
-      out.each_with_index do |e, i|
-        ap e
-      end
-      $stderr.puts "---------------------------------------------------"
-    end
-  end
-
-  class DumpHelper
-    def initialize dump
-      @dump = dump
-    end
-
-    def [](index)
-      return @dump[index]
-    end
-  end
 
   #Execute flok binary with a command
   def flok args
@@ -112,6 +137,9 @@ shared_context "kern" do
 
         v8 = v8_flok
         src = File.read('./products/chrome/application_user.js') 
+        v8.instance_eval do
+          @src = src
+        end
         v8.eval src
         return {:ctx => v8, :src => src}
       end
@@ -300,9 +328,10 @@ shared_context "kern" do
       else
         msg = [0, msg_name].to_json
       end
-        @ctx.eval %{
-          int_dispatch(#{msg});
-        }
+
+      @ctx.eval %{
+        int_dispatch(#{msg});
+      }
     end
 
     def dump_q
@@ -310,5 +339,33 @@ shared_context "kern" do
       @q = []
       return q
     end
+  end
+end
+
+#For unknown reasons, the v8 (therubyracer) gem will dump
+#the references and throw errors. For what ever reason, this
+#calling context (which ends up being a NOP) prevents these
+#references from being destroyed and throw a WeakRef error.
+def v8_memory_hack
+    ENV["DISABLE_PRY"] = "true";
+    require 'pry'; binding.pry;
+    ENV["DISABLE_PRY"] = "false"
+end
+
+require 'rspec/expectations'
+
+#Does the kernel log contain at least 1 line that matches the given regex expression
+RSpec::Matchers.define :include_in_kernel_log do |regex|
+  match do |ctx|
+    v8_memory_hack
+    kern_log_stdout = JSON.parse(ctx.eval "JSON.stringify(kern_log_stdout)")
+
+    kern_log_stdout.detect {|e| e =~ regex}
+  end
+
+  failure_message do |ctx|
+    kern_log_stdout = JSON.parse(ctx.eval "JSON.stringify(kern_log_stdout)")
+
+    "The message defined by (#{regex.inspect}) did not exist in the kernel log: \n #{kern_log_stdout.inspect}"
   end
 end
