@@ -1,5 +1,5 @@
-require 'therubyracer'
 require 'awesome_print'
+require './lib/flok/debug/interactive.rb'
 require './spec/lib/temp_dir'
 require './spec/env/global.rb'
 

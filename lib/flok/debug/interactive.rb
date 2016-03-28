@@ -1,4 +1,3 @@
-require 'therubyracer'
 require 'v8'
 
 #Interactive pipe for testing. 
