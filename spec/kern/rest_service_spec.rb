@@ -77,7 +77,10 @@ RSpec.describe "kern:rest_service" do
       //Drain queue
       int_dispatch([]);
       int_dispatch([]);
+
+
     }
+
 
     @driver.ignore_up_to("if_net_req")
     msg = @driver.mexpect("if_net_req", ["GET", "http://localhost:8080/test", {"hello" => "world"}, Integer], 1) #network priority
